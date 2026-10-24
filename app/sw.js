@@ -1,5 +1,5 @@
 // Mise en cache pour un fonctionnement hors ligne.
-const CACHE = "lifelot-app-v2";
+const CACHE = "lifelot-app-v3";
 const FILES = ["./", "index.html", "app.css", "app.js", "manifest.webmanifest", "icon.svg", "icon-180.png", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "../data.js", "../sim.js"];
 
 self.addEventListener("install", e => {

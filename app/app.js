@@ -31,11 +31,26 @@ function toast(text) {
   toastTimer = setTimeout(() => t.hidden = true, 2600);
 }
 
-// Couleurs de la carte de naissance par région.
-const REGION_GRADIENT = {
-  SAS: ["#ff9966", "#c2185b"], EAS: ["#ff5f6d", "#6a3093"], SSA: ["#f7971e", "#8e2de2"], MENA: ["#e2b04a", "#7b4397"],
-  LAT: ["#11998e", "#38ef7d"], EUR: ["#4b6cb7", "#182848"], NAM: ["#3a7bd5", "#3a6073"],
+// Icônes au trait Lifelot (24 × 24, trait 2, bouts ronds) — même esprit monoline que le logotype.
+const ICON_PATHS = {
+  ticket: '<path d="M5 5h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4V7a2 2 0 0 1 2-2z"/><path d="M10 9v6h4"/>',
+  birth: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6.3 6.3l2.5 2.5M15.2 15.2l2.5 2.5M17.7 6.3l-2.5 2.5M8.8 15.2l-2.5 2.5"/>',
+  edu: '<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v15H5.5A1.5 1.5 0 0 1 4 17.5zM20 5.5A1.5 1.5 0 0 0 18.5 4H13v15h5.5a1.5 1.5 0 0 0 1.5-1.5z"/>',
+  work: '<rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M3 12.5h18"/>',
+  family: '<path d="M12 20s-7-4.4-8.6-8.6C2.2 8.2 4.3 5 7.5 5c1.9 0 3.4 1 4.5 2.6C13.1 6 14.6 5 16.5 5c3.2 0 5.3 3.2 4.1 6.4C19 15.6 12 20 12 20z"/>',
+  move: '<path d="M4 12h15M13 6l6 6-6 6"/>',
+  death: '<path d="M12 3c2 2.4 3 4.1 3 5.8a3 3 0 0 1-6 0C9 7.1 10 5.4 12 3z"/><path d="M9.5 13.5h5V21h-5z"/>',
+  dot: '<circle cx="12" cy="12" r="3"/>',
+  balance: '<path d="M12 4v16M8 20h8M5 7h14M5 7l-3 6a3 3 0 0 0 6 0zM19 7l-3 6a3 3 0 0 0 6 0z"/>',
+  health: '<path d="M3 12h4l2-5 4 10 2-5h6"/>',
+  leisure: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4"/>',
+  friends: '<circle cx="9" cy="9" r="3"/><circle cx="16.5" cy="10" r="2.5"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M14.5 19a4 4 0 0 1 6.5-3"/>',
+  home: '<path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>',
+  money: '<rect x="3" y="6" width="18" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.5"/>',
+  couple: '<circle cx="9" cy="13" r="5"/><circle cx="15" cy="13" r="5"/>',
+  child: '<circle cx="12" cy="8" r="3.5"/><path d="M6 20a6 6 0 0 1 12 0"/>',
 };
+const icon = (name, cls = "ico") => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON_PATHS[name] || ICON_PATHS.dot}</svg>`;
 
 // ---------- Contrôles segmentés ----------
 function segmented(name, value, onChange) {
@@ -138,7 +153,7 @@ function countrySheet(c) {
     ["Mariage avant 18 ans", `${c.cm} % des filles`],
     ["Satisfaction de vie", `${fmt(c.happy, 1)} / 10`],
   ];
-  openSheet(`<div class="big-emoji">${c.flag}</div><h2 class="sheet-title">${c.name}</h2>
+  openSheet(`<div class="big-emoji ticket-badge">${c.flag}</div><h2 class="sheet-title">${c.name}</h2>
     <div class="group">${rows.map(([k, v]) => `<div class="cell"><span class="cell-main"><b>${k}</b></span><span class="cell-value">${v}</span></div>`).join("")}</div>`, { dismissable: true });
 }
 
@@ -225,9 +240,7 @@ function startDraw() {
 
 function showPass() {
   const c = life.country;
-  const [p1, p2] = REGION_GRADIENT[c.region] || REGION_GRADIENT.EUR;
   const pass = $("pass");
-  pass.style.setProperty("--p1", p1); pass.style.setProperty("--p2", p2);
   const weights = COUNTRIES.reduce((s, x) => s + (prefs.mode === "pop" ? x.pop : x.births), 0);
   const odds = Math.round(weights / (prefs.mode === "pop" ? c.pop : c.births));
   $("passFlag").textContent = c.flag;
@@ -255,12 +268,13 @@ $("startLife").addEventListener("click", () => {
 });
 
 // ---------- Vie ----------
-const STATS = [["health", "Santé", "#34c759"], ["happy", "Bonheur", "#ffd60a"], ["know", "Savoir", "#64d2ff"], ["rel", "Liens", "#ff6ac1"]];
+// Palette d’accompagnement Lifelot pour les données (voir brand/README.md).
+const STATS = [["health", "Santé", "#3CC9A0"], ["happy", "Bonheur", "#FFB23F"], ["know", "Savoir", "#7C9BFF"], ["rel", "Liens", "#FF5A36"]];
 const RING_C = 2 * Math.PI * 15;
 $("rings").innerHTML = STATS.map(([k, label, color]) => `<div class="ring" style="--rc:${color}"><svg viewBox="0 0 38 38"><circle class="track" cx="19" cy="19" r="15"/><circle class="prog" id="ring-${k}" cx="19" cy="19" r="15" stroke-dasharray="${RING_C}" stroke-dashoffset="${RING_C}"/></svg><div><b id="val-${k}">0</b><small>${label}</small></div></div>`).join("");
 
-const PRIORITY_ICON = { equilibre: "⚖️", sante: "🍎", travail: "📚", famille: "🤝", plaisir: "🎈" };
-$("priority").innerHTML = Object.entries(PRIORITIES).map(([k, v]) => `<button data-v="${k}"><span class="pi">${PRIORITY_ICON[k]}</span>${v}</button>`).join("");
+const PRIORITY_ICON = { equilibre: "balance", sante: "health", travail: "edu", famille: "friends", plaisir: "leisure" };
+$("priority").innerHTML = Object.entries(PRIORITIES).map(([k, v]) => `<button data-v="${k}">${icon(PRIORITY_ICON[k], "pi")}${v}</button>`).join("");
 $("priority").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b || !life) return;
   life.priority = b.dataset.v; haptic(); markPriority();
@@ -364,7 +378,7 @@ $("resumeBtn").addEventListener("click", () => {
   setRunning(true); lastT = 0; requestAnimationFrame(loop);
 });
 
-const KIND_ICON = { birth: "👶", edu: "🎓", work: "💼", family: "💞", move: "✈️", death: "🕯️" };
+const KIND_ICON = { birth: "birth", edu: "edu", work: "work", family: "family", move: "move", death: "death" };
 
 function renderLife() {
   const L = life, c = L.here;
@@ -377,16 +391,14 @@ function renderLife() {
     $(`val-${k}`).textContent = v;
   });
   const h = L.stats.happy / 100;
-  // Du bleu (bonheur faible) au corail (bonheur élevé), en passant par le magenta.
-  $("lifeHero").style.setProperty("--h1", `hsl(${((225 + h * 147) % 360).toFixed(0)} 85% ${(52 + h * 8).toFixed(0)}%)`);
-  $("lifeHero").style.setProperty("--h2", `hsl(${(245 + h * 25).toFixed(0)} 60% ${(26 + h * 8).toFixed(0)}%)`);
+  $("lifeHero").style.setProperty("--glow", (0.15 + h * 0.6).toFixed(2));
 
   const feed = $("feed");
   for (; rendered < L.log.length; rendered++) {
     const e = L.log[rendered];
     const li = document.createElement("li");
     li.className = `${e.kind} ${L.highlights.includes(e) ? "hl" : ""}`;
-    li.innerHTML = `<span class="dot">${KIND_ICON[e.kind] || "•"}</span><div class="body"><small>${ans(e.age)}</small><p>${esc(e.text)}</p></div>`;
+    li.innerHTML = `<span class="dot">${icon(KIND_ICON[e.kind] || "dot")}</span><div class="body"><small>${ans(e.age)}</small><p>${esc(e.text)}</p></div>`;
     feed.prepend(li);
   }
 
@@ -398,15 +410,15 @@ function renderLife() {
 function renderSituation() {
   const L = life, living = L.children.filter(k => k.alive).length;
   const rows = [
-    ["🏠", "Famille d’origine", L.familyLabel()],
-    ["🎓", "Études", L.schooling ? `en cours · ${EDU_LABEL[L.schooling]}` : EDU_LABEL[L.edu]],
-    ["💼", "Travail", L.retired ? "à la retraite" : L.job || (L.age < 6 ? "—" : "aucun")],
+    ["home", "Famille d’origine", L.familyLabel()],
+    ["edu", "Études", L.schooling ? `en cours · ${EDU_LABEL[L.schooling]}` : EDU_LABEL[L.edu]],
+    ["work", "Travail", L.retired ? "à la retraite" : L.job || (L.age < 6 ? "—" : "aucun")],
   ];
-  if (L.income > 0) rows.push(["💶", "Revenu", `${nf.format(Math.round(L.income / 10) * 10)} $/an`, `≈ ${nf.format(Math.round(L.income * PPP_TO_EUR_FR / 12 / 10) * 10)} € par mois en prix français`]);
-  rows.push(["💞", "Couple", L.married ? `${L.g("marié", "mariée")} à ${L.partner}` : L.marriedEver ? L.g("seul", "seule") : "célibataire"]);
-  if (L.children.length) rows.push(["👶", "Enfants", living === L.children.length ? String(living) : `${living} sur ${L.children.length}`]);
-  rows.push(["👫", "Frères et sœurs", L.siblings ? String(L.siblings) : "aucun"]);
-  $("situation").innerHTML = rows.map(([i, k, v, sub]) => `<div class="cell"><span class="flag-cell" style="font-size:20px">${i}</span><span class="cell-main"><b>${k}</b>${sub ? `<small>${sub}</small>` : ""}</span><span class="cell-value">${esc(v)}</span></div>`).join("");
+  if (L.income > 0) rows.push(["money", "Revenu", `${nf.format(Math.round(L.income / 10) * 10)} $/an`, `≈ ${nf.format(Math.round(L.income * PPP_TO_EUR_FR / 12 / 10) * 10)} € par mois en prix français`]);
+  rows.push(["couple", "Couple", L.married ? `${L.g("marié", "mariée")} à ${L.partner}` : L.marriedEver ? L.g("seul", "seule") : "célibataire"]);
+  if (L.children.length) rows.push(["child", "Enfants", living === L.children.length ? String(living) : `${living} sur ${L.children.length}`]);
+  rows.push(["friends", "Frères et sœurs", L.siblings ? String(L.siblings) : "aucun"]);
+  $("situation").innerHTML = rows.map(([i, k, v, sub]) => `<div class="cell"><span class="row-icon">${icon(i)}</span><span class="cell-main"><b>${k}</b>${sub ? `<small>${sub}</small>` : ""}</span><span class="cell-value">${esc(v)}</span></div>`).join("");
 }
 
 function peerStatus(p, age) {
@@ -430,7 +442,8 @@ function renderPeers() {
   }).join("");
 }
 
-function happyColor(v) { return `hsl(${(8 + v / 100 * 140).toFixed(0)} 70% 55%)`; }
+// Grille de vie aux couleurs Lifelot : plus l’année est heureuse, plus la case est corail.
+function happyColor(v) { return `color-mix(in srgb, #FF5A36 ${Math.round(25 + v * 0.75)}%, #B9B4C9)`; }
 function renderGrid(node, history, nowAge, ended) {
   const last = history.length - 1, cells = Math.max(100, Math.ceil((last + 1) / 10) * 10);
   let html = "";
@@ -533,7 +546,7 @@ function deathSheet(rec, review = false) {
   const heavy = /suicide|homicide|surdose/.test(s.cause) || rec.highlights.some(h => /mariée à \d+ ans|meurt avant ses cinq ans/.test(h.text));
 
   openSheet(`
-    <div class="memorial">
+    <div class="memorial ticket">
       <div class="candle"></div>
       <h2>${esc(s.name)}</h2>
       <p class="years">${c.flag} ${g("Né", "Née")} ${inCountry(c)} · ${ageTxt}${s.emigrated ? ` · ${g("mort", "morte")} ${inCountry(BY_CODE[s.code])}` : ""}</p>
