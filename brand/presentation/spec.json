@@ -1,0 +1,34 @@
+{
+  "brand": "Lifelot",
+  "tagline": "Naître quelque part. Vivre une vie entière.",
+  "brief": "Une simulation de vie gratuite : on naît au hasard parmi les bébés de l’année, dans un pays et une famille qu’on n’a pas choisis, puis on vit une vie entière guidée par les vraies statistiques. Le logo doit être humain, sérieux sans être sinistre, et tenir à 16 px comme icône d’app.",
+  "adjectives": ["humain", "curieux", "universel", "empathique"],
+  "criteria": "Réussite : lisible à 16 px, fonctionne en une couleur, évite globe / silhouettes / dés, porte l’idée du « lot » de vie.",
+  "industry": "consumer-app",
+  "nav": ["Naître", "Monde", "Vies"],
+  "brand_color": "#FF5A36",
+  "greyscale": false,
+  "final": true,
+  "designer": "Lifelot",
+  "concepts": [
+    {
+      "name": "Billet-L",
+      "symbol": "../logo/lifelot-symbol-coral.svg",
+      "lockup": "../logo/lifelot-horizontal.svg",
+      "stacked": "../logo/lifelot-stacked.svg",
+      "symbol_on_tile": "../icons/lifelot-symbol-white.svg",
+      "symbol_on_dark": "../logo/lifelot-symbol-coral.svg",
+      "lockup_on_dark": "../logo/lifelot-horizontal-on-dark.svg",
+      "stacked_on_dark": "../logo/lifelot-stacked-on-dark.svg",
+      "idea": "Un billet de tirage dont le vide dessine un L : le lot de vie qu’on reçoit en naissant.",
+      "rationale": [
+        "Le « lot » du nom devient une forme simple et ownable, sans globe ni silhouette",
+        "Le L est un vrai trou : le billet laisse voir le monde derrière lui",
+        "Tient à 16 px grâce à une version petites tailles (encoches et L renforcés)",
+        "Logotype monoline sur mesure : rond, chaleureux, lisible"
+      ]
+    }
+  ],
+  "recommendation": "Billet-L en corail Lifelot (#FF5A36) et nuit (#17142B), avec le symbole seul pour l’icône d’app et le favicon.",
+  "next_steps": ["Recherche d’antériorité de la marque (INPI / EUIPO)", "Déploiement sur le site et l’app", "Déclinaisons réseaux sociaux"]
+}

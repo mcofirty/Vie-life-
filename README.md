@@ -1,4 +1,6 @@
-# Vie · Naître au hasard
+# Lifelot · Naître au hasard
+
+![Lifelot](brand/logo/lifelot-horizontal.svg)
 
 Simulation de vie en français, inspirée du concept de [1in8b.life](https://1in8b.life/fr/) et entièrement réécrite (code, textes et design originaux).
 
@@ -29,6 +31,10 @@ C’est une PWA : ouverte dans Safari, « Partager → Sur l’écran d’accuei
 - Causes de décès : profils simplifiés par région et par âge (inspirés des estimations de l’OMS).
 
 Les valeurs sont approchées (vers 2023) : voir `data.js`.
+
+## Identité visuelle
+
+Logo, couleurs, icônes et règles d’utilisation : voir [`brand/`](brand/README.md).
 
 ## Lancer en local
 
