@@ -338,10 +338,6 @@ async function sharedFromHash() {
 }
 
 // ---------- Cartes à partager (image) ----------
-const REGION_GRADIENT = {
-  SAS: ["#ff9966", "#c2185b"], EAS: ["#ff5f6d", "#6a3093"], SSA: ["#f7971e", "#8e2de2"], MENA: ["#e2b04a", "#7b4397"],
-  LAT: ["#11998e", "#2d6a4f"], EUR: ["#4b6cb7", "#182848"], NAM: ["#3a7bd5", "#3a6073"],
-};
 function wrapText(ctx, text, x, y, maxW, lh, maxLines = 4) {
   const words = String(text).split(" ");
   let line = "", n = 0;
@@ -355,7 +351,7 @@ function wrapText(ctx, text, x, y, maxW, lh, maxLines = 4) {
   ctx.fillText(line, x, y);
   return y + lh;
 }
-const happyHue = v => `hsl(${(8 + v / 100 * 140).toFixed(0)} 65% 55%)`;
+const happyHue = v => `rgba(255, 90, 54, ${(0.25 + v / 100 * 0.75).toFixed(2)})`;
 // kind : "birth" (avec une vie en cours) ou "death" (avec une vie gardée).
 function drawCard(kind, data) {
   const W = 1080, H = 1350, cv = document.createElement("canvas");
@@ -364,10 +360,9 @@ function drawCard(kind, data) {
   if (!ctx.roundRect) ctx.roundRect = (x, y, w, h) => ctx.rect(x, y, w, h);
   const s = kind === "birth" ? data.summary() : data.s;
   const c = BY_CODE[s.home];
-  const [p1, p2] = kind === "birth" ? (REGION_GRADIENT[c.region] || REGION_GRADIENT.EUR) : ["#2b2d42", "#11121c"];
-  const grad = ctx.createLinearGradient(0, 0, W, H);
-  grad.addColorStop(0, p1); grad.addColorStop(1, p2);
-  ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
+  // Couleurs Lifelot : corail pour une naissance, nuit pour une vie terminée.
+  ctx.fillStyle = kind === "birth" ? "#FF5A36" : "#17142B";
+  ctx.fillRect(0, 0, W, H);
   const font = (w, px) => `${w} ${px}px Inter, -apple-system, "Segoe UI", Roboto, sans-serif`;
   ctx.fillStyle = "rgba(255,255,255,.75)";
   ctx.font = font(600, 34);
@@ -409,7 +404,7 @@ function drawCard(kind, data) {
   }
   ctx.fillStyle = "rgba(255,255,255,.7)";
   ctx.font = font(600, 34);
-  ctx.fillText("Vie · Naître au hasard", 80, H - 80);
+  ctx.fillText("Lifelot · Naître au hasard", 80, H - 80);
   ctx.textAlign = "right";
   ctx.font = font(400, 30);
   ctx.fillText("Une simulation, pas un destin", W - 80, H - 80);

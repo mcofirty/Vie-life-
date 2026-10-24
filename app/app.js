@@ -12,6 +12,27 @@ function toast(text) {
   toastTimer = setTimeout(() => t.hidden = true, 2600);
 }
 
+// Icônes au trait Lifelot (24 × 24, trait 2, bouts ronds) — même esprit monoline que le logotype.
+const ICON_PATHS = {
+  ticket: '<path d="M5 5h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4V7a2 2 0 0 1 2-2z"/><path d="M10 9v6h4"/>',
+  birth: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6.3 6.3l2.5 2.5M15.2 15.2l2.5 2.5M17.7 6.3l-2.5 2.5M8.8 15.2l-2.5 2.5"/>',
+  edu: '<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v15H5.5A1.5 1.5 0 0 1 4 17.5zM20 5.5A1.5 1.5 0 0 0 18.5 4H13v15h5.5a1.5 1.5 0 0 0 1.5-1.5z"/>',
+  work: '<rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M3 12.5h18"/>',
+  family: '<path d="M12 20s-7-4.4-8.6-8.6C2.2 8.2 4.3 5 7.5 5c1.9 0 3.4 1 4.5 2.6C13.1 6 14.6 5 16.5 5c3.2 0 5.3 3.2 4.1 6.4C19 15.6 12 20 12 20z"/>',
+  move: '<path d="M4 12h15M13 6l6 6-6 6"/>',
+  death: '<path d="M12 3c2 2.4 3 4.1 3 5.8a3 3 0 0 1-6 0C9 7.1 10 5.4 12 3z"/><path d="M9.5 13.5h5V21h-5z"/>',
+  dot: '<circle cx="12" cy="12" r="3"/>',
+  balance: '<path d="M12 4v16M8 20h8M5 7h14M5 7l-3 6a3 3 0 0 0 6 0zM19 7l-3 6a3 3 0 0 0 6 0z"/>',
+  health: '<path d="M3 12h4l2-5 4 10 2-5h6"/>',
+  leisure: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4"/>',
+  friends: '<circle cx="9" cy="9" r="3"/><circle cx="16.5" cy="10" r="2.5"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M14.5 19a4 4 0 0 1 6.5-3"/>',
+  home: '<path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>',
+  money: '<rect x="3" y="6" width="18" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.5"/>',
+  couple: '<circle cx="9" cy="13" r="5"/><circle cx="15" cy="13" r="5"/>',
+  child: '<circle cx="12" cy="8" r="3.5"/><path d="M6 20a6 6 0 0 1 12 0"/>',
+};
+const icon = (name, cls = "ico") => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON_PATHS[name] || ICON_PATHS.dot}</svg>`;
+
 // ---------- Contrôles segmentés ----------
 function segmented(name, value, onChange) {
   const seg = document.querySelector(`.segmented[data-name="${name}"]`);
@@ -57,18 +78,84 @@ segmented("dur", String(prefs.dur), v => setPref("dur", v));
   ysel.addEventListener("change", () => { setPref("year", +ysel.value); haptic(); show(); });
 })();
 
-// ---------- Onglets ----------
+// ---------- Onglets : barre de verre flottante ----------
 const PAGES = ["tab-live", "tab-world", "tab-lives", "tab-settings"];
-$("tabbar").addEventListener("click", e => {
-  const b = e.target.closest("button"); if (!b) return;
-  const id = b.dataset.tab;
-  if (!$(id).hidden) { $(id).scrollTo({ top: 0, behavior: "smooth" }); return; }
+const tabbar = $("tabbar"), lens = $("tabLens"), tabs = [...tabbar.querySelectorAll("button")];
+const activeTab = () => tabs.find(t => t.classList.contains("on"));
+
+function placeLens(btn = activeTab(), x) {
+  lens.style.width = `${btn.offsetWidth}px`;
+  lens.style.transform = `translateX(${x ?? btn.offsetLeft}px)`;
+}
+function selectTab(btn) {
+  const id = btn.dataset.tab;
+  if (!$(id).hidden) { $(id).scrollTo({ top: 0, behavior: "smooth" }); placeLens(btn); return; }
   haptic();
   PAGES.forEach(p => $(p).hidden = p !== id);
-  document.querySelectorAll(".tabbar button").forEach(x => x.classList.toggle("on", x === b));
+  tabs.forEach(t => { t.classList.toggle("on", t === btn); t.setAttribute("aria-selected", String(t === btn)); });
+  placeLens(btn);
+  setMini(false);
   if (id === "tab-lives") renderLives();
+}
+function setMini(on) {
+  if (tabbar.classList.contains("mini") === on) return;
+  tabbar.classList.add("resizing");
+  tabbar.classList.toggle("mini", on);
+}
+tabbar.addEventListener("transitionend", e => {
+  if (e.target === tabbar && e.propertyName === "width") { tabbar.classList.remove("resizing"); placeLens(); }
 });
-PAGES.forEach(p => $(p).addEventListener("scroll", e => e.target.classList.toggle("scrolled", e.target.scrollTop > 36), { passive: true }));
+
+// Toucher, appuyer, glisser : la pastille grossit sous le doigt et suit le geste.
+let drag = null;
+const tabAt = x => tabs.reduce((best, t) => {
+  const c = t.offsetLeft + t.offsetWidth / 2;
+  return Math.abs(c - x) < Math.abs(best.offsetLeft + best.offsetWidth / 2 - x) ? t : best;
+}, tabs[0]);
+tabbar.addEventListener("pointerdown", e => {
+  if (tabbar.classList.contains("mini")) { setMini(false); haptic(); return; }
+  const r = tabbar.getBoundingClientRect();
+  drag = { x0: e.clientX, left: r.left, moved: false, start: e.target.closest("button") };
+  tabbar.setPointerCapture(e.pointerId);
+  tabbar.classList.add("pressing");
+  tabs.forEach(t => t.classList.toggle("hover", t === drag.start));
+});
+tabbar.addEventListener("pointermove", e => {
+  if (!drag) return;
+  if (!drag.moved && Math.abs(e.clientX - drag.x0) < 6) return;
+  drag.moved = true;
+  tabbar.classList.add("dragging");
+  const w = lens.offsetWidth, x = Math.max(4, Math.min(tabbar.clientWidth - w - 4, e.clientX - drag.left - w / 2));
+  lens.style.transform = `translateX(${x}px)`;
+  const over = tabAt(x + w / 2);
+  if (!over.classList.contains("hover")) { tabs.forEach(t => t.classList.toggle("hover", t === over)); haptic(4); }
+});
+function endDrag(e, cancel) {
+  if (!drag) return;
+  const target = drag.moved ? tabAt(e.clientX - drag.left) : drag.start;
+  drag = null;
+  tabbar.classList.remove("pressing", "dragging");
+  tabs.forEach(t => t.classList.remove("hover"));
+  if (!cancel && target) selectTab(target); else placeLens();
+}
+tabbar.addEventListener("pointerup", e => endDrag(e, false));
+tabbar.addEventListener("pointercancel", e => endDrag(e, true));
+// Clavier : Entrée / Espace sur un onglet.
+tabbar.addEventListener("click", e => { if (e.detail === 0) { const b = e.target.closest("button"); if (b) selectTab(b); } });
+window.addEventListener("resize", () => placeLens());
+requestAnimationFrame(() => placeLens());
+
+// Défilement : grand titre dans la barre du haut, barre d'onglets réduite en descendant.
+PAGES.forEach(p => {
+  let last = 0;
+  $(p).addEventListener("scroll", e => {
+    const y = e.target.scrollTop;
+    e.target.classList.toggle("scrolled", y > 36);
+    if (y > last + 8 && y > 120) setMini(true);
+    else if (y < last - 8 || y < 40) setMini(false);
+    last = y;
+  }, { passive: true });
+});
 
 // ---------- Compteurs ----------
 (function counters() {
@@ -134,7 +221,7 @@ function countrySheet(code, year = DATA_YEAR) {
   const c = countryAt(code, year);
   const years = [1900, 1950, 1980, DATA_YEAR, 2050, 2100];
   const rows = [["Chance d’y naître", `1 sur ${nf.format(birthOdds(code, "births", year))}`], ...countryFacts(c)];
-  openSheet(`<div class="big-emoji">${c.flag}</div><h2 class="sheet-title">${c.name}</h2>
+  openSheet(`<div class="big-emoji ticket-badge">${c.flag}</div><h2 class="sheet-title">${c.name}</h2>
     <div class="segmented" data-name="cyear" style="margin-bottom:16px">${years.map(y => `<button data-v="${y}" class="${y === year ? "on" : ""}">${y === DATA_YEAR ? "Auj." : y}</button>`).join("")}</div>
     <div class="group">${rows.map(([k, v]) => `<div class="cell"><span class="cell-main"><b>${k}</b></span><span class="cell-value">${v}</span></div>`).join("")}</div>
     <p class="group-footer">${year === DATA_YEAR ? "Valeurs vers 2023." : `Valeurs estimées pour ${year} : des ordres de grandeur.`}</p>`, { dismissable: true });
@@ -198,8 +285,8 @@ function renderLives() {
   $("livesGroup").innerHTML = lives.slice(0, livesShown).map(r => {
     const c = BY_CODE[r.s.home];
     const cause = prefs.gentle && HEAVY_CAUSES.includes(r.s.cause) ? "cause non affichée" : r.s.cause;
-    const sub = livesTab === "mine" ? `${c.name} · ${ans(r.s.age)}${r.s.year ? ` · ${r.s.year}` : ""}${r.s.gen > 1 ? ` · génération ${r.s.gen}` : ""} · ${esc(cause)}` : `${c.name} · ${ans(r.s.age)} · 🕯️ ${r.candles || 0}${r.notes && r.notes.length ? ` · ${r.notes.length} mot${r.notes.length > 1 ? "s" : ""}` : ""}`;
-    return `<button class="cell link" data-id="${r.id}"><span class="flag-cell">${c.flag}</span><span class="cell-main"><b>${esc(r.s.name)}${r.memorial ? " 🕯️" : ""}</b><small>${sub}</small></span><span class="cell-value">${r.shared ? "reçue" : new Date(r.date).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}</span><span class="chev"></span></button>`;
+    const sub = livesTab === "mine" ? `${c.name} · ${ans(r.s.age)}${r.s.year ? ` · ${r.s.year}` : ""}${r.s.gen > 1 ? ` · génération ${r.s.gen}` : ""} · ${esc(cause)}` : `${c.name} · ${ans(r.s.age)} · ${r.candles || 0} bougie${(r.candles || 0) > 1 ? "s" : ""}${r.notes && r.notes.length ? ` · ${r.notes.length} mot${r.notes.length > 1 ? "s" : ""}` : ""}`;
+    return `<button class="cell link" data-id="${r.id}"><span class="flag-cell">${c.flag}</span><span class="cell-main"><b>${esc(r.s.name)}${r.memorial ? ` <span class="inline-ico">${icon("death")}</span>` : ""}</b><small>${sub}</small></span><span class="cell-value">${r.shared ? "reçue" : new Date(r.date).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}</span><span class="chev"></span></button>`;
   }).join("");
 }
 $("moreBtn").addEventListener("click", () => { livesShown += 30; haptic(); renderLives(); });
@@ -262,9 +349,7 @@ function startDraw(confirmed = false) {
 
 function showPass() {
   const c = life.country;
-  const [p1, p2] = REGION_GRADIENT[c.region] || REGION_GRADIENT.EUR;
   const pass = $("pass");
-  pass.style.setProperty("--p1", p1); pass.style.setProperty("--p2", p2);
   const events = activeEvents(life.code, life.year).map(x => x.ev.name);
   $("passFlag").textContent = c.flag;
   $("passDate").textContent = birthDateText(life);
@@ -297,12 +382,13 @@ $("startLife").addEventListener("click", () => {
 });
 
 // ---------- Vie ----------
-const STATS = [["health", "Santé", "#34c759"], ["happy", "Bonheur", "#ffd60a"], ["know", "Savoir", "#64d2ff"], ["rel", "Liens", "#ff6ac1"]];
+// Palette d’accompagnement Lifelot pour les données (voir brand/README.md).
+const STATS = [["health", "Santé", "#3CC9A0"], ["happy", "Bonheur", "#FFB23F"], ["know", "Savoir", "#7C9BFF"], ["rel", "Liens", "#FF5A36"]];
 const RING_C = 2 * Math.PI * 15;
 $("rings").innerHTML = STATS.map(([k, label, color]) => `<div class="ring" style="--rc:${color}"><svg viewBox="0 0 38 38"><circle class="track" cx="19" cy="19" r="15"/><circle class="prog" id="ring-${k}" cx="19" cy="19" r="15" stroke-dasharray="${RING_C}" stroke-dashoffset="${RING_C}"/></svg><div><b id="val-${k}">0</b><small>${label}</small></div></div>`).join("");
 
-const PRIORITY_ICON = { equilibre: "⚖️", sante: "🍎", travail: "📚", famille: "🤝", plaisir: "🎈" };
-$("priority").innerHTML = Object.entries(PRIORITIES).map(([k, v]) => `<button data-v="${k}"><span class="pi">${PRIORITY_ICON[k]}</span>${v}</button>`).join("");
+const PRIORITY_ICON = { equilibre: "balance", sante: "health", travail: "edu", famille: "friends", plaisir: "leisure" };
+$("priority").innerHTML = Object.entries(PRIORITIES).map(([k, v]) => `<button data-v="${k}">${icon(PRIORITY_ICON[k], "pi")}${v}</button>`).join("");
 $("priority").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b || !life) return;
   life.priority = b.dataset.v; haptic(); markPriority(); saveCurrent(life);
@@ -462,7 +548,7 @@ function helpSheet() {
   openSheet(`<h2 class="sheet-title">Besoin d’aide</h2><p class="help-note" style="margin-top:0">${HELP_HTML}</p>`, { dismissable: true });
 }
 
-const KIND_ICON = { birth: "👶", edu: "🎓", work: "💼", family: "💞", move: "✈️", death: "🕯️", history: "📜", money: "💶", health: "🩺" };
+const KIND_ICON = { birth: "birth", edu: "edu", work: "work", family: "family", move: "move", death: "death", history: "ticket", money: "money", health: "health" };
 
 function renderLife() {
   const L = life, c = L.here;
@@ -477,9 +563,7 @@ function renderLife() {
     $(`val-${k}`).textContent = v;
   });
   const h = L.stats.happy / 100;
-  // Du bleu (bonheur faible) au corail (bonheur élevé), en passant par le magenta.
-  $("lifeHero").style.setProperty("--h1", `hsl(${((225 + h * 147) % 360).toFixed(0)} 85% ${(52 + h * 8).toFixed(0)}%)`);
-  $("lifeHero").style.setProperty("--h2", `hsl(${(245 + h * 25).toFixed(0)} 60% ${(26 + h * 8).toFixed(0)}%)`);
+  $("lifeHero").style.setProperty("--glow", (0.15 + h * 0.6).toFixed(2));
 
   renderFeed();
   if (pane === "act") renderActions();
@@ -494,7 +578,7 @@ function feedItem(e, i) {
   const li = document.createElement("li");
   li.className = `${e.kind} ${e.hl ? "hl" : ""}`;
   li.dataset.i = i;
-  li.innerHTML = `<span class="dot">${KIND_ICON[e.kind] || "•"}</span><div class="body"><small>${ans(e.age)}${e.year ? ` <span class="yr">· ${e.year}</span>` : ""}</small><p>${hidden ? `<button class="reveal" data-reveal="${i}">Un moment difficile · le lire</button>` : esc(e.text)}</p>${e.heavy ? `<a href="#" class="helpline" data-help>Besoin d’en parler ? Numéros d’aide</a>` : ""}</div><button class="star" data-star="${i}" aria-pressed="${!!e.star}" aria-label="Garder ce moment">${e.star ? "★" : "☆"}</button>`;
+  li.innerHTML = `<span class="dot">${icon(KIND_ICON[e.kind] || "dot")}</span><div class="body"><small>${ans(e.age)}${e.year ? ` <span class="yr">· ${e.year}</span>` : ""}</small><p>${hidden ? `<button class="reveal" data-reveal="${i}">Un moment difficile · le lire</button>` : esc(e.text)}</p>${e.heavy ? `<a href="#" class="helpline" data-help>Besoin d’en parler ? Numéros d’aide</a>` : ""}</div><button class="star" data-star="${i}" aria-pressed="${!!e.star}" aria-label="Garder ce moment">${e.star ? "★" : "☆"}</button>`;
   return li;
 }
 function renderFeed() {
@@ -521,15 +605,15 @@ const rowsHtml = rows => rows.map(([k, v, sub]) => `<div class="cell"><span clas
 function renderSituation() {
   const L = life;
   const rows = [
-    ["Famille d’origine", L.familyLabel()],
-    ["Études", L.schooling ? `en cours · ${EDU_LABEL[L.schooling]}` : EDU_LABEL[L.edu]],
-    ["Travail", L.retired ? "à la retraite" : L.job || (L.homemaker ? "au foyer" : L.age < 6 ? "—" : "sans emploi")],
-    ["Lieu de vie", L.urban ? "en ville" : "à la campagne"],
+    ["home", "Famille d’origine", L.familyLabel()],
+    ["edu", "Études", L.schooling ? `en cours · ${EDU_LABEL[L.schooling]}` : EDU_LABEL[L.edu]],
+    ["work", "Travail", L.retired ? "à la retraite" : L.job || (L.homemaker ? "au foyer" : L.age < 6 ? "—" : "sans emploi")],
+    ["home", "Lieu de vie", L.urban ? "en ville" : "à la campagne"],
   ];
-  if (L.lineage) rows.push(["Lignée", `génération ${L.lineage.gen}`]);
-  if (L.smoker) rows.push(["Tabac", L.g("fumeur", "fumeuse")]);
-  if (L.hivPos) rows.push(["VIH", L.hivTreated() ? "sous traitement" : "sans traitement"]);
-  $("situation").innerHTML = rowsHtml(rows);
+  if (L.lineage) rows.push(["family", "Lignée", `génération ${L.lineage.gen}`]);
+  if (L.smoker) rows.push(["health", "Tabac", L.g("fumeur", "fumeuse")]);
+  if (L.hivPos) rows.push(["health", "VIH", L.hivTreated() ? "sous traitement" : "sans traitement"]);
+  $("situation").innerHTML = rows.map(([i, k, v, sub]) => `<div class="cell"><span class="row-icon">${icon(i)}</span><span class="cell-main"><b>${k}</b>${sub ? `<small>${sub}</small>` : ""}</span><span class="cell-value">${esc(v)}</span></div>`).join("");
   $("moneyMini").innerHTML = rowsHtml([
     ["Revenu", L.income > 0 ? `${dollars(L.income)}/an` : "aucun", L.income > 0 ? `≈ ${euroMonth(L.income)} par mois en prix français` : ""],
     ["Épargne", dollars(L.savings)],
@@ -636,7 +720,8 @@ function renderPeers() {
   }).join("");
 }
 
-function happyColor(v) { return `hsl(${(8 + v / 100 * 140).toFixed(0)} 70% 55%)`; }
+// Grille de vie aux couleurs Lifelot : plus l’année est heureuse, plus la case est corail.
+function happyColor(v) { return `color-mix(in srgb, #FF5A36 ${Math.round(25 + v * 0.75)}%, #B9B4C9)`; }
 function renderGrid(node, history, nowAge, ended) {
   const last = history.length - 1, cells = Math.max(100, Math.ceil((last + 1) / 10) * 10);
   let html = "";
@@ -724,15 +809,15 @@ function deathSheet(rec, mode) {
   const kicker = mode === "stranger" ? "Une vie au hasard" : mode.startsWith("shared") ? "Une vie partagée" : `Acte de décès · ${new Date(rec.date).toLocaleDateString("fr-FR", { dateStyle: "long" })}`;
 
   openSheet(`
-    <div class="memorial">
+    <div class="memorial ticket">
       <div class="candle"></div>
       <h2>${esc(s.name)}</h2>
       <p class="years">${c.flag} ${g("Né", "Née")} ${inCountry(c)}${s.year ? ` en ${s.year}` : ""} · ${s.age === 0 ? "moins d’un an" : ans(s.age)}${s.emigrated ? ` · ${g("mort", "morte")} ${inCountry(BY_CODE[s.code])}` : ""}</p>
       <p>${vsLifeExpectancy(s)}</p>
       <div class="grid100" id="memGrid"></div>
-      ${memorialShown ? `<p class="candles" style="color:#fff;opacity:.85">${n ? `${"🕯️".repeat(Math.min(n, 10))} ${n} bougie${n > 1 ? "s" : ""}` : "Aucune bougie pour l’instant"}</p>` : ""}
+      ${memorialShown ? `<p class="candles" style="color:#fff;opacity:.85">${n ? `${n} bougie${n > 1 ? "s" : ""} allumée${n > 1 ? "s" : ""}` : "Aucune bougie pour l’instant"}</p>` : ""}
     </div>
-    ${memorialShown ? `<div class="btn-row"><button class="btn-tinted" id="candleBtn">🕯️ Allumer une bougie</button><button class="btn-gray" id="noteFocus">Laisser un mot</button></div>
+    ${memorialShown ? `<div class="btn-row"><button class="btn-tinted" id="candleBtn">Allumer une bougie</button><button class="btn-gray" id="noteFocus">Laisser un mot</button></div>
       ${(rec.notes || []).length ? `<div class="group" style="margin-top:12px">${rec.notes.map(x => `<div class="cell column"><span>${esc(x.text)}</span><small style="color:var(--label-2)">${new Date(x.date).toLocaleDateString("fr-FR")}</small></div>`).join("")}</div>` : ""}
       <div class="note-input"><input id="noteInput" maxlength="300" placeholder="Un mot pour ${esc(s.name)}…"><button id="noteBtn">Laisser</button></div>` : ""}
     <p class="group-header">${kicker}</p>
