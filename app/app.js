@@ -73,18 +73,84 @@ segmented("theme", prefs.theme, v => { prefs.theme = v; store.set("vie.theme", v
 segmented("mode", prefs.mode, v => { prefs.mode = v; store.set("vie.app.mode", v); });
 segmented("dur", prefs.dur, v => { prefs.dur = v; store.set("vie.app.dur", v); });
 
-// ---------- Onglets ----------
+// ---------- Onglets : barre de verre flottante ----------
 const PAGES = ["tab-live", "tab-world", "tab-lives", "tab-settings"];
-$("tabbar").addEventListener("click", e => {
-  const b = e.target.closest("button"); if (!b) return;
-  const id = b.dataset.tab;
-  if (!$(id).hidden) { $(id).scrollTo({ top: 0, behavior: "smooth" }); return; }
+const tabbar = $("tabbar"), lens = $("tabLens"), tabs = [...tabbar.querySelectorAll("button")];
+const activeTab = () => tabs.find(t => t.classList.contains("on"));
+
+function placeLens(btn = activeTab(), x) {
+  lens.style.width = `${btn.offsetWidth}px`;
+  lens.style.transform = `translateX(${x ?? btn.offsetLeft}px)`;
+}
+function selectTab(btn) {
+  const id = btn.dataset.tab;
+  if (!$(id).hidden) { $(id).scrollTo({ top: 0, behavior: "smooth" }); placeLens(btn); return; }
   haptic();
   PAGES.forEach(p => $(p).hidden = p !== id);
-  document.querySelectorAll(".tabbar button").forEach(x => x.classList.toggle("on", x === b));
+  tabs.forEach(t => { t.classList.toggle("on", t === btn); t.setAttribute("aria-selected", String(t === btn)); });
+  placeLens(btn);
+  setMini(false);
   if (id === "tab-lives") renderLives();
+}
+function setMini(on) {
+  if (tabbar.classList.contains("mini") === on) return;
+  tabbar.classList.add("resizing");
+  tabbar.classList.toggle("mini", on);
+}
+tabbar.addEventListener("transitionend", e => {
+  if (e.target === tabbar && e.propertyName === "width") { tabbar.classList.remove("resizing"); placeLens(); }
 });
-PAGES.forEach(p => $(p).addEventListener("scroll", e => e.target.classList.toggle("scrolled", e.target.scrollTop > 36), { passive: true }));
+
+// Toucher, appuyer, glisser : la pastille grossit sous le doigt et suit le geste.
+let drag = null;
+const tabAt = x => tabs.reduce((best, t) => {
+  const c = t.offsetLeft + t.offsetWidth / 2;
+  return Math.abs(c - x) < Math.abs(best.offsetLeft + best.offsetWidth / 2 - x) ? t : best;
+}, tabs[0]);
+tabbar.addEventListener("pointerdown", e => {
+  if (tabbar.classList.contains("mini")) { setMini(false); haptic(); return; }
+  const r = tabbar.getBoundingClientRect();
+  drag = { x0: e.clientX, left: r.left, moved: false, start: e.target.closest("button") };
+  tabbar.setPointerCapture(e.pointerId);
+  tabbar.classList.add("pressing");
+  tabs.forEach(t => t.classList.toggle("hover", t === drag.start));
+});
+tabbar.addEventListener("pointermove", e => {
+  if (!drag) return;
+  if (!drag.moved && Math.abs(e.clientX - drag.x0) < 6) return;
+  drag.moved = true;
+  tabbar.classList.add("dragging");
+  const w = lens.offsetWidth, x = Math.max(4, Math.min(tabbar.clientWidth - w - 4, e.clientX - drag.left - w / 2));
+  lens.style.transform = `translateX(${x}px)`;
+  const over = tabAt(x + w / 2);
+  if (!over.classList.contains("hover")) { tabs.forEach(t => t.classList.toggle("hover", t === over)); haptic(4); }
+});
+function endDrag(e, cancel) {
+  if (!drag) return;
+  const target = drag.moved ? tabAt(e.clientX - drag.left) : drag.start;
+  drag = null;
+  tabbar.classList.remove("pressing", "dragging");
+  tabs.forEach(t => t.classList.remove("hover"));
+  if (!cancel && target) selectTab(target); else placeLens();
+}
+tabbar.addEventListener("pointerup", e => endDrag(e, false));
+tabbar.addEventListener("pointercancel", e => endDrag(e, true));
+// Clavier : Entrée / Espace sur un onglet.
+tabbar.addEventListener("click", e => { if (e.detail === 0) { const b = e.target.closest("button"); if (b) selectTab(b); } });
+window.addEventListener("resize", () => placeLens());
+requestAnimationFrame(() => placeLens());
+
+// Défilement : grand titre dans la barre du haut, barre d'onglets réduite en descendant.
+PAGES.forEach(p => {
+  let last = 0;
+  $(p).addEventListener("scroll", e => {
+    const y = e.target.scrollTop;
+    e.target.classList.toggle("scrolled", y > 36);
+    if (y > last + 8 && y > 120) setMini(true);
+    else if (y < last - 8 || y < 40) setMini(false);
+    last = y;
+  }, { passive: true });
+});
 
 // ---------- Compteurs ----------
 (function counters() {
