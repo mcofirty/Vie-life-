@@ -16,6 +16,12 @@ Vous naissez au hasard parmi les bébés de l’année (ou parmi les 8 milliards
 - Grille de vie, courbe de survie, comparaison avec votre vrai pays.
 - Acte de décès, vies antérieures gardées dans le navigateur, thème clair/sombre.
 
+## Version application (téléphone)
+
+Le dossier `app/` contient une version pensée pour le téléphone, au style iOS : grands titres, barre d’onglets floutée (Vivre, Monde, Vies, Réglages), listes groupées, anneaux pour les indicateurs, carte de naissance façon « pass », feuilles qui glissent du bas (fermeture d’un geste vers le bas), vibrations, écran maintenu allumé pendant la vie, thème clair/sombre.
+
+C’est une PWA : ouverte dans Safari, « Partager → Sur l’écran d’accueil » l’installe comme une app, et elle fonctionne hors ligne. Elle partage le moteur (`sim.js`), les données (`data.js`) et les vies gardées avec la version web.
+
 ## Modèle
 
 - Mortalité : mortalité infantile, puis loi de Gompertz-Makeham calée par pays et par sexe sur l’espérance de vie (ONU), modulée par la santé et la richesse.
