@@ -139,6 +139,7 @@ a { color: var(--blue); text-decoration: none; }
 }
 .hero-glow { position: absolute; width: 220px; height: 220px; right: -60px; bottom: -80px; border-radius: 50%; background: rgba(255, 214, 10, .35); filter: blur(40px); animation: float 8s ease-in-out infinite; }
 @keyframes float { 50% { transform: translate(-30px, -20px) scale(1.1); } }
+.hero-logo { height: 26px; width: auto; display: block; margin: 0 0 22px; position: relative; }
 .hero-kicker { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; opacity: .8; margin: 0 0 10px; position: relative; }
 .hero-stats { display: flex; gap: 28px; position: relative; }
 .hero-stats b { display: block; font-size: 34px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.02em; line-height: 1.05; }

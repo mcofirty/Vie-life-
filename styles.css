@@ -70,8 +70,8 @@ section.wrap { padding-top: 56px; padding-bottom: 8px; }
 
 /* Navigation */
 .topnav { display: flex; justify-content: space-between; align-items: center; padding: 16px; max-width: 1080px; margin: 0 auto; }
-.brand { font: 800 1.5rem var(--serif); color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: .35em; }
-.dot { width: 14px; height: 14px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 5px color-mix(in srgb, var(--gold) 25%, transparent); }
+.brand { color: var(--ink); text-decoration: none; display: flex; align-items: center; }
+.brand-logo { height: 28px; width: auto; display: block; }
 .topnav nav { display: flex; gap: 18px; align-items: center; }
 .topnav nav a { color: var(--ink-2); text-decoration: none; font-weight: 500; font-size: .92rem; }
 @media (max-width: 640px) { .topnav nav a { display: none; } }
