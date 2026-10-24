@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Vie · Naître au hasard</title>
-<meta name="description" content="Une simulation de vie gratuite : naissez au hasard parmi les bébés qui viennent au monde aujourd’hui et vivez une vie entière, guidée par les statistiques réelles de son pays.">
+<meta name="description" content="Une simulation de vie gratuite : naissez au hasard parmi les bébés qui viennent au monde, hier, aujourd’hui ou demain, et vivez une vie entière, guidée par les statistiques réelles de son pays.">
 <meta name="theme-color" content="#1d2340">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='%231d2340'/><circle cx='32' cy='32' r='9' fill='%23f2b544'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,6 +21,7 @@
     <nav>
       <a href="#settings">Naître</a>
       <a href="#how">Comment ça marche</a>
+      <a href="#memorial">Mémorial</a>
       <a href="#past">Vies antérieures</a>
       <a href="app/">App mobile</a>
       <button class="icon-btn" id="themeBtn" aria-label="Changer de thème" title="Clair / sombre">◐</button>
@@ -30,17 +31,20 @@
   <section class="hero">
     <p class="eyebrow">Simulation de vie · statistiques réelles · dès 15 ans</p>
     <h1><span class="big">1</span> vie,<br>tirée au sort.</h1>
-    <p class="lead">Chaque seconde, quatre bébés environ ouvrent les yeux quelque part sur Terre. Vous allez devenir l’un d’eux. Le pays, la famille, la richesse ou la pauvreté : rien de tout cela ne se choisit. Ensuite, il ne reste qu’à vivre, une année après l’autre, jusqu’au bout.</p>
+    <p class="lead">Chaque seconde, quatre bébés environ ouvrent les yeux quelque part sur Terre. Vous allez devenir l’un d’eux, aujourd’hui, dans le passé ou dans le futur. Le pays, la famille, la richesse ou la pauvreté : rien de tout cela ne se choisit. Ensuite, il ne reste qu’à vivre, une année après l’autre, jusqu’au bout.</p>
     <div class="counters">
       <div class="counter"><b id="birthCount">0</b><span>bébés nés depuis que vous lisez cette page</span></div>
       <div class="counter"><b id="deathCount">0</b><span>personnes mortes pendant ce temps</span></div>
     </div>
-    <a class="btn primary big-btn" href="#settings">Naître maintenant</a>
+    <div class="cta-row">
+      <a class="btn primary big-btn" href="#settings">Naître maintenant</a>
+      <button class="btn ghost" id="strangerBtn">Rencontrer une vie au hasard</button>
+    </div>
   </section>
 
   <section class="band" id="odds">
     <div class="wrap">
-      <h2>Si vous naissiez à l’instant</h2>
+      <h2 id="oddsTitle">Si vous naissiez à l’instant</h2>
       <p class="muted" id="oddsNote"></p>
       <ol class="odds" id="oddsList"></ol>
       <details class="all-countries">
@@ -54,53 +58,97 @@
     <h2>Avant de naître</h2>
     <div class="settings">
       <fieldset>
+        <legend>Quand naître</legend>
+        <div class="era" id="eraChoices"></div>
+        <label class="year-field" id="yearField">Année de naissance
+          <input type="number" id="yearInput" min="1900" max="2100" step="1" inputmode="numeric">
+        </label>
+        <small class="muted" id="eraNote"></small>
+      </fieldset>
+      <fieldset>
         <legend>Comment le pays est tiré</legend>
-        <label class="choice"><input type="radio" name="mode" value="births" checked><span><b>Parmi les bébés de l’année</b><small>Chaque pays pèse selon son nombre de naissances.</small></span></label>
-        <label class="choice"><input type="radio" name="mode" value="pop"><span><b>Parmi les 8 milliards d’humains</b><small>Chaque pays pèse selon sa population. La vie commence quand même à 0 an.</small></span></label>
+        <label class="choice"><input type="radio" name="mode" value="births"><span><b>Parmi les bébés de l’année</b><small>Chaque pays pèse selon son nombre de naissances.</small></span></label>
+        <label class="choice"><input type="radio" name="mode" value="pop"><span><b>Parmi tous les humains</b><small>Chaque pays pèse selon sa population. La vie commence quand même à 0 an.</small></span></label>
       </fieldset>
       <fieldset>
         <legend>Durée d’une vie</legend>
-        <div class="seg" role="radiogroup">
-          <label><input type="radio" name="dur" value="15"><span>≈ 15 min</span></label>
-          <label><input type="radio" name="dur" value="30" checked><span>≈ 30 min</span></label>
-          <label><input type="radio" name="dur" value="60"><span>≈ 1 h</span></label>
-        </div>
-        <small class="muted">Temps réel pour atteindre l’espérance de vie du pays. Vous pourrez mettre en pause ou accélérer jusqu’à ×16.</small>
+        <div class="seg" role="radiogroup" id="durSeg"></div>
+        <small class="muted">Temps réel pour atteindre l’espérance de vie du pays. À 1 h, une année passe en 40 à 60 secondes environ. Pause et vitesses jusqu’à ×16.</small>
       </fieldset>
       <fieldset>
         <legend>Votre vrai pays de naissance <em>(facultatif)</em></legend>
         <select id="realCountry"><option value="">— Ne pas comparer —</option></select>
         <small class="muted">Pour comparer cette vie à la vôtre. Gardé seulement sur cet appareil.</small>
       </fieldset>
+      <fieldset class="wide-field">
+        <legend>Pendant la vie</legend>
+        <label class="choice"><input type="checkbox" data-pref="pauses"><span><b>Pauses de réflexion</b><small>À 5, 15, 30, 50 et 70 ans, le temps s’arrête sur une question.</small></span></label>
+        <label class="choice"><input type="checkbox" data-pref="auto"><span><b>Mode automatique</b><small>Vous fixez une priorité par an et regardez la vie se dérouler ; les décisions se prennent toutes seules.</small></span></label>
+        <label class="choice"><input type="checkbox" data-pref="music"><span><b>Musique douce</b><small>Une nappe sonore calme, générée dans le navigateur.</small></span></label>
+        <label class="choice"><input type="checkbox" data-pref="gentle"><span><b>Pas de scènes effrayantes</b><small>Les passages les plus durs sont repliés : vous choisissez de les lire ou non.</small></span></label>
+        <label class="choice"><input type="checkbox" data-pref="classroom"><span><b>Mode classe</b><small>Pour les enseignants : met de côté les thèmes les plus lourds (suicide, homicide, surdose, mariage d’enfants, harcèlement) et désactive le partage.</small></span></label>
+      </fieldset>
     </div>
     <div class="cta-row">
       <button class="btn primary big-btn" id="bornBtn">Naître</button>
       <button class="btn ghost" id="resumeBtn" hidden>Reprendre la vie en cours</button>
     </div>
-    <p class="notice"><b>Avertissement.</b> La maladie, la mort d’un enfant, la violence, le mariage forcé ou le suicide arrivent ici aussi souvent que dans les statistiques. Rien n’est montré en détail, et des numéros d’aide sont toujours indiqués.</p>
+    <p class="notice"><b>Avertissement.</b> La maladie, la mort d’un enfant, la guerre, la violence, le mariage forcé ou le suicide arrivent ici aussi souvent que dans les statistiques. Rien n’est montré en détail, et des numéros d’aide sont toujours indiqués.</p>
   </section>
 
   <section class="wrap" id="how">
     <h2>Comment ça marche</h2>
     <div class="cards">
       <article class="card"><h3>Nés à la même seconde</h3><p>Au moment où vous naissez, quatre autres bébés naissent ailleurs. Ils vivent eux aussi selon les statistiques de leur pays, et vous les suivez à côté de vous, âge par âge.</p></article>
-      <article class="card"><h3>Des pauses</h3><p>À 5, 15, 30, 50 et 70 ans, le temps s’arrête sur une question. Vous pouvez y répondre en pensant à cette personne… et à vous.</p></article>
-      <article class="card"><h3>Vos choix</h3><p>Études, travail, amour, départ à l’étranger : vous décidez. Chaque année, vous choisissez aussi une priorité. Les choix comptent, mais les statistiques du lieu de naissance pèsent lourd.</p></article>
-      <article class="card"><h3>Des données réelles</h3><p>Espérance de vie par sexe, mortalité infantile, revenus et inégalités, scolarité, université, homicides, fécondité, mariage des enfants, satisfaction de vie. Le moment de la mort suit une table de mortalité calée sur chaque pays.</p></article>
+      <article class="card"><h3>Passé, présent, futur</h3><p>Naître en 1920, aujourd’hui ou en 2080. Dans le passé, de vrais événements historiques (guerres, famines, épidémies, crises) traversent la vie. Le futur suit les projections de l’ONU.</p></article>
+      <article class="card"><h3>Vos choix</h3><p>Études, travail, amour, départ à l’étranger, soins, tabac, mobilisation : vous décidez. Chaque année, vous choisissez aussi une priorité. Les choix comptent, mais le lieu de naissance pèse lourd.</p></article>
+      <article class="card"><h3>Famille et argent</h3><p>Parents, frères et sœurs, enfants, petits-enfants. Un train de vie, une épargne, des placements, peut-être un logement, peut-être des dettes.</p></article>
+      <article class="card"><h3>Des pauses</h3><p>À 5, 15, 30, 50 et 70 ans, le temps s’arrête sur une question. À la fin, vous pouvez écrire quelques mots à la personne dont vous avez vécu la vie.</p></article>
+      <article class="card"><h3>Des données réelles</h3><p>Espérance de vie par sexe, mortalité infantile et maternelle, revenus et inégalités, école, université, emploi agricole, fécondité, mariage des enfants, VIH, homicides, tabac, coût des soins, satisfaction de vie.</p></article>
     </div>
+  </section>
+
+  <section class="wrap" id="memorial">
+    <h2>Mémorial</h2>
+    <p class="muted">Les vies que vous mettez au mémorial sont gardées pour longtemps, même si vous effacez les autres. On peut y allumer une bougie et y laisser un mot. Une vie partagée par lien s’ouvre ici aussi.</p>
+    <div class="toolbar">
+      <div class="seg compact" id="memSeg">
+        <label><input type="radio" name="memf" value="all" checked><span>Tout le mémorial</span></label>
+        <label><input type="radio" name="memf" value="mine"><span>Mes mémoriaux</span></label>
+        <label><input type="radio" name="memf" value="shared"><span>Reçus par lien</span></label>
+      </div>
+      <button class="btn ghost small" id="strangerBtn2">Rencontrer une vie au hasard</button>
+    </div>
+    <ul class="past" id="memList"></ul>
   </section>
 
   <section class="wrap" id="past">
     <h2>Vies antérieures</h2>
     <p class="muted">Gardées uniquement dans ce navigateur.</p>
+    <div class="toolbar">
+      <label class="sort">Trier <select id="sortSel"></select></label>
+      <button class="btn ghost small" id="exportBtn">Transférer (exporter)</button>
+      <label class="btn ghost small file-btn">Importer<input type="file" id="importInput" accept="application/json,.json"></label>
+      <button class="btn ghost small" id="clearPast" hidden>Tout effacer</button>
+    </div>
     <ul class="past" id="pastList"></ul>
-    <button class="btn ghost small" id="clearPast" hidden>Tout effacer</button>
+    <button class="btn ghost small" id="moreBtn" hidden>Voir plus</button>
+  </section>
+
+  <section class="wrap" id="about">
+    <h2>À propos</h2>
+    <div class="cards">
+      <article class="card"><h3>Le projet</h3><p>Une simulation de vie en français, inspirée de 1in8b.life et entièrement réécrite. Elle montre des probabilités, pas des destins. Elle s’adresse aux personnes de 15 ans et plus.</p></article>
+      <article class="card"><h3>Confidentialité</h3><p>Pas de compte, pas de publicité, pas de mesure d’audience. Vos vies, vos réponses et vos réglages restent dans ce navigateur. Un lien de partage contient la vie elle-même (sans vos réponses ni vos derniers mots) : rien n’est envoyé à un serveur.</p></article>
+      <article class="card"><h3>Données</h3><p>58 pays, environ 85 % des naissances. Le moment de la mort suit des tables de mortalité par pays, sexe et année ; les causes suivent des profils de l’OMS par région et par âge. Les valeurs historiques et futures sont des ordres de grandeur.</p></article>
+      <article class="card"><h3>Notes de version <small>v<span class="appVersion"></span></small></h3><p>Naître dans le passé ou le futur, événements historiques, famille et argent, soins, tabac, VIH, mobilisation, mode automatique, musique douce, mode classe, mémorial, partage, transfert des vies, reprise d’une vie après fermeture.</p></article>
+    </div>
   </section>
 
   <footer class="foot">
     <div class="wrap">
       <p><b>Besoin d’aide ?</b> En France : 3114 (prévention du suicide), 119 (enfance en danger), 3919 (violences faites aux femmes), 15 ou 112 (urgences). Ailleurs : <a href="https://findahelpline.com" target="_blank" rel="noopener">findahelpline.com</a>.</p>
-      <p class="muted small">Sources (valeurs approchées, vers 2023) : ONU World Population Prospects, Banque mondiale, OMS, UNESCO, ONUDC, UNICEF, World Happiness Report. Les <span class="countryCount2"></span> pays inclus regroupent la grande majorité des naissances mondiales ; le tirage se fait parmi eux. Les causes de décès suivent des profils simplifiés par région et par âge. C’est une simulation : elle montre des probabilités, pas des destins.</p>
+      <p class="muted small">Sources (valeurs approchées, vers 2023) : ONU World Population Prospects, ONU IGME, Banque mondiale, OMS, UNESCO, PNUD, OIT, ONUSIDA, ONUDC, UNICEF, World Happiness Report, Our World in Data, projet Maddison. Les <span class="countryCount2"></span> pays inclus regroupent la grande majorité des naissances mondiales ; le tirage se fait parmi eux. C’est une simulation : elle montre des probabilités, pas des destins.</p>
     </div>
   </footer>
 </div>
@@ -108,7 +156,7 @@
 <!-- ============ TIRAGE / ACTE DE NAISSANCE ============ -->
 <div id="draw" class="screen overlay" hidden>
   <div class="draw-box">
-    <p class="eyebrow">Tirage de votre lieu de naissance</p>
+    <p class="eyebrow" id="drawKicker">Tirage de votre lieu de naissance</p>
     <div class="spinner" id="spinner"><span id="spinFlag">🌍</span><b id="spinName">…</b></div>
     <article class="certificate" id="birthCert" hidden>
       <header><span>Acte de naissance</span><span id="bcDate"></span></header>
@@ -117,6 +165,7 @@
       <p class="family" id="bcFamily"></p>
       <div class="cta-row">
         <button class="btn primary" id="startLife">Commencer cette vie</button>
+        <button class="btn ghost" id="birthCardBtn">Carte à partager</button>
         <button class="btn ghost" id="cancelDraw">Annuler</button>
       </div>
     </article>
@@ -127,12 +176,29 @@
 <div id="life" class="screen" hidden>
   <header class="lifebar">
     <div class="who"><span id="lfFlag"></span><div><b id="lfName"></b><small id="lfCountry"></small></div></div>
-    <div class="age"><b id="lfAge">0</b><span>an</span><div class="yearbar"><i id="lfYear"></i></div></div>
+    <div class="age"><b id="lfAge">0</b><span>an</span><small class="calyear" id="lfCalYear"></small><div class="yearbar"><i id="lfYear"></i></div></div>
     <div class="controls">
       <button class="icon-btn" id="playBtn" aria-label="Pause">❚❚</button>
       <div class="speeds" id="speeds"></div>
       <button class="btn small" id="nextBtn" title="Avancer jusqu’au prochain événement important">Suivant »</button>
+      <button class="btn small" id="nextDecBtn" title="Avancer jusqu’à la prochaine décision">Décision ⏭</button>
+      <button class="btn small primary" id="pendingBtn" hidden>Décision en attente</button>
       <label class="toggle" title="Les décisions se prennent toutes seules"><input type="checkbox" id="autoChk"><span>Auto</span></label>
+      <div class="menu-wrap">
+        <button class="icon-btn" id="menuBtn" aria-label="Menu" aria-expanded="false" title="Menu">⋯</button>
+        <div class="menu" id="menu" hidden>
+          <button data-act="family">Famille et vie</button>
+          <button data-act="money">Dépenser et investir</button>
+          <hr>
+          <label><input type="checkbox" data-pref="music"> Musique douce</label>
+          <label><input type="checkbox" data-pref="pauses"> Pauses de réflexion</label>
+          <label><input type="checkbox" data-pref="gentle"> Pas de scènes effrayantes</label>
+          <hr>
+          <button data-act="birthcard">Carte de naissance</button>
+          <button data-act="help">Besoin d’aide</button>
+          <button data-act="quit">Quitter (la vie est gardée)</button>
+        </div>
+      </div>
       <button class="icon-btn" id="quitBtn" aria-label="Quitter" title="Quitter">✕</button>
     </div>
   </header>
@@ -142,7 +208,7 @@
       <section class="panel">
         <h3>Indicateurs <small>0–100</small></h3>
         <div id="statBars"></div>
-        <p class="tiny muted">Des valeurs élevées améliorent les chances, sans rien garantir.</p>
+        <p class="tiny muted">Santé : risque de mourir et capacité à travailler. Bonheur : revenus, proches, santé, dettes. Savoir : examens, emplois, premier salaire. Relations : mariage, enfants, harcèlement, solitude.</p>
       </section>
       <section class="panel">
         <h3>Priorité de l’année</h3>
@@ -152,14 +218,29 @@
         <h3>Situation</h3>
         <dl class="facts" id="situation"></dl>
       </section>
+      <section class="panel">
+        <h3>Argent</h3>
+        <dl class="facts" id="moneyMini"></dl>
+        <button class="btn ghost small" data-act="money">Dépenser et investir</button>
+      </section>
+      <section class="panel">
+        <h3>Famille et vie</h3>
+        <dl class="facts" id="familyMini"></dl>
+        <button class="btn ghost small" data-act="family">Ouvrir</button>
+      </section>
     </aside>
 
     <section class="col story panel">
-      <h3>Récit d’une vie <small>le plus récent en haut</small></h3>
+      <h3>Récit d’une vie <small>le plus récent en haut · ☆ pour garder un moment</small></h3>
       <ol id="storyLog"></ol>
+      <button class="btn ghost small" id="olderBtn" hidden>Afficher les moments plus anciens</button>
     </section>
 
     <aside class="col">
+      <section class="panel" id="worldPanel">
+        <h3>Le monde autour <small id="worldYear"></small></h3>
+        <ul class="world" id="worldList"></ul>
+      </section>
       <section class="panel">
         <h3>Nés à la même seconde <small>au même âge</small></h3>
         <ul class="peers" id="peers"></ul>
@@ -187,6 +268,7 @@
     <p class="eyebrow">Une décision vous attend · <span id="decAge"></span></p>
     <h2 id="decText"></h2>
     <div class="options" id="decOptions"></div>
+    <div class="cta-row"><button class="btn ghost small" id="decLater">Plus tard (le temps reste arrêté)</button></div>
   </div>
 </div>
 
@@ -199,34 +281,63 @@
   </div>
 </div>
 
+<div class="modal" id="panelModal" hidden>
+  <div class="modal-box wide">
+    <div class="modal-head"><h2 id="panelTitle"></h2><button class="icon-btn" id="panelClose" aria-label="Fermer">✕</button></div>
+    <div id="panelBody"></div>
+  </div>
+</div>
+
+<div class="modal" id="helpModal" hidden>
+  <div class="modal-box">
+    <div class="modal-head"><h2>Besoin d’aide</h2><button class="icon-btn" id="helpClose" aria-label="Fermer">✕</button></div>
+    <p class="help" id="helpText"></p>
+  </div>
+</div>
+
 <div class="modal" id="deathModal" hidden>
   <div class="modal-box wide">
     <article class="certificate death">
-      <header><span>Acte de décès</span><span id="dcDate"></span></header>
+      <header><span id="dcKind">Acte de décès</span><span id="dcDate"></span></header>
       <h2 id="dcTitle"></h2>
       <p id="dcLine" class="lead-sm"></p>
       <dl class="facts" id="dcFacts"></dl>
       <div class="grid100 small" id="dcGrid"></div>
+      <div id="dcStarred"></div>
       <h3>Moments marquants</h3>
       <ol class="highlights" id="dcHighlights"></ol>
       <h3>Les quatre autres bébés</h3>
       <ul class="peers final" id="dcPeers"></ul>
       <div id="dcCompare"></div>
       <div id="dcReflections"></div>
-      <p class="help" id="dcHelp" hidden>Si ces sujets vous touchent, vous pouvez en parler : en France, 3114, gratuit, 24 h/24. Ailleurs : <a href="https://findahelpline.com" target="_blank" rel="noopener">findahelpline.com</a>.</p>
-      <label class="last-words">Quelques mots pour <span id="dcName2"></span>
+      <p class="help" id="dcHelp" hidden></p>
+      <label class="last-words" id="dcWords">Quelques mots pour <span id="dcName2"></span>
         <textarea id="dcMessage" rows="2" placeholder="Ce que vous auriez voulu lui dire…"></textarea>
       </label>
+      <section class="memorial-box" id="dcMemorial" hidden>
+        <h3>Au mémorial</h3>
+        <p class="candles"><span id="dcCandles"></span> <button class="btn small" id="candleBtn">🕯️ Allumer une bougie</button></p>
+        <ul class="notes" id="dcNotes"></ul>
+        <div class="note-row"><input type="text" id="noteInput" maxlength="300" placeholder="Laisser un mot…"><button class="btn small" id="noteBtn">Laisser</button></div>
+      </section>
     </article>
     <div class="cta-row">
       <button class="btn primary" id="againBtn">Une autre vie</button>
+      <button class="btn ghost" id="memorialBtn">Mettre au mémorial</button>
+      <button class="btn ghost" id="keepBtn" hidden>Garder dans mes vies</button>
+      <button class="btn ghost" id="cardBtn">Carte à partager</button>
+      <button class="btn ghost" id="linkBtn">Lien de partage</button>
+      <button class="btn ghost" id="deleteBtn" hidden>Supprimer</button>
       <button class="btn ghost" id="homeBtn">Accueil</button>
     </div>
   </div>
 </div>
 
+<div class="toast" id="toast" hidden></div>
+
 <script src="data.js"></script>
 <script src="sim.js"></script>
+<script src="common.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
