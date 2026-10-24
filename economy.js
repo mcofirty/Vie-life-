@@ -80,6 +80,10 @@ const JOB_ROWS = [
 const JOBS_LIST = JOB_ROWS.map(([id, m, f, sector, edu, from, to, lo, hi, o]) => ({ id, m, f, sector, edu, from, to, lo, hi, ...o }));
 const JOB_BY_ID = Object.fromEntries(JOBS_LIST.map(j => [j.id, j]));
 const SECTOR_LABEL = { agri: "agriculture", informal: "secteur informel", ind: "industrie", serv: "services", pub: "secteur public", tech: "technique et sciences" };
+// Métiers encore très marqués par le sexe (ordre de grandeur des statistiques d'emploi).
+const MALE_LEANING = new Set(["soldier", "miner", "builder", "trucker", "mechanic", "welder", "electrician", "fisher", "porter", "mototaxi", "pilot", "police", "engineer"]);
+const FEMALE_LEANING = new Set(["domestic", "tailor", "carer", "nurse", "teacher", "secretary", "hairdresser", "textile", "cashier"]);
+const genderFit = (j, sex) => !sex ? 1 : sex === "f" ? (MALE_LEANING.has(j.id) ? 0.25 : FEMALE_LEANING.has(j.id) ? 1.6 : 1) : (FEMALE_LEANING.has(j.id) ? 0.35 : MALE_LEANING.has(j.id) ? 1.3 : 1);
 const jobEdu = (j, year) => Array.isArray(j.edu) ? (year < j.edu[1] ? j.edu[0] : j.edu[2]) : j.edu;
 // Poids de chaque secteur dans l'emploi d'un pays une année donnée.
 function sectorWeight(c, sector) {
@@ -100,7 +104,7 @@ function jobsFor(L) {
   const sectors = {};
   for (const j of JOBS_LIST) if (y >= j.from && y <= j.to) sectors[j.sector] = (sectors[j.sector] || 0) + 1;
   return JOBS_LIST.filter(j => y >= j.from && y <= j.to && jobEdu(j, y) <= rank && L.age >= (j.minAge || (jobEdu(j, y) <= 1 ? 10 : 16)) && !(j.sector === "agri" && L.urban && c.agri < 5))
-    .map(j => ({ job: j, weight: sectorWeight(c, j.sector) / sectors[j.sector] * (j.w ?? 1) * (jobEdu(j, y) === rank ? 1.6 : 1) * (j.sector === "agri" && L.urban ? 0.3 : 1) }))
+    .map(j => ({ job: j, weight: sectorWeight(c, j.sector) / sectors[j.sector] * (j.w ?? 1) * genderFit(j, L.sex) * (jobEdu(j, y) === rank ? 1.6 : 1) * (j.sector === "agri" && L.urban ? 0.3 : 1) }))
     .filter(x => x.weight > 0.05);
 }
 const jobLabel = (j, sex) => sex === "m" ? j.m : j.f;
@@ -631,7 +635,7 @@ Object.assign(Life.prototype, {
   initLineage(lin) {
     this.lineage = { id: lin.id, gen: lin.gen, ancestors: lin.ancestors, parentName: lin.parent.name };
     const p = lin.parent;
-    this.parents = [{ role: p.sex === "f" ? "mère" : "père", name: p.name, sex: p.sex, age: p.ageAtBirth, alive: true, previous: true, deathAt: p.deathAt, cause: p.cause, estate: lin.estate }];
+    this.parents = [{ role: p.sex === "f" ? "mère" : "père", name: p.name, sex: p.sex, age: p.ageAtBirth, alive: true, previous: true, deathAt: p.deathAt, cause: p.cause, estate: lin.estate, job: p.job || null, edu: p.edu || null }];
     if (lin.other) {
       const sx = p.sex === "f" ? "m" : "f";
       this.parents.push({ role: sx === "f" ? "mère" : "père", name: lin.other, sex: sx, age: Math.max(16, p.ageAtBirth + (sx === "m" ? 3 : -2)), alive: true });
@@ -643,6 +647,93 @@ Object.assign(Life.prototype, {
     this.kidsFundStart = lin.fund || 0;
   },
 });
+
+// --- La famille et le lieu de naissance --------------------------------------------
+Object.assign(Life.prototype, {
+  // Études et métier des parents, selon le pays, leur époque et l'aisance de la famille.
+  initParentDetails() {
+    const c = this.country, pct = (this.decile - 0.5) / 10;
+    for (const p of this.parents) {
+      if (p.edu == null) {
+        const young = countryAt(this.code, this.year - p.age + 15);
+        const years = young.school * (1 + 0.3 * normInv(clamp(pct, 0.05, 0.95)) + 0.25 * randn());
+        p.edu = years < 2.5 ? "none" : years < 7 ? "primaire" : years < 12 || rand() > young.tert / 60 ? "secondaire" : "universite";
+      }
+      if (p.job === undefined || (p.job === null && !p.previous)) {
+        const works = p.sex === "m" ? rand() < 0.93 : rand() < clamp(c.flp / 65, 0.15, 1);
+        p.job = null;
+        if (works) {
+          const ctx = { here: c, calYear: this.year, edu: p.edu, age: p.age, urban: this.urban, jobInfo: null, sex: p.sex };
+          const options = jobsFor(ctx);
+          if (options.length) {
+            const target = clamp(pct + 0.12 * randn(), 0.02, 0.98);
+            const j = weighted(options.map(o => [o.job, o.weight * Math.exp(-((((o.job.lo + o.job.hi) / 2 - target) / 0.3) ** 2))]));
+            p.job = jobLabel(j, p.sex);
+            p.pct = clamp(j.lo + (j.hi - j.lo) * clamp(0.5 + 0.25 * randn(), 0, 1), 0.01, 0.99);
+          }
+        } else p.home = p.sex === "f";
+      }
+    }
+  },
+  householdIncome() {
+    const c = this.country;
+    return this.parents.filter(p => p.job).reduce((s, p) => s + incomeAt(c, p.pct ?? (this.decile - 0.5) / 10), 0);
+  },
+  housingAtBirth() {
+    const c = this.country, d = this.decile;
+    if (!this.urban) return c.gdp < 6000 ? (d <= 5 ? "une maison de terre au toit de tôle ou de chaume" : "une maison en dur, au village") : d >= 8 ? "une grande maison" : "une maison familiale";
+    if (c.gdp < 12000 && d <= 3) return "un quartier informel, en bordure de la ville";
+    if (d >= 9) return "une grande maison dans un beau quartier";
+    if (d >= 6) return "un appartement confortable";
+    return "un petit logement";
+  },
+});
+const EDU_SHORT = { none: "sans école", primaire: "école primaire", secondaire: "lycée", universite: "université" };
+// Tout ce qu'on peut dire d'une naissance : famille, foyer, lieu, statistiques.
+function birthDetails(L) {
+  const c = L.country, y = L.year, inc = L.householdIncome();
+  const parentLine = p => `${p.name}, ${ans(p.age)} · ${p.job || (p.home ? "au foyer" : "sans emploi")}${p.edu ? ` · ${EDU_SHORT[p.edu]}` : ""}${p.previous ? " · votre vie précédente" : ""}`;
+  const sibs = L.sibs.filter(s => s.born < 0);
+  const family = [
+    ...L.parents.map(p => [p.sex === "f" ? "Mère" : "Père", parentLine(p)]),
+    ["Frères et sœurs", sibs.length ? sibs.map(s => `${s.name} (${ans(-s.born)})`).join(", ") : "aucun pour l’instant"],
+    ["Milieu", `famille ${L.familyLabel()}`],
+  ];
+  if (L.lineage) family.push(["Lignée", `génération ${L.lineage.gen} : ${L.lineage.ancestors.map(a => a.name).join(" → ")}`]);
+  const home = [
+    ["Lieu", L.urban ? "en ville" : "à la campagne"],
+    ["Logement", L.housingAtBirth()],
+    ["Revenu du foyer", inc > 0 ? `≈ ${money(inc)} par an · ≈ ${(Math.round(inc * 0.72 / 12 / 10) * 10).toLocaleString("fr-FR")} € par mois aux prix français` : "presque aucun revenu monétaire"],
+    ["Compte en banque", c.bank >= 70 ? "courant dans le pays" : c.bank >= 30 ? "un adulte sur deux environ" : "rare"],
+  ];
+  const events = activeEvents(L.code, y).map(x => x.ev.name);
+  const place = [
+    ["Région du monde", REGION_NAMES[c.region]],
+    ["Population", `${(Math.round(c.pop * 10) / 10).toLocaleString("fr-FR")} millions · ${Math.round(c.urban)} % en ville`],
+    ["Enfants par femme", c.tfr.toLocaleString("fr-FR", { maximumFractionDigits: 1 })],
+    ["Travail", `${Math.round(c.agri)} % dans l’agriculture · ${Math.round(c.ind)} % dans l’industrie · chômage ${c.unemp.toLocaleString("fr-FR", { maximumFractionDigits: 1 })} %`],
+    ["École", `${c.school.toLocaleString("fr-FR", { maximumFractionDigits: 1 })} années en moyenne · ${Math.round(c.tert)} % vont dans le supérieur`],
+    ...(y >= 1995 ? [["Internet", `${Math.round(c.net)} % des habitants`]] : []),
+    ["Homicides", `${c.hom.toLocaleString("fr-FR", { maximumFractionDigits: 1 })} pour 100 000 habitants par an`],
+    ["Satisfaction de vie", `${c.happy.toLocaleString("fr-FR", { maximumFractionDigits: 1 })} / 10`],
+    ...(events.length ? [["En ce moment", capFirst(events.join(", "))]] : []),
+  ];
+  const lx = cohortLx(L.home, L.sex, y), pc = x => `${Math.round(x * 100)} %`;
+  const odds = [
+    ["Fêter ses 5 ans", pc(lx[5])],
+    ["Atteindre 65 ans", pc(lx[65])],
+    ["Entrer à l’université", pc(clamp(c.tert / 100 * (0.5 + L.decile / 15), 0.002, 0.95))],
+    ...(L.sex === "f" && c.cm >= 1 ? [["Être mariée avant 18 ans", pc(clamp(c.cm / 100 * (1.3 - L.decile / 10), 0, 0.95))]] : []),
+    ["Partir vivre à l’étranger", c.gdp < 20000 ? "possible, si l’occasion se présente" : "rare"],
+  ];
+  // Un récit en quelques phrases.
+  const [m, f] = [L.parents.find(p => p.sex === "f"), L.parents.find(p => p.sex === "m")];
+  const who = p => p ? `${p.sex === "f" ? "votre mère" : "votre père"}, ${p.name} (${ans(p.age)}), ${p.job ? (/^(vend |travaille )/.test(p.job) ? p.job : `est ${p.job}`) : p.home ? "s’occupe du foyer" : "cherche du travail"}` : "";
+  const story = `Vous naissez ${L.urban ? "en ville" : "à la campagne"}, ${inCountry(c)}, dans ${L.housingAtBirth()}. ${capFirst([who(m), who(f)].filter(Boolean).join(" ; "))}. `
+    + (inc > 0 ? `Le foyer gagne environ ${money(inc)} par an. ` : "")
+    + (sibs.length ? `${sibs.length > 1 ? `${sibs.length} frères et sœurs` : sibs[0].sex === "m" ? "Un grand frère" : "Une grande sœur"} vous attend${sibs.length > 1 ? "ent" : ""} : ${sibs.map(s => s.name).join(", ")}.` : "Vous êtes le premier enfant.");
+  return { story, family, home: home.filter(r => r[1]), place, odds };
+}
 
 // Ce qu'une vie laisse en mourant, et comment reprendre la lignée avec un enfant.
 // will : "egal" (parts égales), "heritier" (tout à l'enfant choisi), "oeuvres" (moitié aux œuvres).
@@ -661,7 +752,7 @@ function lineageFor(rec, heirName, will) {
     lineage: {
       id: d.lineageId, gen: d.gen + 1, ancestors: [...d.ancestors, { name: rec.s.name, sex: rec.s.sex, home: rec.s.home, year: rec.s.year, age: rec.s.age, cause: rec.s.cause, wealth: rec.s.wealth }],
       decile: clamp(Math.round(pct * 10 + 0.5) + (d.estate > median(c) * 10 ? 1 : 0), 1, 10),
-      parent: { name: rec.s.name, sex: rec.s.sex, ageAtBirth: kid.born, deathAt: rec.s.age - kid.born, cause: rec.s.cause },
+      parent: { name: rec.s.name, sex: rec.s.sex, ageAtBirth: kid.born, deathAt: rec.s.age - kid.born, cause: rec.s.cause, job: rec.s.job, edu: rec.s.edu },
       other: kid.other, estate: share, knowBonus: (rec.s.edu === "universite" ? 5 : rec.s.edu === "secondaire" ? 2 : 0) + Math.min(6, d.fund / median(c) * 2),
       siblings: d.allKids.filter(k => k.name !== kid.name).map(k => ({ name: k.name, sex: k.sex, born: k.born - kid.born, alive: k.alive })),
       fund: d.fund,

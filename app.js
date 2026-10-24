@@ -237,7 +237,6 @@ function startDraw() {
 
 function showBirth() {
   const c = life.country;
-  const events = activeEvents(life.code, life.year).map(x => x.ev.name);
   $("bcDate").textContent = birthDateText(life);
   $("bcName").value = life.name;
   $("bcFacts").innerHTML = [
@@ -248,12 +247,10 @@ function showBirth() {
     ["Espérance de vie", `${fmt(c.e0[life.sex])} ans`],
     ["Mortalité infantile", `${fmt(c.imr, 1)} bébés sur 1 000 meurent avant 1 an`],
     ["Revenu moyen", `${nf.format(c.gdp)} $ PPA par an`],
-    ["École", `${fmt(c.school, 1)} années en moyenne`],
-    ["Université", `${fmt(c.tert)} % d’une génération`],
-    ["Parents", `${life.parents[0].name} (${life.parents[0].age} ans) et ${life.parents[1].name} (${life.parents[1].age} ans)`],
-    ...(events.length ? [["Contexte", capFirst(events.join(", "))]] : []),
   ].map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join("");
-  $("bcFamily").textContent = `Votre famille est ${life.familyLabel()}.${life.siblings ? ` ${life.siblings > 1 ? `${life.siblings} frères et sœurs` : "Un frère ou une sœur"} vous attend${life.siblings > 1 ? "ent" : ""}.` : ""}`;
+  const d = birthDetails(life), dl = rows => `<dl class="facts">${rows.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join("")}</dl>`;
+  $("bcStory").textContent = d.story;
+  $("bcMore").innerHTML = `<h4>Votre famille</h4>${dl(d.family)}<h4>Votre foyer</h4>${dl(d.home)}<h4>Là où vous naissez</h4>${dl(d.place)}<h4>Ce que disent les statistiques</h4>${dl(d.odds)}`;
   $("birthCardBtn").hidden = prefs.classroom;
   $("spinner").hidden = true;
   $("birthCert").hidden = false;

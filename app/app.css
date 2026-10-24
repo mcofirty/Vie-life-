@@ -475,3 +475,6 @@ a { color: var(--tint); text-decoration: none; }
 .slider-row output { width: 3.2em; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
 .cell[disabled] { opacity: .45; }
 .inline-ico .ico { width: 14px; height: 14px; vertical-align: -2px; color: var(--tint); }
+.pass-details { width: 100%; max-width: 420px; margin: 8px auto 0; text-align: left; }
+.pass-details .cell small { white-space: normal; }
+.pass-details .group-header { color: rgba(255, 248, 241, .72); }

@@ -265,6 +265,7 @@ class Life {
     if (opts.lineage) this.initLineage(opts.lineage);
     else this.initParents(c);
     this.initMoney();
+    this.initParentDetails();
     // Santé
     this.smoker = false;
     this.smokeOffered = false;
@@ -306,9 +307,8 @@ class Life {
   // Un prénom qui n'est pas déjà porté dans la famille (si possible).
   freshName(sex, code = this.code) {
     const used = new Set([this.name, this.partner, ...(this.parents || []).map(p => p.name), ...(this.sibs || []).map(x => x.name), ...this.children.map(k => k.name), ...this.children.map(k => k.other)]);
-    let nm;
-    for (let i = 0; i < 8; i++) { nm = drawName(code, sex); if (!used.has(nm)) break; }
-    return nm;
+    const pool = namesFor(code)[sex === "m" ? 0 : 1], free = pool.filter(n => !used.has(n));
+    return pick(free.length ? free : pool);
   }
   get calYear() { return this.year + this.age; }
   get here() { return countryAt(this.code, this.calYear); }

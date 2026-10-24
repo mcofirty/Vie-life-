@@ -331,7 +331,7 @@ function startDraw(confirmed = false) {
   v.classList.remove("landed");
   v.hidden = false; v.style.animation = "none"; void v.offsetWidth; v.style.animation = "";
   $("drawKicker").textContent = `Tirage de votre lieu de naissance · ${year}`;
-  $("pass").hidden = true; $("drawActions").hidden = true;
+  $("pass").hidden = true; $("drawActions").hidden = true; $("passDetails").hidden = true;
   const globe = $("globe");
   globe.classList.add("spin"); globe.classList.remove("land");
   let n = 0;
@@ -350,7 +350,6 @@ function startDraw(confirmed = false) {
 function showPass() {
   const c = life.country;
   const pass = $("pass");
-  const events = activeEvents(life.code, life.year).map(x => x.ev.name);
   $("passFlag").textContent = c.flag;
   $("passDate").textContent = birthDateText(life);
   $("passName").value = life.name;
@@ -361,7 +360,11 @@ function showPass() {
     ["Revenu moyen", `${nf.format(c.gdp)} $`],
     ["École", `${fmt(c.school, 1)} ans`],
   ].map(([k, v]) => `<div><small>${k}</small><b>${v}</b></div>`).join("");
-  $("passFamily").textContent = `Votre famille est ${life.familyLabel()}. Parents : ${life.parents[0].name} et ${life.parents[1].name}.${events.length ? ` Le pays traverse ${events.join(", ")}.` : ""}`;
+  const d = birthDetails(life);
+  $("passFamily").textContent = d.story;
+  const grp = (title, rows) => `<p class="group-header">${title}</p><div class="group">${rows.map(([k, v]) => `<div class="cell"><span class="cell-main"><b>${esc(k)}</b><small>${esc(v)}</small></span></div>`).join("")}</div>`;
+  $("passDetails").innerHTML = grp("Votre famille", d.family) + grp("Votre foyer", d.home) + grp("Là où vous naissez", d.place) + grp("Ce que disent les statistiques", d.odds);
+  $("passDetails").hidden = false;
   $("drawView").classList.add("landed");
   $("passCard").hidden = prefs.classroom;
   pass.hidden = false; $("drawActions").hidden = false;

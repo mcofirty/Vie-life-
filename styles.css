@@ -319,3 +319,6 @@ caption { caption-side: top; text-align: left; padding: 8px 10px; color: var(--m
 tfoot td { text-align: left; color: var(--muted); font-size: .78rem; white-space: normal; }
 @media (max-width: 640px) { .alloc-row { grid-template-columns: 1fr; } }
 #heirModal, #panelModal, #helpModal { z-index: 35; }
+.birth-story { font-size: 1rem; line-height: 1.55; color: var(--ink); margin: 4px 0 14px; }
+.birth-more h4 { font: 600 .78rem var(--sans); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 16px 0 6px; }
+.draw-box { width: min(620px, 100%); }
