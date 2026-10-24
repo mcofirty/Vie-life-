@@ -106,7 +106,7 @@
       <article class="feature" style="--c: var(--teal)"><span class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 3L2 9l10 6 10-6zm-6 9v4c0 2 3 4 6 4s6-2 6-4v-4l-6 3.5z"/></svg></span><h3>Famille et argent</h3><p>Parents, enfants, épargne, placements, logement, dettes.</p></article>
       <article class="feature" style="--c: var(--indigo)"><span class="feature-icon"><svg viewBox="0 0 24 24"><path d="M6 4h4v16H6zm8 0h4v16h-4z"/></svg></span><h3>Des pauses</h3><p>À 5, 15, 30, 50 et 70 ans, le temps s’arrête sur une question.</p></article>
       <article class="feature" style="--c: var(--green)"><span class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 2l3 6 6 1-4.5 4.3L17.6 20 12 17l-5.6 3 1.1-6.7L3 9l6-1z"/></svg></span><h3>Vos choix</h3><p>Études, amour, départ à l’étranger. Ils comptent, mais le lieu de naissance pèse lourd.</p></article>
-      <article class="feature" style="--c: var(--blue)"><span class="feature-icon"><svg viewBox="0 0 24 24"><path d="M4 20V10h3v10zm6.5 0V4h3v16zM17 20v-7h3v7z"/></svg></span><h3>Données réelles</h3><p>Espérance de vie, revenus, école, violence, fécondité : 58 pays.</p></article>
+      <article class="feature" style="--c: var(--blue)"><span class="feature-icon"><svg viewBox="0 0 24 24"><path d="M4 20V10h3v10zm6.5 0V4h3v16zM17 20v-7h3v7z"/></svg></span><h3>Données réelles</h3><p>Tous les pays du monde, de 1900 à 2100 : Banque mondiale, ONU, Our World in Data.</p></article>
     </div>
 
     <p class="group-footer warn">La maladie, la mort d’un enfant, la violence, le mariage forcé ou le suicide surviennent ici aussi souvent que dans les statistiques. Rien n’est montré en détail. Dès 15 ans.</p>
@@ -285,12 +285,24 @@
 
     <div class="segmented life-seg" id="lifeSeg">
       <button data-v="story" class="on">Récit</button>
+      <button data-v="act">Agir</button>
       <button data-v="me">Situation</button>
-      <button data-v="peers">Les autres</button>
+      <button data-v="peers">Autres</button>
       <button data-v="data">Données</button>
     </div>
 
     <div class="pane" id="pane-story"><ol class="feed" id="feed"></ol></div>
+
+    <div class="pane" id="pane-act" hidden>
+      <p class="group-header" id="actLeft"></p>
+      <div class="segmented" data-name="actcat" style="margin:0 0 12px">
+        <button data-v="pro" class="on">Travail et argent</button>
+        <button data-v="perso">Vie personnelle</button>
+      </div>
+      <div class="group" id="actList"></div>
+      <p class="group-header">Impossible pour l’instant</p>
+      <div class="group" id="actOff"></div>
+    </div>
 
     <div class="pane" id="pane-me" hidden>
       <p class="group-header">Priorité de l’année</p>
@@ -341,8 +353,10 @@
 
 <div class="toast" id="toast" hidden></div>
 
+<script src="../countries.js"></script>
 <script src="../data.js"></script>
 <script src="../sim.js"></script>
+<script src="../economy.js"></script>
 <script src="../common.js"></script>
 <script src="app.js"></script>
 </body>

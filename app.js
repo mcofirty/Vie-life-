@@ -104,7 +104,7 @@ function renderOdds() {
   }).join("");
   const rest = 1 - sorted.slice(0, 10).reduce((s, c) => s + w(c), 0) / total;
   const birthsNow = COUNTRIES.reduce((s, c) => s + c.births, 0);
-  $("oddsNote").textContent = `Sur 100 bébés tirés au sort, voici d’où ils viendraient. Les ${COUNTRIES.length - 10} autres pays de la simulation se partagent les ${fmt(rest * 100, 0)} % restants. Ensemble, les ${COUNTRIES.length} pays inclus représentent environ ${fmt(birthsNow / WORLD_BIRTHS_K * 100, 0)} % des naissances mondiales d’aujourd’hui.${prefs.era === "past" || prefs.era === "future" || prefs.era === "random" ? " Les chances changent avec l’année tirée." : ""}`;
+  $("oddsNote").textContent = `Sur 100 bébés tirés au sort, voici d’où ils viendraient. Les ${COUNTRIES.length - 10} autres pays de la simulation se partagent les ${fmt(rest * 100, 0)} % restants. La simulation couvre tous les pays et territoires (${COUNTRIES.length}), soit environ ${nf.format(Math.round(birthsNow / 1000) * 1000 * 1000)} naissances par an aujourd’hui.${prefs.era === "past" || prefs.era === "future" || prefs.era === "random" ? " Les chances changent avec l’année tirée." : ""}`;
   $("countryCount").textContent = COUNTRIES.length;
   document.querySelectorAll(".countryCount2").forEach(n => n.textContent = COUNTRIES.length);
   drawTable(at, year);
@@ -126,6 +126,11 @@ const TABLE_COLS = [
   ["Homicides /100k", c => fmt(c.hom, 1), c => c.hom],
   ["Tabac %", c => fmt(c.smoke), c => c.smoke],
   ["Soins à sa charge %", c => fmt(c.oop), c => c.oop],
+  ["Chômage %", c => fmt(c.unemp, 1), c => c.unemp],
+  ["Urbains %", c => fmt(c.urban), c => c.urban],
+  ["Internautes %", c => fmt(c.net), c => c.net],
+  ["Compte bancaire %", c => fmt(c.bank), c => c.bank],
+  ["Inflation %", c => fmt(c.infl, 1), c => c.infl],
   ["Satisfaction /10", c => fmt(c.happy, 1), c => c.happy],
 ];
 let tableRows = [];
@@ -137,6 +142,7 @@ function drawTable(at = tableRows, year) {
   });
   $("countryTable").innerHTML = `<caption>${year && year !== DATA_YEAR ? `Valeurs estimées pour ${year}` : "Valeurs vers 2023"}</caption><thead><tr>${TABLE_COLS.map((c, i) => `<th data-i="${i}">${c[0]}${i === sortCol ? (sortDir > 0 ? " ▲" : " ▼") : ""}</th>`).join("")}</tr></thead>
     <tbody>${rows.map(r => `<tr>${TABLE_COLS.map(c => `<td>${c[1](r)}</td>`).join("")}</tr>`).join("")}</tbody>`;
+  $("countryTable").insertAdjacentHTML("beforeend", `<tfoot><tr><td colspan="${TABLE_COLS.length}">Sources : Banque mondiale, Our World in Data. Certaines valeurs manquantes sont estimées d’après la région (voir la fiche du pays dans l’app mobile).</td></tr></tfoot>`);
 }
 $("countryTable").addEventListener("click", e => {
   const th = e.target.closest("th"); if (!th) return;
@@ -159,7 +165,7 @@ $("sortSel").addEventListener("change", () => { store.set("vie.sort", $("sortSel
 
 function lifeItem(r, extra = "") {
   const c = BY_CODE[r.s.home];
-  const li = el("li", {}, `<span>${c.flag} <b>${esc(r.s.name)}</b> · ${c.name} · ${ans(r.s.age)}${r.s.year ? ` · ${r.s.year}` : ""}${r.memorial ? " · <span title=\"Au mémorial\">🕯️</span>" : ""}<br><small class="muted">${esc(prefs.gentle && HEAVY_CAUSES.includes(r.s.cause) ? "cause non affichée" : r.s.cause)} · ${r.shared ? "reçue par lien" : `vécue le ${new Date(r.date).toLocaleDateString("fr-FR")}`}${extra}</small></span>`);
+  const li = el("li", {}, `<span>${c.flag} <b>${esc(r.s.name)}</b> · ${c.name} · ${ans(r.s.age)}${r.s.year ? ` · ${r.s.year}` : ""}${r.s.gen > 1 ? ` · génération ${r.s.gen}` : ""}${r.memorial ? " · <span title=\"Au mémorial\">🕯️</span>" : ""}<br><small class="muted">${esc(prefs.gentle && HEAVY_CAUSES.includes(r.s.cause) ? "cause non affichée" : r.s.cause)} · ${r.shared ? "reçue par lien" : `vécue le ${new Date(r.date).toLocaleDateString("fr-FR")}`}${extra}</small></span>`);
   const b = el("button", { className: "btn ghost small", textContent: "Revoir" });
   b.addEventListener("click", () => showDeath(pastLives().find(x => x.id === r.id) || r, r.shared ? "shared-kept" : "review"));
   li.append(b);
@@ -431,15 +437,19 @@ function renderLife() {
   const facts = [
     ["Famille d’origine", L.familyLabel()],
     ["Études", L.schooling ? `en cours : ${EDU_LABEL[L.schooling]}` : EDU_LABEL[L.edu]],
-    ["Travail", L.retired ? "à la retraite" : L.job || (L.age < 6 ? "—" : "aucun")],
+    ["Travail", L.retired ? "à la retraite" : L.job || (L.homemaker ? "au foyer" : L.age < 6 ? "—" : "sans emploi")],
   ];
   if (L.smoker) facts.push(["Tabac", L.g("fumeur", "fumeuse")]);
   if (L.hivPos) facts.push(["VIH", L.hivTreated() ? "sous traitement" : "sans traitement"]);
+  facts.push(["Lieu de vie", L.urban ? "en ville" : "à la campagne"]);
+  if (L.lineage) facts.push(["Lignée", `génération ${L.lineage.gen}`]);
   $("situation").innerHTML = facts.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join("");
   $("moneyMini").innerHTML = [
     ["Revenu", L.income > 0 ? `${dollars(L.income)} PPA/an<br><small class="muted">≈ ${euroMonth(L.income)} par mois en prix français</small>` : "aucun"],
     ["Épargne", dollars(L.savings)],
+    ...(L.house ? [["Logement", `${dollars(L.house.value)}${L.house.loan > 0 ? ` (emprunt ${dollars(L.house.loan)})` : ""}`]] : []),
     ["Dettes", L.debt > 0 ? dollars(L.debt) : "aucune"],
+    ["Patrimoine", `${dollars(L.netWorth())}<br><small class="muted">plus riche que ${Math.round(L.wealthPct() * 100)} % du pays</small>`],
   ].map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("");
   const living = L.children.filter(k => k.alive).length;
   $("familyMini").innerHTML = [
@@ -450,11 +460,37 @@ function renderLife() {
   ].map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("");
 
   renderStory();
+  renderActions();
   renderWorld();
   renderPeers();
   renderGrid($("grid100"), L.history, L.alive ? L.age : -1, !L.alive);
   renderSurvival();
-  if (!$("panelModal").hidden) openPanel($("panelModal").dataset.kind);
+  if (!$("panelModal").hidden && !$("panelModal").dataset.kind.startsWith("choices:")) openPanel($("panelModal").dataset.kind);
+}
+
+// Agir : trois actions par an, selon la vie et le pays.
+function renderActions() {
+  const L = life, cat = document.querySelector("input[name=actcat]:checked").value;
+  const acts = L.alive ? L.availableActions().filter(a => a.cat === cat) : [];
+  $("actLeft").textContent = L.alive ? `${L.actionsLeft} sur ${ACTIONS_PER_YEAR} restante${L.actionsLeft > 1 ? "s" : ""}` : "";
+  $("actList").innerHTML = acts.filter(a => a.ok).map(a => `<button class="act" data-act-id="${a.id}" title="${esc(a.desc)}"><b>${esc(a.label)}${a.hasChoices ? " ›" : ""}</b><small>${esc(a.desc)}</small></button>`).join("") || `<p class="tiny muted">${L.actionsLeft ? "Rien de possible pour l’instant." : "Plus d’actions cette année : laissez passer le temps."}</p>`;
+  $("actOff").innerHTML = acts.filter(a => !a.ok).map(a => `<li><b>${esc(a.label)}</b> — ${esc(a.why)}</li>`).join("");
+}
+document.querySelectorAll("input[name=actcat]").forEach(i => i.addEventListener("change", renderActions));
+$("actList").addEventListener("click", e => {
+  const b = e.target.closest("[data-act-id]"); if (!b || !life) return;
+  const a = life.availableActions().find(x => x.id === b.dataset.actId);
+  if (!a || !a.ok) return;
+  if (a.hasChoices) openPanel(`choices:${a.id}`);
+  else runAction(a.id);
+});
+function runAction(id, arg) {
+  const res = life.doAction(id, arg);
+  if (res) toast(res);
+  renderLife();
+  saveCurrent(life);
+  if (!life.alive) return;
+  if (life.queue.length) showDecision();
 }
 
 // Récit : les moments les plus récents en haut ; ☆ pour en garder un.
@@ -554,17 +590,30 @@ function openPanel(kind) {
         <button class="btn small" data-do="help" ${L.helpedAt === L.age || L.savings < 1 || !L.alive ? "disabled" : ""}>Aider la famille financièrement</button>
       </div>
       <p class="tiny muted">Une fois par an. Les liens familiaux comptent pour le mariage, les enfants et la solitude du grand âge.</p>`;
-  } else {
-    const price = L.housePrice();
+  } else if (kind === "money") {
+    const d = L.houseDeal(), port = portfolioRows(L), alloc = L.validAlloc(), budget = budgetRows(L);
     $("panelTitle").textContent = "Dépenser et investir";
-    $("panelBody").innerHTML = rows(moneyRows(L)) + (L.age < 16 && !L.job ? `<p class="notice">Encore enfant : l’argent de la famille n’est pas le vôtre. Ces choix compteront dès le premier revenu.</p>` : "") + `
+    $("panelBody").innerHTML = rows(moneyRows(L)) + (L.age < 16 && !L.job ? `<p class="notice">Encore enfant : l’argent de la famille n’est pas le vôtre. Ces choix compteront dès le premier revenu.</p>` : "")
+      + (budget.length ? `<h3>Budget de l’année</h3>${rows(budget)}` : "") + `
       <h3>Train de vie</h3>${radios("spend", SPEND, L.spend)}
-      <h3>Où placer l’épargne</h3>${radios("invest", INVEST, L.invest)}
+      <h3>Placements <small>répartition visée, rééquilibrée chaque année</small></h3>
+      <div class="alloc">${port.map(r => `<div class="alloc-row${r.available ? "" : " off"}">
+        <div><b>${r.label}</b> <span class="muted">${dollars(r.value)}</span><small>${r.available ? r.note : "Plus accessible : vendu au prochain rééquilibrage."}</small></div>
+        ${r.available ? `<label><input type="range" min="0" max="100" step="5" value="${r.target}" data-asset="${r.id}"><output>${Math.round(alloc[r.id] || 0)} %</output></label>` : ""}
+      </div>`).join("")}</div>
+      ${L.bank ? "" : `<p class="tiny muted">Sans compte en banque, on ne peut garder que du liquide, de l’or, du bétail ou une tontine. Ouvrez un compte depuis « Agir ».</p>`}
+      <h3>Logement</h3>
+      ${L.house ? `<p>${L.house.built ? "Maison construite soi-même" : "Propriétaire"} : valeur ${dollars(L.house.value)}${L.house.loan > 0 ? `, reste ${dollars(L.house.loan)} à rembourser (${dollars(L.house.payment)} par an, taux réel ${fmt(L.house.rate * 100, 1)} %)` : ""}.</p>`
+        : `<p>Un logement ${L.urban ? "en ville" : "à la campagne"} coûte environ ${dollars(d.price)}. ${d.canBorrow ? `Apport ${dollars(d.down)}, emprunt ${dollars(d.loan)} sur 25 ans à ${fmt(d.rate * 100, 1)} % (réel), soit ${dollars(d.payment)} par an.` : "Pas de crédit immobilier accessible : il faut payer comptant."} ${d.why}</p>`}
       <div class="cta-row">
-        ${L.house ? `<button class="btn small" data-do="sell">Vendre le logement (≈ ${dollars(price * 0.92)})</button>` : `<button class="btn small" data-do="buy" ${L.canBuyHouse() ? "" : "disabled"}>Acheter un logement (≈ ${dollars(price)})</button>`}
-        <button class="btn small" data-do="repay" ${L.debt > 0 && L.savings > 0 ? "" : "disabled"}>Rembourser les dettes</button>
+        ${L.house ? `<button class="btn small" data-do="sell">Vendre le logement</button>` : `<button class="btn small" data-do="buy" ${d.ok ? "" : "disabled"}>Acheter</button>`}
+        <button class="btn small" data-do="repay" ${(L.debt > 0 || (L.house && L.house.loan > 0)) && L.savings > 0 ? "" : "disabled"}>Rembourser les dettes</button>
       </div>
-      <p class="tiny muted">Acheter demande d’avoir mis de côté au moins un quart du prix ; le reste devient un emprunt. Montants en dollars PPA, à prix constants. Les dettes pèsent sur le bonheur et la santé ; l’épargne rassure.</p>`;
+      <p class="tiny muted">Dollars PPA à prix constants. Les rendements sont réels (après inflation) ; krachs, crises immobilières et hyperinflations suivent l’histoire. Les dettes pèsent sur le bonheur et la santé ; l’épargne rassure.</p>`;
+  } else if (kind.startsWith("choices:")) {
+    const id = kind.slice(8), act = L.availableActions().find(a => a.id === id), list = L.actionChoices(id);
+    $("panelTitle").textContent = act.label;
+    $("panelBody").innerHTML = `<p class="muted">${esc(act.desc)}</p>` + (list.length ? `<div class="choices">${list.map(o => `<button class="choice-btn" data-choice="${esc(o.id)}" ${o.disabled ? "disabled" : ""}><b>${esc(o.label)}</b><small>${esc(o.sub)}</small></button>`).join("")}</div>` : `<p>Rien à proposer pour l’instant.</p>`);
   }
   m.hidden = false;
 }
@@ -572,10 +621,24 @@ $("panelBody").addEventListener("change", e => {
   const i = e.target; if (!life) return;
   if (i.name === "kidsPlan") life.wantKids = i.value;
   if (i.name === "spend") life.spend = i.value;
-  if (i.name === "invest") life.invest = i.value;
+  saveCurrent(life);
+});
+$("panelBody").addEventListener("input", e => {
+  const i = e.target; if (!life || !i.dataset.asset) return;
+  life.alloc[i.dataset.asset] = +i.value;
+  life.rebalance();
+  const alloc = life.validAlloc();
+  $("panelBody").querySelectorAll("[data-asset]").forEach(x => x.nextElementSibling.textContent = `${Math.round(alloc[x.dataset.asset] || 0)} %`);
   saveCurrent(life);
 });
 $("panelBody").addEventListener("click", e => {
+  const ch = e.target.closest("[data-choice]");
+  if (ch && life) {
+    const id = $("panelModal").dataset.kind.slice(8);
+    $("panelModal").hidden = true;
+    runAction(id, ch.dataset.choice);
+    return;
+  }
   const b = e.target.closest("[data-do]"); if (!b || !life) return;
   const L = life, act = b.dataset.do;
   const ok = act === "visit" ? L.visitFamily() : act === "help" ? L.helpFamily() : act === "buy" ? L.buyHouse() : act === "sell" ? L.sellHouse() : L.repayDebt();
@@ -647,6 +710,9 @@ function showDeath(rec, mode) {
   if (s.wealth != null) facts.push(["Patrimoine", s.wealth >= 0 ? `${dollars(s.wealth)}${s.house ? " et un logement" : ""}` : `des dettes de ${dollars(-s.wealth)}`]);
   facts.push(["Mariage", s.marriedEver ? "oui" : "non"], ["Enfants", s.children ? `${s.children}${s.childrenAlive !== s.children ? ` (dont ${s.children - s.childrenAlive} ${s.children - s.childrenAlive > 1 ? "morts" : "mort"} en bas âge)` : ""}` : "aucun"]);
   if (s.grandkids) facts.push(["Petits-enfants", s.grandkids]);
+  if (s.business) facts.push(["Entreprise", s.business]);
+  const dyn = rec.dyn;
+  if (dyn && (dyn.gen > 1 || dyn.ancestors.length)) facts.push(["Lignée", `génération ${dyn.gen} : ${[...dyn.ancestors.map(a => `${a.name} (${BY_CODE[a.home].flag} ${a.year})`), s.name].join(" → ")}`]);
   $("dcFacts").innerHTML = facts.map(([k, v]) => `<dt>${k}</dt><dd>${v == null ? `<button class="reveal" id="showCause">Afficher</button>` : esc(v)}</dd>`).join("");
   if (hideCause) $("showCause").onclick = e => e.target.replaceWith(document.createTextNode(s.cause));
   renderGrid($("dcGrid"), rec.history, -1, true);
@@ -671,6 +737,8 @@ function showDeath(rec, mode) {
   renderMemorialBox();
   $("againBtn").textContent = mode === "new" ? "Une autre vie" : "Naître";
   $("memorialBtn").hidden = !own;
+  $("lineageBtn").hidden = !(own && rec.dyn && rec.dyn.heirs && rec.dyn.heirs.length);
+  $("lineageBtn").textContent = rec.dyn && rec.dyn.heirs && rec.dyn.heirs.length === 1 ? `Continuer avec ${rec.dyn.heirs[0].name}` : "Continuer la lignée";
   $("memorialBtn").textContent = rec.memorial ? "Retirer du mémorial" : "Mettre au mémorial";
   $("keepBtn").hidden = !(mode === "stranger" || mode === "shared");
   $("keepBtn").textContent = mode === "shared" ? "Garder au mémorial" : "Garder dans mes vies";
@@ -727,6 +795,41 @@ $("deleteBtn").addEventListener("click", () => {
   reviewMode = "deleted";
   closeDeath();
   toast("Vie supprimée");
+});
+
+// ---------- Descendance ----------
+const WILLS = {
+  egal: { label: "Parts égales", note: "Chaque enfant reçoit la même part." },
+  heritier: { label: "Tout à l’enfant choisi", note: "Les autres enfants n’ont rien." },
+  oeuvres: { label: "La moitié aux œuvres", note: "Une moitié pour des associations, le reste partagé entre les enfants." },
+};
+function openHeirs() {
+  const rec = reviewRecord, d = rec.dyn;
+  $("heirIntro").textContent = `${rec.s.name} laisse ${dollars(d.estate)} (après dettes). Vous allez revivre depuis la naissance l’enfant choisi : votre vie précédente mourra dans la sienne, au même âge et de la même cause.`;
+  $("heirList").innerHTML = d.heirs.map((h, i) => `<label class="choice"><input type="radio" name="heir" value="${esc(h.name)}"${i === 0 ? " checked" : ""}><span><b>${esc(h.name)}</b><small>${h.sex === "m" ? "Fils" : "Fille"} · ${h.age} ans à la mort de ${esc(rec.s.name)} · ${h.sex === "m" ? "né" : "née"} en ${h.year} ${inCountry(BY_CODE[h.code])}</small></span></label>`).join("");
+  $("willList").innerHTML = Object.entries(WILLS).map(([k, w], i) => `<label class="choice"><input type="radio" name="will" value="${k}"${i === 0 ? " checked" : ""}><span><b>${w.label}</b><small>${w.note}</small></span></label>`).join("");
+  updateHeirNote();
+  $("heirModal").hidden = false;
+}
+function updateHeirNote() {
+  const rec = reviewRecord, name = document.querySelector("input[name=heir]:checked").value, will = document.querySelector("input[name=will]:checked").value;
+  const opts = lineageFor(rec, name, will);
+  $("heirNote").textContent = `${name} héritera d’environ ${dollars(opts.lineage.estate)} à ${opts.lineage.parent.deathAt} ans (après droits de succession). Génération ${opts.lineage.gen}.`;
+}
+$("heirModal").addEventListener("change", updateHeirNote);
+$("heirClose").addEventListener("click", () => $("heirModal").hidden = true);
+$("lineageBtn").addEventListener("click", openHeirs);
+$("heirGo").addEventListener("click", () => {
+  const rec = reviewRecord, name = document.querySelector("input[name=heir]:checked").value, will = document.querySelector("input[name=will]:checked").value;
+  const opts = lineageFor(rec, name, will);
+  $("heirModal").hidden = true;
+  closeDeath();
+  clearCurrent();
+  life = new Life({ ...opts, classroom: prefs.classroom });
+  peers = Array.from({ length: 4 }, () => simulateWhole({ mode: "births", year: opts.year, classroom: prefs.classroom }));
+  showScreen("draw");
+  $("drawKicker").textContent = `La lignée continue · génération ${opts.lineage.gen} · ${opts.year}`;
+  showBirth();
 });
 
 function closeDeath() {

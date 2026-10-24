@@ -76,23 +76,33 @@ function compareRows(a, b, sex) {
 
 // Indicateurs du pays affichés à la naissance et dans les fiches pays.
 function countryFacts(c) {
+  const est = new Set(ESTIMATED[c.code] || []), e = k => est.has(k) ? " (estimé)" : "";
   return [
-    ["Naissances par an", nf.format(Math.round(c.births) * 1000)],
+    ["Région", REGION_NAMES[c.region]],
+    ["Population", `${fmt(c.pop, c.pop < 1 ? 2 : 1)} million${c.pop >= 2 ? "s" : ""}`],
+    ["Naissances par an", nf.format(Math.round(c.births * 1000))],
     ["Espérance de vie (H / F)", `${fmt(c.e0.m)} / ${fmt(c.e0.f)} ans`],
     ["Mortalité infantile", `${fmt(c.imr, 1)} ‰`],
-    ["Mortalité maternelle", `${nf.format(Math.round(c.mmr))} / 100 000 naissances`],
-    ["PIB par habitant", `${nf.format(c.gdp)} $ PPA`],
-    ["Inégalités (Gini)", c.gini],
-    ["Années d’école", fmt(c.school, 1)],
-    ["Accès au supérieur", `${fmt(c.tert)} %`],
-    ["Emploi agricole", `${fmt(c.agri)} %`],
+    ["Mortalité maternelle", `${nf.format(Math.round(c.mmr))} / 100 000 naissances${e("mmr")}`],
+    ["PIB par habitant", `${nf.format(c.gdp)} $ PPA${e("gdp")}`],
+    ["Inégalités (Gini)", `${fmt(c.gini, 1)}${e("gini")}`],
+    ["Années d’école", `${fmt(c.school, 1)}${e("school")}`],
+    ["Inscription dans le supérieur", `${fmt(c.tert)} %${e("tert")}`],
+    ["Emploi agricole / industriel", `${fmt(c.agri)} % / ${fmt(c.ind)} %${e("agri")}`],
+    ["Chômage", `${fmt(c.unemp, 1)} %${e("unemp")}`],
+    ["Femmes sur le marché du travail", `${fmt(c.flp)} %${e("flp")}`],
+    ["Population urbaine", `${fmt(c.urban)} %`],
+    ["Internautes", `${fmt(c.net)} %${e("net")}`],
+    ["Adultes avec un compte en banque", `${fmt(c.bank)} %${e("bank")}`],
+    ["Inflation habituelle", `${fmt(c.infl, 1)} % par an${e("infl")}`],
+    ["Impôts (% du PIB)", `${fmt(c.tax, 1)} %${e("tax")}`],
     ["Enfants par femme", fmt(c.tfr, 1)],
-    ["Mariage avant 18 ans", `${fmt(c.cm)} % des filles`],
-    ["VIH (15-49 ans)", `${fmt(c.hiv, 1)} %`],
-    ["Homicides", `${fmt(c.hom, 1)} / 100 000`],
-    ["Tabac", `${fmt(c.smoke)} % des adultes`],
-    ["Soins payés de sa poche", `${fmt(c.oop)} %`],
-    ["Satisfaction de vie", `${fmt(c.happy, 1)} / 10`],
+    ["Mariage avant 18 ans", `${fmt(c.cm)} % des femmes${e("cm")}`],
+    ["VIH (15-49 ans)", `${fmt(c.hiv, 1)} %${e("hiv")}`],
+    ["Homicides", `${fmt(c.hom, 1)} / 100 000${e("hom")}`],
+    ["Tabac", `${fmt(c.smoke)} % des adultes${e("smoke")}`],
+    ["Soins payés de sa poche", `${fmt(c.oop)} %${e("oop")}`],
+    ["Satisfaction de vie", `${fmt(c.happy, 1)} / 10${e("happy")}`],
   ];
 }
 
@@ -106,17 +116,41 @@ function familyRows(L) {
   rows.push(["Enfants", L.children.length ? L.children.map(k => `${k.name}${k.alive ? ` (${ans(L.age - k.born)})` : " †"}`).join(", ") : "aucun"]);
   if (L.grandkids) rows.push(["Petits-enfants", String(L.grandkids)]);
   rows.push(["Projet d’enfants", KIDS_PLAN[L.wantKids]]);
+  if (L.lineage) rows.push(["Lignée", `génération ${L.lineage.gen} · ${L.lineage.ancestors.map(a => a.name).join(" → ")}`]);
   return rows;
 }
 function moneyRows(L) {
   const rows = [];
-  rows.push(["Revenu", L.income > 0 ? `${dollars(L.income)} PPA/an · ≈ ${euroMonth(L.income)} par mois (prix français)` : "aucun"]);
-  rows.push(["Épargne", dollars(L.savings)]);
+  rows.push(["Revenu", L.income > 0 ? `${dollars(L.income)} par an · ≈ ${euroMonth(L.income)} par mois (prix français)` : "aucun"]);
+  if (L.married && L.partnerInfo) rows.push([`Revenu de ${L.partner}`, L.partnerInfo.income > 0 ? `${dollars(L.partnerInfo.income)} par an` : L.partnerInfo.retired ? "à la retraite" : "au foyer"]);
+  rows.push(["Épargne et placements", dollars(L.savings)]);
+  if (L.house) rows.push(["Logement", `${dollars(L.house.value)}${L.house.loan > 0 ? ` · reste ${dollars(L.house.loan)} à rembourser` : ""}`]);
+  else rows.push(["Logement", L.urban ? "locataire, en ville" : "locataire ou chez la famille, à la campagne"]);
+  if (L.business) rows.push(["Entreprise", `${L.business.label} · valeur ≈ ${dollars(L.business.value)}`]);
   rows.push(["Dettes", L.debt > 0 ? dollars(L.debt) : "aucune"]);
-  rows.push(["Logement", L.house ? "propriétaire" : "locataire ou chez la famille"]);
-  rows.push(["Train de vie", SPEND[L.spend].label]);
-  rows.push(["Placements", INVEST[L.invest].label]);
+  rows.push(["Patrimoine net", `${dollars(L.netWorth())} · plus riche que ${Math.round(L.wealthPct() * 100)} % du pays`]);
+  rows.push(["Compte en banque", L.bank ? "oui" : "non"]);
+  if (L.retired) rows.push(["Pension", L.pension > 0 ? `${dollars(L.pension)} par an` : "aucune"]);
   return rows;
+}
+// Le budget de l'année passée, poste par poste.
+function budgetRows(L) {
+  const b = L.budget;
+  if (!b || !b.gross) return [];
+  const pct = x => b.net > 0 ? ` (${Math.round(x / b.net * 100)} %)` : "";
+  return [
+    ["Revenus du ménage", dollars(b.gross)],
+    ["Impôts et cotisations", `− ${dollars(b.tax)}`],
+    ["Logement", `− ${dollars(b.housing)}${pct(b.housing)}`],
+    ...(b.kids > 0 ? [["Enfants", `− ${dollars(b.kids)}${pct(b.kids)}`]] : []),
+    ["Vie courante", `− ${dollars(b.living)}${pct(b.living)}`],
+    [b.saved >= 0 ? "Mis de côté" : "Manque (dette ou épargne)", `${b.saved >= 0 ? "" : "− "}${dollars(Math.abs(b.saved))}`],
+  ];
+}
+// Ce que contient le portefeuille, et ce qui est accessible ici et maintenant.
+function portfolioRows(L) {
+  return Object.keys(ASSETS).map(k => ({ id: k, label: ASSETS[k].label, note: ASSETS[k].note, value: L.assets[k] || 0, target: L.alloc[k] || 0, available: assetAvailable(L, k) }))
+    .filter(r => r.available || r.value > 0);
 }
 
 // ---------- Vies gardées ----------
@@ -161,6 +195,17 @@ function buildRecord(L, peers) {
     reflections: L.reflections,
     peers: peers.map(p => ({ name: p.name, home: p.home, code: p.code, age: p.age, cause: p.cause, sex: p.sex, edu: p.edu, children: p.children.length, emigrated: p.emigrated })),
     message: "", memorial: false, candles: 0, notes: [],
+    dyn: dynastyData(L),
+  };
+}
+// Ce qu'il faut pour continuer la lignée avec un enfant.
+function dynastyData(L) {
+  const heirs = heirOptions(L);
+  return {
+    lineageId: L.lineage ? L.lineage.id : L.born.getTime(), gen: L.lineage ? L.lineage.gen : 1,
+    ancestors: L.lineage ? L.lineage.ancestors : [], estate: Math.round(L.estate()), fund: Math.round(L.kidsFund || 0),
+    heirs, allKids: L.children.map(k => ({ name: k.name, sex: k.sex, born: k.born, alive: k.alive })),
+    pctAt: L.history.map(h => h ? h.pct : null),
   };
 }
 // Une vie inconnue, simulée de bout en bout (« rencontrer une vie au hasard »).
@@ -200,7 +245,7 @@ function cleanRecord(r) {
       year: clamp(Math.round(num(s.year, DATA_YEAR)), MIN_YEAR, MAX_YEAR), alive: false, cause: str(s.cause, 80),
       edu: EDU_LABEL[s.edu] ? s.edu : "none", job: s.job ? str(s.job, 60) : null, income: num(s.income), incomePct: s.incomePct == null ? null : num(s.incomePct),
       marriedEver: !!s.marriedEver, children: Math.round(num(s.children)), childrenAlive: Math.round(num(s.childrenAlive)), grandkids: Math.round(num(s.grandkids)),
-      wealth: num(s.wealth), house: !!s.house, emigrated: !!s.emigrated, stats: {}, born: "", birthDate: s.birthDate && !isNaN(new Date(s.birthDate)) ? new Date(s.birthDate).toISOString() : null,
+      wealth: num(s.wealth), house: !!s.house, business: s.business ? str(s.business, 60) : null, gen: clamp(Math.round(num(s.gen, 1)), 1, 99), emigrated: !!s.emigrated, stats: {}, born: "", birthDate: s.birthDate && !isNaN(new Date(s.birthDate)) ? new Date(s.birthDate).toISOString() : null,
     },
     real: BY_CODE[r.real] ? r.real : null,
     highlights: (Array.isArray(r.highlights) ? r.highlights : []).slice(0, 200).map(line).filter(Boolean),
@@ -212,8 +257,22 @@ function cleanRecord(r) {
       sex: p.sex === "m" ? "m" : "f", edu: EDU_LABEL[p.edu] ? p.edu : "none", children: Math.round(num(p.children)), emigrated: !!p.emigrated,
     })),
     message: str(r.message, 500), memorial: !!r.memorial, candles: Math.round(num(r.candles)),
+    dyn: cleanDyn(r.dyn, str, num),
     notes: (Array.isArray(r.notes) ? r.notes : []).slice(0, 50).map(n => ({ text: str(n.text, 300), date: isNaN(new Date(n.date)) ? new Date().toISOString() : new Date(n.date).toISOString() })),
     ...(r.shared ? { shared: true } : {}),
+  };
+}
+
+function cleanDyn(d, str, num) {
+  if (!d || typeof d !== "object") return null;
+  const kid = k => k && ({ name: str(k.name, 40), sex: k.sex === "m" ? "m" : "f", born: Math.round(num(k.born)), alive: k.alive !== false });
+  const anc = a => a && BY_CODE[a.home] && ({ name: str(a.name, 40), sex: a.sex === "m" ? "m" : "f", home: a.home, year: Math.round(num(a.year, DATA_YEAR)), age: Math.round(num(a.age)), cause: str(a.cause, 80), wealth: num(a.wealth) });
+  return {
+    lineageId: Math.round(num(d.lineageId)), gen: clamp(Math.round(num(d.gen, 1)), 1, 99), estate: Math.max(0, num(d.estate)), fund: Math.max(0, num(d.fund)),
+    ancestors: (Array.isArray(d.ancestors) ? d.ancestors : []).slice(0, 99).map(anc).filter(Boolean),
+    heirs: (Array.isArray(d.heirs) ? d.heirs : []).slice(0, 20).filter(h => h && BY_CODE[h.code]).map(h => ({ ...kid(h), age: Math.round(num(h.age)), year: clamp(Math.round(num(h.year)), MIN_YEAR, MAX_YEAR), code: h.code, other: h.other ? str(h.other, 40) : null })),
+    allKids: (Array.isArray(d.allKids) ? d.allKids : []).slice(0, 30).map(kid).filter(Boolean),
+    pctAt: (Array.isArray(d.pctAt) ? d.pctAt : []).slice(0, 121).map(x => x == null ? null : clamp(num(x, 0.4), 0, 1)),
   };
 }
 
@@ -245,7 +304,7 @@ async function importLives(file) {
 function shareable(rec) {
   return {
     id: rec.id, date: rec.date, s: rec.s, highlights: rec.highlights.slice(-14), history: rec.history,
-    peers: rec.peers, shared: true,
+    peers: rec.peers, shared: true, dyn: rec.dyn ? { gen: rec.dyn.gen, ancestors: rec.dyn.ancestors } : null,
   };
 }
 const b64url = bytes => btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");

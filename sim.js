@@ -47,7 +47,7 @@ function normInv(p) {
 // Les valeurs de data.js décrivent les années 2020. Pour une autre année, on les
 // fait évoluer : vers le passé à partir de points d'appui par région (1900, 1950),
 // vers le futur selon des tendances proches des projections de l'ONU.
-const NOW_YEAR = new Date().getFullYear();
+const NOW_YEAR = Math.min(new Date().getFullYear(), MAX_YEAR);
 const ERAS = {
   today: "Aujourd’hui",
   past: "Le passé (1900-2000)",
@@ -63,19 +63,18 @@ function drawYear(era, chosen) {
   return NOW_YEAR;
 }
 
-const regionE0 = {};
-function regionAvgE0(region) {
-  if (regionE0[region]) return regionE0[region];
-  const cs = COUNTRIES.filter(c => c.region === region);
-  const w = cs.reduce((s, c) => s + c.births, 0);
-  return (regionE0[region] = cs.reduce((s, c) => s + (c.e0.m + c.e0.f) / 2 * c.births, 0) / w);
-}
-// Interpolation linéaire 1900 → 1950 → année des données.
-function lerpYear(year, v1900, v1950, vNow) {
-  if (year <= 1950) return v1900 + (v1950 - v1900) * (year - MIN_YEAR) / (1950 - MIN_YEAR);
-  return v1950 + (vNow - v1950) * (year - 1950) / (DATA_YEAR - 1950);
+// Valeur d'une série décennale (1900, 1910… 2100) à une année quelconque.
+function seriesAt(arr, year) {
+  if (!arr) return null;
+  const x = (clamp(year, MIN_YEAR, MAX_YEAR) - MIN_YEAR) / 10, i = Math.floor(x), f = x - i;
+  const a = arr[i], b = arr[Math.min(i + 1, arr.length - 1)];
+  if (a == null) return b;
+  if (b == null) return a;
+  return a + (b - a) * f;
 }
 
+// Statistiques d'un pays une année donnée : les valeurs récentes (countries.js),
+// déplacées selon les séries longues du pays (passé réel, projections de l'ONU).
 const countryCache = {};
 function countryAt(code, year) {
   year = clamp(Math.round(year), MIN_YEAR, MAX_YEAR);
@@ -83,52 +82,32 @@ function countryAt(code, year) {
   if (countryCache[key]) return countryCache[key];
   const c = BY_CODE[code];
   if (year === DATA_YEAR) return (countryCache[key] = { ...c, year });
-  const e0 = (c.e0.m + c.e0.f) / 2;
-  const rich = c.region === "EUR" || c.region === "NAM" || code === "JP";
-  let e0y, gdp, school, tert, tfr, cm, hiv, agri, births;
-  if (year < DATA_YEAR) {
-    const back = DATA_YEAR - year;
-    let anchors = E0_OVERRIDE[code];
-    if (!anchors) {
-      const [r00, r50] = E0_ANCHORS[c.region], off = (e0 - regionAvgE0(c.region)) * 0.6;
-      anchors = [Math.max(22, r00 + off * 0.5), Math.max(28, r50 + off)];
-    }
-    e0y = Math.min(e0, lerpYear(year, anchors[0], anchors[1], e0));
-    const [g1, g2] = GROWTH_OVERRIDE[code] || GROWTH[c.region];
-    gdp = Math.max(500, year >= 1950 ? c.gdp * Math.exp(-g2 * back) : c.gdp * Math.exp(-g2 * (DATA_YEAR - 1950) - g1 * (1950 - year)));
-    const s50 = Math.max(0.5, c.school - (DATA_YEAR - 1950) * (rich ? 0.05 : 0.07));
-    school = Math.min(c.school, lerpYear(year, s50 * (rich ? 0.65 : 0.3), s50, c.school));
-    tert = lerpYear(year, c.tert * (rich ? 0.025 : 0.01), c.tert * (rich ? 0.1 : 0.05), c.tert);
-    const [t00, t50] = TFR_ANCHORS[c.region];
-    const tf50 = Math.max(c.tfr + 0.5, code === "JP" ? 3 : t50), tf00 = Math.max(tf50, code === "JP" ? 5 : t00);
-    tfr = lerpYear(year, tf00, tf50, c.tfr);
-    cm = Math.min(75, c.cm + back * (rich || code === "KR" ? 0.05 : 0.25));
-    hiv = year < 1980 ? 0 : year < 2000 ? c.hiv * (year - 1980) / 20 : c.hiv;
-    agri = c.agri + (100 - c.agri) * 0.45 * back / (DATA_YEAR - MIN_YEAR);
-    births = c.births * Math.exp(-BIRTH_TREND[c.region][0] * back);
-  } else {
-    const fwd = year - DATA_YEAR, room = Math.max(1, 95 - e0);
-    const rate = 0.06 + 0.14 * clamp((85 - e0) / 30, 0, 1);
-    e0y = e0 + room * (1 - Math.exp(-fwd * rate / room));
-    gdp = c.gdp;
-    for (let i = 0; i < fwd; i++) gdp *= 1 + 0.01 + 0.025 * clamp(1 - gdp / 60000, 0, 1);
-    const k = clamp(fwd / 90, 0, 1);
-    school = Math.max(c.school, c.school + (13.5 - c.school) * k * 0.8);
-    tert = Math.max(c.tert, c.tert + (90 - c.tert) * k * 0.6);
-    tfr = 1.6 + (c.tfr - 1.6) * Math.exp(-fwd / 40);
-    cm = c.cm * Math.exp(-fwd / 30);
-    hiv = c.hiv * Math.exp(-fwd / 25);
-    agri = c.agri * Math.exp(-fwd / 40);
-    births = c.births * Math.exp(BIRTH_TREND[c.region][1] * fwd);
-  }
-  const d = e0y - e0;
-  // Plus la mortalité infantile actuelle est basse, plus elle a baissé (France ≈ 150 ‰ en 1900).
-  const k = 0.045 + 0.06 * clamp((20 - c.imr) / 17, 0, 1);
-  const imr = d < 0 ? Math.min(250, c.imr * Math.exp(-d * k)) : Math.max(1.2, c.imr * Math.exp(-d * 0.12));
-  const mmr = d < 0 ? Math.min(1500, c.mmr * Math.exp(-d * 0.11)) : Math.max(2, c.mmr * Math.exp(-d * 0.15));
+  const S = COUNTRY_SERIES[code] || {};
+  const ratio = (k, ref = DATA_YEAR) => { const a = seriesAt(S[k], year), b = seriesAt(S[k], ref); return a != null && b ? a / b : 1; };
+  const diff = (k, ref = DATA_YEAR) => { const a = seriesAt(S[k], year), b = seriesAt(S[k], ref); return a != null && b != null ? a - b : 0; };
+  const back = Math.max(0, DATA_YEAR - year), fwd = Math.max(0, year - DATA_YEAR), k = clamp(fwd / 90, 0, 1);
+  const rich = c.gdp > 30000 || ["EUR", "NAM", "OCE"].includes(c.region);
+  const d = diff("e0");
+  const e0 = { m: clamp(c.e0.m + d, 18, 97), f: clamp(c.e0.f + d, 20, 99) };
+  const imr = clamp(c.imr * ratio("u5"), 1, 320);
+  let gdp = c.gdp;
+  if (year <= 2020) gdp = c.gdp * ratio("gdp", 2020);
+  else for (let i = 0; i < fwd; i++) gdp *= 1 + 0.01 + 0.025 * clamp(1 - gdp / 60000, 0, 1);
+  gdp = Math.max(400, gdp);
+  const school = year <= 2020 ? Math.max(0.1, c.school + diff("school", 2020)) : Math.max(c.school, c.school + (13.5 - c.school) * k * 0.8);
+  const tert = year < DATA_YEAR ? c.tert * clamp((school / Math.max(c.school, 0.5)) ** 3, 0.002, 1) : Math.max(c.tert, c.tert + (90 - c.tert) * k * 0.6);
   return (countryCache[key] = {
-    ...c, year, e0: { m: c.e0.m + d, f: c.e0.f + d }, imr, mmr, gdp: Math.round(gdp), school, tert, tfr, cm, hiv, agri, births,
-    pop: c.pop * births / c.births, happy: clamp(c.happy + 0.45 * Math.log(gdp / c.gdp), 2.5, 8),
+    ...c, year, e0, imr, gdp: Math.round(gdp), school, tert,
+    births: c.births * ratio("births"), pop: c.pop * ratio("pop"), tfr: Math.max(0.6, c.tfr + diff("tfr")),
+    mmr: clamp(c.mmr * imr / c.imr, 2, 1500),
+    cm: back ? Math.min(75, c.cm + back * (rich ? 0.05 : 0.25)) : c.cm * Math.exp(-fwd / 30),
+    hiv: year < 1980 ? 0 : year < 2000 ? c.hiv * (year - 1980) / 20 : year > DATA_YEAR ? c.hiv * Math.exp(-fwd / 25) : c.hiv,
+    agri: back ? c.agri + (100 - c.agri) * 0.45 * back / (DATA_YEAR - MIN_YEAR) : c.agri * Math.exp(-fwd / 40),
+    urban: back ? Math.max(c.urban * 0.25, c.urban - back * 0.4) : c.urban + (90 - c.urban) * k * 0.5,
+    net: year < 1993 ? 0 : back ? c.net * clamp((year - 1993) / (DATA_YEAR - 1993), 0, 1) ** 2 : c.net + (97 - c.net) * k,
+    bank: back ? c.bank * clamp(1 - back / 140, 0.08, 1) : c.bank + (98 - c.bank) * k,
+    flp: back ? c.flp * clamp(1 - back / 160, 0.35, 1) : c.flp,
+    happy: clamp(c.happy + 0.45 * Math.log(gdp / c.gdp), 2.5, 8),
   });
 }
 
@@ -210,22 +189,6 @@ function incomeAt(c, p) {
   const median = mean * Math.exp(-sigma * sigma / 2);
   return median * Math.exp(sigma * normInv(clamp(p, 0.005, 0.995)));
 }
-const money = x => `${(Math.round(x / 10) * 10).toLocaleString("fr-FR")} $`;
-
-// Dépenser et placer.
-const SPEND = {
-  frugal: { label: "Économe", rate: 0.78, happy: -3, note: "On met de côté, on se prive un peu." },
-  normal: { label: "Raisonnable", rate: 0.93, happy: 0, note: "On vit bien, on épargne un peu." },
-  large: { label: "Dépensier", rate: 1.05, happy: 4, note: "On profite, quitte à s’endetter." },
-};
-const INVEST = {
-  cash: { label: "Garder en liquide", r: -0.02, sd: 0, note: "Aucun risque, mais l’inflation grignote tout." },
-  epargne: { label: "Compte d’épargne", r: 0.01, sd: 0.01, note: "Sûr, rendement faible." },
-  bourse: { label: "Actions en Bourse", r: 0.05, sd: 0.17, note: "Rapporte plus en moyenne, avec de mauvaises années." },
-  immo: { label: "Immobilier locatif", r: 0.03, sd: 0.07, note: "Assez stable, rendement moyen." },
-};
-const KIDS_PLAN = { oui: "En vouloir", plusTard: "Plus tard", non: "Ne pas en vouloir" };
-
 // --- Tirage au sort ----------------------------------------------------------
 function drawCountry(mode, year = NOW_YEAR) {
   return weighted(COUNTRIES.map(c => { const x = countryAt(c.code, year); return [c.code, mode === "pop" ? x.pop : x.births]; }));
@@ -239,13 +202,6 @@ function drawName(code, sex) { return pick(namesFor(code)[sex === "m" ? 0 : 1]);
 
 const EDU_LABEL = { none: "aucune", primaire: "école primaire", secondaire: "lycée", universite: "université" };
 const EDU_Z = { none: -1.3, primaire: -0.6, secondaire: 0.3, universite: 1.3 };
-
-const JOBS = {
-  low: [["vend au marché", "vend au marché"], ["ouvrier du bâtiment", "ouvrière du bâtiment"], ["employé de maison", "employée de maison"], ["pêcheur", "pêcheuse"], ["porteur", "porteuse"]],
-  mid: [["vendeur", "vendeuse"], ["chauffeur", "chauffeuse"], ["ouvrier d’usine", "ouvrière d’usine"], ["couturier", "couturière"], ["mécanicien", "mécanicienne"], ["aide-soignant", "aide-soignante"], ["cuisinier", "cuisinière"], ["agent de sécurité", "agente de sécurité"]],
-  high: [["enseignant", "enseignante"], ["infirmier", "infirmière"], ["ingénieur", "ingénieure"], ["comptable", "comptable"], ["médecin", "médecin"], ["développeur", "développeuse"], ["fonctionnaire", "fonctionnaire"], ["avocat", "avocate"], ["architecte", "architecte"]],
-};
-const FARM_JOB = ["travaille aux champs", "travaille aux champs"];
 
 // Santé moyenne observée par âge dans la simulation (sans mortalité).
 const HEALTH_CURVE = [[0, 66], [18, 71.5], [30, 69.6], [40, 63], [50, 56], [60, 49], [70, 38], [80, 25.5], [90, 14], [100, 6], [MAX_AGE, 3]];
@@ -267,7 +223,7 @@ const PRIORITIES = {
 };
 // Thèmes les plus lourds, mis de côté en mode classe et signalés avec une aide.
 const HEAVY_CAUSES = ["suicide", "homicide", "surdose"];
-const CLASSROOM_CAUSE = { "violences politiques": "conflit", "violences de la Partition": "conflit", "mort au combat": "guerre", "mort au front": "guerre" };
+const CLASSROOM_CAUSE = { "répression politique": "conflit", "génocide": "conflit", "violences armées": "conflit", "violences politiques": "conflit", "violences de la Partition": "conflit", "mort au combat": "guerre", "mort au front": "guerre" };
 
 class Life {
   constructor(opts = {}) {
@@ -280,7 +236,7 @@ class Life {
     this.sex = opts.sex || drawSex();
     this.name = opts.name || drawName(this.code, this.sex);
     this.auto = !!opts.auto;
-    this.decile = 1 + Math.floor(rand() * 10);
+    this.decile = opts.lineage ? opts.lineage.decile : 1 + Math.floor(rand() * 10);
     this.age = 0;
     this.alive = true;
     const c = this.country;
@@ -305,21 +261,10 @@ class Life {
     this.children = [];
     this.grandkids = 0;
     this.wantKids = "oui";
-    // Famille d'origine
-    const momAge = clamp(Math.round(17 + c.tfr * 1.5 + (c.gdp > 25000 ? 6 : 0) + randn() * 4), 15, 45);
-    this.parents = [
-      { role: "mère", name: this.freshName("f"), sex: "f", age: momAge, alive: true },
-    ];
-    this.parents.push({ role: "père", name: this.freshName("m"), sex: "m", age: momAge + clamp(Math.round(3 + randn() * 4), -3, 15), alive: true });
-    this.sibs = [];
-    const older = Math.min(Math.floor((momAge - 16) / 2.5), Math.floor(rand() * Math.max(0, c.tfr - 0.4) + rand() * 0.6));
-    for (let i = older; i >= 1; i--) { const sx = drawSex(); this.sibs.push({ name: this.freshName(sx), sex: sx, born: -2 * i - Math.floor(rand() * 2), alive: true }); }
-    // Argent
-    this.savings = 0;
-    this.debt = 0;
-    this.house = false;
-    this.spend = "normal";
-    this.invest = c.gdp < 8000 ? "cash" : "epargne";
+    // Famille d'origine (ou, pour un descendant, la famille de la vie précédente)
+    if (opts.lineage) this.initLineage(opts.lineage);
+    else this.initParents(c);
+    this.initMoney();
     // Santé
     this.smoker = false;
     this.smokeOffered = false;
@@ -341,8 +286,20 @@ class Life {
     // Date de naissance dans le calendrier de la vie simulée.
     this.birthDate = this.year === NOW_YEAR ? new Date() : new Date(this.year, Math.floor(rand() * 12), 1 + Math.floor(rand() * 28), Math.floor(rand() * 24), Math.floor(rand() * 60));
     this.say(`Naît ${inCountry(c)}${this.year !== NOW_YEAR ? ` en ${this.year}` : ""}, dans une famille ${this.familyLabel()}.`, "birth");
+    if (this.lineage) this.say(`Enfant de ${this.lineage.parentName}, votre vie précédente (génération ${this.lineage.gen}).`, "family", true);
     this.historyEvents(true);
     this.snapshot();
+  }
+
+  initParents(c) {
+    const momAge = clamp(Math.round(17 + c.tfr * 1.5 + (c.gdp > 25000 ? 6 : 0) + randn() * 4), 15, 45);
+    this.parents = [
+      { role: "mère", name: this.freshName("f"), sex: "f", age: momAge, alive: true },
+    ];
+    this.parents.push({ role: "père", name: this.freshName("m"), sex: "m", age: momAge + clamp(Math.round(3 + randn() * 4), -3, 15), alive: true });
+    this.sibs = [];
+    const older = Math.min(Math.floor((momAge - 16) / 2.5), Math.floor(rand() * Math.max(0, c.tfr - 0.4) + rand() * 0.6));
+    for (let i = older; i >= 1; i--) { const sx = drawSex(); this.sibs.push({ name: this.freshName(sx), sex: sx, born: -2 * i - Math.floor(rand() * 2), alive: true }); }
   }
 
   g(m, f) { return this.sex === "m" ? m : f; }
@@ -396,7 +353,7 @@ class Life {
       age: this.age, year: this.calYear, alive: this.alive, ...Object.fromEntries(Object.entries(this.stats).map(([k, v]) => [k, Math.round(v)])),
       edu: this.edu, schooling: this.schooling, job: this.job, income: Math.round(this.income),
       married: this.married, children: this.children.filter(k => k.alive).length, code: this.code,
-      wealth: Math.round(this.savings - this.debt),
+      wealth: Math.round(this.netWorth()), pct: this.incomePct == null ? null : Math.round(this.incomePct * 100) / 100,
     };
   }
 
@@ -404,17 +361,21 @@ class Life {
   // santé moyenne à cet âge), la richesse, le tabac et le VIH.
   hazard() {
     if (this.age >= MAX_AGE) return 1;
+    if (this.protected()) return 0;
     const t = lifeTable(this.code, this.sex, this.calYear);
     const q = t.qx[Math.min(this.age, MAX_AGE)];
     const wealth = this.incomePct != null ? this.incomePct : (this.decile - 0.5) / 10;
     // Écart à la santé « attendue » de cette personne (même évolution, sans les aléas).
     const expected = this.healthRef ?? expectedHealth(this.age);
     let mult = Math.exp(-(this.stats.health - expected) / 45) * (1.25 - wealth * 0.5);
-    if (this.smoker && this.age >= 35) mult *= 1.6;
+    // Les tables du pays incluent déjà ses fumeurs : on répartit l'écart entre fumeurs et non-fumeurs.
+    if (this.age >= 35) { const sh = this.here.smoke / 100; mult *= (this.smoker ? 1.6 : 1) / (1 + 0.6 * sh); }
     let extra = 0;
     if (this.hivPos) { if (this.hivTreated()) mult *= 1.5; else extra = 0.09; }
     return clamp(1 - (1 - clamp(q * mult, 0, 1)) * (1 - extra), 0, 1);
   }
+  // Un descendant vit au moins jusqu'à la mort du parent dont on a déjà joué la vie.
+  protected() { return this.protectUntil != null && this.age < this.protectUntil; }
   hivTreated() { return this.calYear >= (this.here.gdp > 25000 ? 1996 : 2005); }
 
   pickCause() {
@@ -444,14 +405,16 @@ class Life {
       if (x) { extra += x; extraCauses.push([ev.cause || "guerre", x]); }
       if (this.drafted[ev.id] === "front" && p.soldier) { extra += p.soldier; extraCauses.push([ev.soldierCause || ev.cause || "guerre", p.soldier]); }
     }
-    extra = Math.min(0.9, extra);
+    extra = this.protected() ? 0 : Math.min(0.9, extra);
     const total = 1 - (1 - q) * (1 - extra);
     if (rand() < total) return this.die(rand() * total < extra ? weighted(extraCauses) : null);
     this.age += 1;
+    this.actionsLeft = ACTIONS_PER_YEAR;
     this.historyEvents();
     this.familyEvents();
     this.yearEvents();
-    if (this.pendingDeath) return this.die(this.pendingDeath);
+    if (this.pendingDeath && !this.protected()) return this.die(this.pendingDeath);
+    this.pendingDeath = null;
     this.updateStats();
     this.updateMoney();
     this.snapshot();
@@ -485,9 +448,8 @@ class Life {
       if (ev.happy) this.bump("happy", ev.happy * (this.age < 5 ? 0.3 : 1));
       if (ev.school && this.schooling) this.bump("know", ev.school * 10);
       if (ev.emigrate) this.emigBoost = ev.emigrate;
-      if (ev.jobLoss && this.job && !this.retired && rand() < ev.jobLoss) {
-        this.say(`Perd son travail à cause de ${ev.name}.`, "work", true);
-        this.incomePct = clamp(this.incomePct - 0.15, 0.01, 0.99);
+      if (ev.jobLoss && this.job && !this.retired && !this.business && rand() < ev.jobLoss) {
+        this.loseJob(`Perd son travail à cause de ${ev.name}.`);
         this.bump("happy", -6);
       }
       if (p.draft && this.sex === "m" && this.age >= 18 && this.age <= 40 && !this.drafted[ev.id] && rand() < p.draft) {
@@ -517,11 +479,14 @@ class Life {
     for (const p of this.parents) {
       if (!p.alive) continue;
       p.age += 1;
-      if (rand() < lifeTable(this.home, p.sex, this.calYear).qx[Math.min(p.age, MAX_AGE)]) {
+      // Le parent dont on a joué la vie meurt exactement comme dans cette vie-là.
+      const dies = p.previous ? a >= p.deathAt : rand() < lifeTable(this.home, p.sex, this.calYear).qx[Math.min(p.age, MAX_AGE)];
+      if (dies) {
         p.alive = false;
         const young = a < 18;
-        this.say(`${p.sex === "f" ? "Sa mère" : "Son père"}, ${p.name}, meurt à ${p.age} ans.`, "family", true, young);
+        this.say(`${p.sex === "f" ? "Sa mère" : "Son père"}, ${p.name}, meurt à ${p.age} ans${p.previous ? ` (${p.cause}) : c’était votre vie précédente` : ""}.`, "family", true, young);
         this.bump("happy", young ? -16 : -10); if (young) this.bump("rel", -5);
+        this.inheritFrom(p);
       }
     }
     if (a >= 1 && a <= 14 && this.parents[0].alive && this.parents[0].age < 44 && rand() < (c.tfr - 1) / 12) {
@@ -585,7 +550,13 @@ class Life {
         { label: "Travailler tout de suite", autoWeight: 1, apply: () => { this.say("Choisit de travailler tout de suite."); this.startWork(); } },
       ]);
     }
-    if (a === 22 && this.schooling === "universite") {
+    // Études reprises à l'âge adulte.
+    if (this.adultStudy && a >= this.adultStudy && this.schooling === "universite") {
+      this.edu = "universite"; this.schooling = null; this.adultStudy = null;
+      this.say("Obtient son diplôme universitaire, des années après le lycée.", "edu", true);
+      this.bump("happy", 6); this.bump("know", 4);
+    }
+    if (a === 22 && this.schooling === "universite" && !this.adultStudy) {
       this.edu = "universite";
       this.schooling = null;
       this.say("Obtient son diplôme universitaire.", "edu", true);
@@ -594,9 +565,10 @@ class Life {
     }
     if (this.schooling) this.bump("know", (this.schooling === "universite" ? 6 : 5) * (0.6 + Math.log10(c.gdp) / 10));
 
-    // Les enfants hors de l'école finissent par travailler.
-    if (!this.schooling && !this.job && !this.retired && a >= 12) {
-      const p = a < 15 ? clamp(0.6 - Math.log10(c.gdp) / 10, 0.05, 0.4) : 0.5;
+    // Les enfants hors de l'école finissent par travailler ; les chômeurs retrouvent
+    // un emploi plus ou moins vite selon le chômage du pays.
+    if (!this.schooling && !this.job && !this.business && !this.retired && !this.homemaker && !this.queue.length && a >= 12) {
+      const p = a < 15 ? clamp(0.6 - Math.log10(c.gdp) / 10, 0.05, 0.4) : clamp(0.6 - c.unemp / 40, 0.15, 0.7);
       if (rand() < p) this.startWork();
     }
 
@@ -635,24 +607,26 @@ class Life {
     }
 
     // Travail
-    if (this.job && !this.retired) {
-      if (rand() < 0.05 + (c.gdp < 10000 ? 0.04 : 0)) { this.say(pick(["Perd son travail.", "L’entreprise ferme ; il faut chercher autre chose.", "Une mauvaise saison ruine le travail de l’année."]), "work", true); this.incomePct = clamp(this.incomePct - 0.12, 0.01, 0.99); this.bump("happy", -8); }
-      else if (rand() < 0.04 + s.know / 1000) { this.say(pick(["Obtient une promotion.", "Trouve un meilleur travail.", "Son activité se développe."]), "work", true); this.incomePct = clamp(this.incomePct + 0.1, 0.01, 0.99); this.bump("happy", 5); }
-      if (this.priority === "travail") this.incomePct = clamp(this.incomePct + 0.01, 0.01, 0.99);
+    if (this.job && !this.retired && !this.business) {
+      const self = this.jobInfo && this.jobInfo.self;
+      if (rand() < (self ? 0.03 : 0.02 + c.unemp / 250) + (c.gdp < 10000 ? 0.02 : 0)) {
+        if (self) { this.say("Une mauvaise saison ruine le travail de l’année.", "work", true); this.incomePct = clamp(this.incomePct - 0.08, 0.01, 0.99); }
+        else this.loseJob(pick(["Perd son travail.", "L’entreprise ferme ; il faut chercher autre chose.", "Est licencié·e."]).replace("licencié·e", this.g("licencié", "licenciée")));
+        this.bump("happy", -8);
+      }
+      else if (rand() < 0.04 + s.know / 1000) { this.say(pick(["Obtient une promotion.", "Prend du galon.", "Son activité se développe."]), "work", true); this.incomePct = clamp(this.incomePct + 0.06, 0.01, 0.99); this.bump("happy", 5); }
+      if (this.priority === "travail" && this.job) this.incomePct = clamp(this.incomePct + 0.01, 0.01, 0.99);
+    }
+    if (this.job && !this.retired && !this.business) {
       if (a >= 22 && a <= 55 && rand() < 0.03) {
         this.ask("On lui propose un poste mieux payé, loin de ses proches. Accepter ?", [
           { label: "Accepter le poste", autoWeight: 1.5, apply: () => { this.incomePct = clamp(this.incomePct + 0.12, 0.01, 0.99); this.income = incomeAt(this.here, this.incomePct) * this.econ; this.say("Accepte un poste mieux payé dans une autre ville.", "work", true); this.bump("rel", -6); this.bump("happy", 2); } },
           { label: "Rester près des siens", autoWeight: 1, apply: () => { this.say("Refuse un poste mieux payé pour rester près des siens."); this.bump("rel", 3); } },
         ]);
       }
-      this.income = incomeAt(c, this.incomePct) * this.econ;
     }
-    const retireAge = c.gdp > 25000 ? 64 : c.gdp > 10000 ? 62 : 68;
-    if (this.job && !this.retired && a >= retireAge && (rand() < 0.5 || s.health < 30)) {
-      this.retired = true;
-      this.say(c.gdp > 25000 ? "Prend sa retraite." : "Arrête de travailler ; les enfants aident désormais.", "work", true);
-      this.income *= c.gdp > 25000 ? 0.6 : 0.3;
-    }
+    this.computeIncome();
+    if ((this.job || this.business) && !this.retired && a >= this.retireAge() && (rand() < 0.5 || s.health < 30)) this.retire();
 
     // Amour et mariage
     if (!this.married && a >= 18) {
@@ -666,36 +640,17 @@ class Life {
         ]);
       }
     }
-    if (this.married && rand() < 0.012 * (1.5 - s.rel / 100) * (c.gdp > 20000 ? 1.6 : 0.8)) {
-      this.say(`Divorce de ${this.partner}.`, "family", true);
-      this.married = false; this.partner = null; this.bump("happy", -10);
-    }
+    if (this.married && rand() < 0.012 * (1.5 - s.rel / 100) * (c.gdp > 20000 ? 1.6 : 0.8) * (this.calYear < 1970 ? 0.3 : 1)) this.divorce();
     if (this.married && a > 55 && rand() < 0.012 * (a - 50) / 10) {
       this.say(`${this.partner} meurt. ${this.g("Il", "Elle")} reste ${this.g("veuf", "veuve")}.`, "family", true);
-      this.married = false; this.partner = null; this.bump("happy", -15); this.bump("rel", -8);
+      this.married = false; this.partner = null; this.partnerInfo = null; this.homemaker = false; this.bump("happy", -15); this.bump("rel", -8);
     }
 
     // Enfants
     if (this.married && a >= 16 && a <= 44) {
       const plan = this.wantKids === "oui" ? 1 : this.wantKids === "plusTard" ? 0.25 : clamp(0.05 + (c.tfr - 1.5) * 0.08, 0.05, 0.5);
       const p = clamp(c.tfr / 16, 0.03, 0.45) * (this.children.length >= Math.round(c.tfr + 1) ? 0.3 : 1) * plan;
-      if (rand() < p) {
-        const kidSex = drawSex();
-        const kidName = this.freshName(kidSex);
-        const kid = { name: kidName, sex: kidSex, born: a, alive: true };
-        this.children.push(kid);
-        this.say(`Naissance ${this.children.length === 1 ? "de son premier enfant" : "d’un enfant"} : ${kidName}.`, "family", true);
-        this.bump("happy", 6); this.bump("rel", 4);
-        if (this.sex === "f") {
-          const wealth = this.incomePct != null ? this.incomePct : this.decile / 10;
-          if (rand() < c.mmr / 100000 * (1.4 - wealth * 0.8)) this.pendingDeath = "complications de grossesse";
-        }
-        if (rand() < c.imr * 1.4 / 1000) {
-          kid.alive = false;
-          this.say(`${kidName} meurt avant ses cinq ans.`, "family", true, true);
-          this.bump("happy", -20);
-        }
-      }
+      if (rand() < p) this.haveChild();
     }
 
     // Émigration
@@ -705,28 +660,24 @@ class Life {
       const p = clamp(0.1 + s.know / 300 + this.decile / 40, 0.05, 0.7);
       this.ask(`Une occasion de partir vivre ${inCountry(dest)} se présente. Tenter l’émigration ?`, [
         { label: `Partir ${inCountry(dest)}`, autoWeight: 1, apply: () => {
-          if (rand() < p) {
-            this.emigrated = true; this.code = dest.code;
-            this.incomePct = clamp(0.15 + (this.incomePct ?? 0.3) * 0.4, 0.05, 0.6);
-            if (this.job) this.income = incomeAt(dest, this.incomePct);
-            this.say(`Émigre ${inCountry(dest)} ${dest.flag}.`, "move", true);
-            this.bump("rel", -12); this.bump("happy", -3);
-          } else { this.say(`La tentative de départ ${inCountry(dest)} échoue.`, "move", true); this.bump("happy", -6); }
+          if (rand() < p) this.moveTo(dest);
+          else { this.say(`La tentative de départ ${inCountry(dest)} échoue.`, "move", true); this.bump("happy", -6); }
         } },
         { label: "Rester", autoWeight: 2, apply: () => this.say("Décide de rester près des siens.") },
       ]);
     }
 
     // Santé à l'âge adulte : une maladie grave, et la question des soins.
-    if (a >= 30 && rand() < 0.02 + a / 3000) {
+    if (a >= 30 && rand() < (0.02 + a / 3000) * (this.checkupAt === a ? 0.6 : 1)) {
       this.say(pick(["Une grave maladie la cloue au lit plusieurs mois.", "Un accident l’oblige à s’arrêter de longues semaines.", "Les médecins découvrent un problème de cœur."]).replace("la cloue", this.g("le cloue", "la cloue")), "health", true);
       this.bump("health", -8);
       const cost = this.careCost();
-      const afford = this.savings + this.income * 0.5 >= cost;
+      const afford = this.savings + this.netIncome() * 0.5 >= cost;
       this.ask(`Des soins sont possibles. Ils coûtent environ ${money(cost)}${afford ? "" : ", plus que ce que la famille peut payer"}. Que faire ?`, [
         { label: "Se faire soigner", autoWeight: afford ? 6 : 1.2, apply: () => {
           this.pay(cost);
           const ok = rand() < clamp(0.45 + Math.log10(this.here.gdp) / 10, 0.5, 0.95);
+          if (cost > 1) this.say(`Paie ${money(cost)} de soins.`, "money");
           this.bump("health", ok ? 5 : 2);
           this.say(ok ? "Se fait soigner et se rétablit bien." : "Se fait soigner ; la guérison est lente.", "health");
         } },
@@ -736,24 +687,11 @@ class Life {
     if (a >= 18 && rand() < 0.03) this.say(pick(["Part en voyage pour la première fois.", "Se lance dans un nouveau projet.", "Retrouve un vieil ami perdu de vue.", "Apprend à cuisiner le plat de sa grand-mère.", "Déménage dans une autre ville.", "Plante un arbre devant la maison."]));
   }
 
-  startWork() {
-    if (this.job) return;
-    const c = this.here;
-    const z = 0.45 * normInv((this.decile - 0.5) / 10) + 0.4 * EDU_Z[this.edu] + 0.25 * (this.stats.know - 50) / 25 + 0.6 * randn();
-    this.incomePct = clamp(normCdf(z / 0.95), 0.01, 0.99);
-    const tier = this.edu === "universite" ? "high" : this.edu === "secondaire" && this.incomePct > 0.25 ? "mid" : c.gdp > 25000 && this.age >= 16 ? "mid" : "low";
-    const farm = tier === "low" ? rand() < c.agri / 100 * 1.4 : tier === "mid" && rand() < c.agri / 100 * 0.4;
-    const job = farm ? FARM_JOB : pick(JOBS[tier]);
-    this.job = this.g(job[0], job[1]);
-    this.income = incomeAt(c, this.incomePct) * this.econ;
-    const verb = /^(travaille|vend)/.test(this.job) ? this.job : `devient ${this.job}`;
-    this.say(`${this.age < 15 ? "Encore enfant, " + verb : verb.charAt(0).toUpperCase() + verb.slice(1)}.`, "work", true);
-  }
-
   marry(child, nm) {
     const sexP = this.sex === "m" ? "f" : "m";
     this.partner = nm || this.freshName(sexP);
     this.married = true; this.marriedEver = true;
+    this.initPartner(child);
     if (child) {
       this.say(`Est mariée à ${this.age} ans à ${this.partner}, un homme bien plus âgé.`, "family", true, true);
       if (this.schooling) { this.schooling = null; this.say("Doit quitter l’école."); }
@@ -768,12 +706,13 @@ class Life {
     const a = this.age, c = this.here, s = this.stats, pr = this.priority;
     // Santé (healthRef suit la même pente, plus la part moyenne des maladies)
     if (a < 18) { this.bump("health", (78 - s.health) * 0.08); this.healthRef += (78 - this.healthRef) * 0.08; }
-    else if (a > 30) { const d = a < 60 ? 0.25 : a < 75 ? 0.6 : 1.0; this.bump("health", -d); this.healthRef = clamp(this.healthRef - d - 0.15, 0, 100); }
+    else if (a > 30) { const d = a < 60 ? 0.25 : a < 75 ? 0.6 : 1.0; this.bump("health", -d); this.healthRef = clamp(this.healthRef - d - 0.15 - 0.4 * c.smoke / 100 - 0.1, 0, 100); }
     if (this.incomePct != null && this.incomePct < 0.2) this.bump("health", -0.5);
     if (pr === "sante") this.bump("health", 1.8);
     if (pr === "plaisir") this.bump("health", -0.8);
     if (this.smoker) this.bump("health", -0.4);
     if (this.debt > Math.max(this.income, 1)) this.bump("health", -0.3);
+    if (this.sport === a) this.bump("health", 0.5);
     // Savoir
     if (!this.schooling) this.bump("know", pr === "travail" ? 1.2 : a > 60 ? -0.3 : 0.2);
     // Relations
@@ -786,89 +725,14 @@ class Life {
     this.bump("happy", (target - s.happy) * 0.22 + randn() * 2);
   }
 
-  // --- Argent : dépenses, épargne, placements, dettes ---
-  updateMoney() {
-    const c = this.here, inc = this.income;
-    if (this.debt > 0) this.debt *= this.house ? 1.05 : 1.12;
-    if (this.savings > 0) {
-      const inv = INVEST[this.invest], r = inv.r + inv.sd * randn();
-      this.savings = Math.max(0, this.savings * (1 + r));
-      if (this.invest === "bourse" && r < -0.15 && this.savings > inc * 0.3) this.say(`Les marchés s’effondrent : ses placements perdent ${Math.round(-r * 100)} %.`, "money", true);
-      else if (this.invest === "bourse" && r > 0.25 && this.savings > inc * 0.3) this.say("Une très bonne année en Bourse.", "money");
-    }
-    if (inc <= 0) return;
-    const kids = this.children.filter(k => k.alive && this.age - k.born < 18).length;
-    let cost = inc * (SPEND[this.spend].rate + Math.min(kids * 0.04, 0.12) - (this.house ? 0.08 : 0));
-    // Près du minimum vital, on ne peut presque rien mettre de côté.
-    cost = Math.max(cost, Math.min(inc * 0.99, incomeAt(c, 0.12)));
-    // Seul un train de vie dépensier fait vivre au-dessus de ses moyens.
-    if (this.spend !== "large") cost = Math.min(cost, inc);
-    // À la retraite, on puise dans l'épargne.
-    if (this.retired) cost += this.savings * 0.07;
-    let net = inc - cost;
-    if (net > 0 && this.debt > 0) { const payback = Math.min(net, this.debt); this.debt -= payback; net -= payback; }
-    this.savings += net;
-    if (this.savings < 0) { this.debt += -this.savings; this.savings = 0; }
-    if (this.debt < 1) this.debt = 0;
-    if (this.debt > inc * 3 && !this.debtWarned) { this.debtWarned = true; this.say("Les dettes s’accumulent ; chaque mois devient une lutte.", "money", true); }
-    if (this.debt === 0) this.debtWarned = false;
-  }
-  pay(x) {
-    this.savings -= x;
-    if (this.savings < 0) { this.debt += -this.savings; this.savings = 0; }
-  }
-  careCost() { return incomeAt(this.here, 0.5) * this.here.oop / 100; }
-  housePrice() { return incomeAt(this.here, 0.5) * 5; }
-  canBuyHouse() { return this.alive && !this.house && this.age >= 18 && this.income > 0 && this.savings >= this.housePrice() * 0.25; }
-  buyHouse() {
-    if (!this.canBuyHouse()) return false;
-    const price = this.housePrice();
-    this.pay(price);
-    this.house = true;
-    this.say(`Achète un logement (${money(price)}).`, "money", true);
-    this.bump("happy", 5);
-    return true;
-  }
-  sellHouse() {
-    if (!this.house) return false;
-    this.house = false;
-    this.savings += this.housePrice() * 0.92;
-    this.say("Vend son logement.", "money", true);
-    return true;
-  }
-  repayDebt() {
-    const x = Math.min(this.savings, this.debt);
-    if (x <= 0) return false;
-    this.savings -= x; this.debt -= x;
-    this.say(this.debt < 1 ? "Rembourse toutes ses dettes." : `Rembourse ${money(x)} de dettes.`, "money");
-    if (this.debt < 1) this.debt = 0;
-    return true;
-  }
-  helpFamily() {
-    if (this.helpedAt === this.age) return false;
-    const gift = Math.max(this.savings * 0.15, 0);
-    if (gift < 1) return false;
-    this.helpedAt = this.age;
-    this.savings -= gift;
-    this.bump("rel", 6); this.bump("happy", 2);
-    this.say(`Aide sa famille (${money(gift)}).`, "family");
-    return true;
-  }
-  visitFamily() {
-    if (this.visitedAt === this.age) return false;
-    this.visitedAt = this.age;
-    this.bump("rel", 3); this.bump("happy", 1);
-    this.say(pick(["Passe du temps avec les siens.", "Rend visite à la famille.", "Organise un grand repas de famille."]), "family");
-    return true;
-  }
-
   summary() {
     const living = this.children.filter(k => k.alive).length;
     return {
       name: this.name, sex: this.sex, home: this.home, code: this.code, age: this.age, year: this.year, alive: this.alive, cause: this.cause,
       edu: this.edu, job: this.job, income: Math.round(this.income), incomePct: this.incomePct,
       marriedEver: this.marriedEver, children: this.children.length, childrenAlive: living, grandkids: this.grandkids,
-      wealth: Math.round(this.savings - this.debt), house: this.house,
+      wealth: Math.round(this.netWorth()), house: !!this.house, business: this.business ? this.business.label : null,
+      gen: this.lineage ? this.lineage.gen : 1,
       emigrated: this.emigrated, stats: { ...this.stats }, born: this.born.toISOString(), birthDate: this.birthDate.toISOString(), classroom: this.classroom,
     };
   }
@@ -889,7 +753,14 @@ function serializeLife(L) {
   return o;
 }
 function reviveLife(o) {
+  o = { ...o };
+  // Anciennes sauvegardes : épargne unique et logement booléen.
+  if (!o.assets) { o.assets = { cash: o.savings || 0 }; o.alloc = { cash: 100 }; }
+  delete o.savings;
+  if (typeof o.invest === "string") delete o.invest;
+  if (o.house === true) o.house = { value: 0, loan: 0, rate: 0, payment: 0 };
   const L = Object.assign(Object.create(Life.prototype), o);
+  if (L.actionsLeft == null) L.actionsLeft = ACTIONS_PER_YEAR;
   L.born = new Date(o.born);
   L.birthDate = new Date(o.birthDate || o.born);
   L.queue = [];

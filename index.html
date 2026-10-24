@@ -102,7 +102,9 @@
       <article class="card"><h3>Nés à la même seconde</h3><p>Au moment où vous naissez, quatre autres bébés naissent ailleurs. Ils vivent eux aussi selon les statistiques de leur pays, et vous les suivez à côté de vous, âge par âge.</p></article>
       <article class="card"><h3>Passé, présent, futur</h3><p>Naître en 1920, aujourd’hui ou en 2080. Dans le passé, de vrais événements historiques (guerres, famines, épidémies, crises) traversent la vie. Le futur suit les projections de l’ONU.</p></article>
       <article class="card"><h3>Vos choix</h3><p>Études, travail, amour, départ à l’étranger, soins, tabac, mobilisation : vous décidez. Chaque année, vous choisissez aussi une priorité. Les choix comptent, mais le lieu de naissance pèse lourd.</p></article>
-      <article class="card"><h3>Famille et argent</h3><p>Parents, frères et sœurs, enfants, petits-enfants. Un train de vie, une épargne, des placements, peut-être un logement, peut-être des dettes.</p></article>
+      <article class="card"><h3>Agir sur sa vie</h3><p>Chaque année, trois actions : chercher un emploi parmi les métiers qui existent vraiment ici et à cette époque, demander une augmentation, se former, créer une entreprise, partir à l’étranger, chercher l’amour, faire du sport…</p></article>
+      <article class="card"><h3>Argent réaliste</h3><p>Revenus du ménage, impôts, loyer ou emprunt, enfants, épargne. Placements selon le pays et l’époque (épargne, obligations, actions, fonds mondial, or, bétail, tontine, cryptos), krachs et hyperinflations réels, retraite.</p></article>
+      <article class="card"><h3>Descendance</h3><p>À la mort, choisissez un testament et continuez avec l’un de vos enfants : il hérite, et votre vie précédente meurt dans la sienne au moment exact où vous l’avez quittée.</p></article>
       <article class="card"><h3>Des pauses</h3><p>À 5, 15, 30, 50 et 70 ans, le temps s’arrête sur une question. À la fin, vous pouvez écrire quelques mots à la personne dont vous avez vécu la vie.</p></article>
       <article class="card"><h3>Des données réelles</h3><p>Espérance de vie par sexe, mortalité infantile et maternelle, revenus et inégalités, école, université, emploi agricole, fécondité, mariage des enfants, VIH, homicides, tabac, coût des soins, satisfaction de vie.</p></article>
     </div>
@@ -140,7 +142,7 @@
     <div class="cards">
       <article class="card"><h3>Le projet</h3><p>Une simulation de vie en français, inspirée de 1in8b.life et entièrement réécrite. Elle montre des probabilités, pas des destins. Elle s’adresse aux personnes de 15 ans et plus.</p></article>
       <article class="card"><h3>Confidentialité</h3><p>Pas de compte, pas de publicité, pas de mesure d’audience. Vos vies, vos réponses et vos réglages restent dans ce navigateur. Un lien de partage contient la vie elle-même (sans vos réponses ni vos derniers mots) : rien n’est envoyé à un serveur.</p></article>
-      <article class="card"><h3>Données</h3><p>58 pays, environ 85 % des naissances. Le moment de la mort suit des tables de mortalité par pays, sexe et année ; les causes suivent des profils de l’OMS par région et par âge. Les valeurs historiques et futures sont des ordres de grandeur.</p></article>
+      <article class="card"><h3>Données</h3><p><span class="countryCount2"></span> pays et territoires, toutes les naissances du monde, à partir de la Banque mondiale et d’Our World in Data (ONU, Maddison, Lee-Lee, Riley). Les valeurs manquantes sont estimées d’après la région et signalées. Le moment de la mort suit des tables de mortalité par pays, sexe et année ; les causes suivent des profils de l’OMS par région et par âge. Les valeurs historiques et futures sont des ordres de grandeur.</p></article>
       <article class="card"><h3>Notes de version <small>v<span class="appVersion"></span></small></h3><p>Naître dans le passé ou le futur, événements historiques, famille et argent, soins, tabac, VIH, mobilisation, mode automatique, musique douce, mode classe, mémorial, partage, transfert des vies, reprise d’une vie après fermeture.</p></article>
     </div>
   </section>
@@ -148,7 +150,7 @@
   <footer class="foot">
     <div class="wrap">
       <p><b>Besoin d’aide ?</b> En France : 3114 (prévention du suicide), 119 (enfance en danger), 3919 (violences faites aux femmes), 15 ou 112 (urgences). Ailleurs : <a href="https://findahelpline.com" target="_blank" rel="noopener">findahelpline.com</a>.</p>
-      <p class="muted small">Sources (valeurs approchées, vers 2023) : ONU World Population Prospects, ONU IGME, Banque mondiale, OMS, UNESCO, PNUD, OIT, ONUSIDA, ONUDC, UNICEF, World Happiness Report, Our World in Data, projet Maddison. Les <span class="countryCount2"></span> pays inclus regroupent la grande majorité des naissances mondiales ; le tirage se fait parmi eux. C’est une simulation : elle montre des probabilités, pas des destins.</p>
+      <p class="muted small">Sources (valeurs approchées, vers 2023) : ONU World Population Prospects, ONU IGME, Banque mondiale, OMS, UNESCO, PNUD, OIT, ONUSIDA, ONUDC, UNICEF, World Happiness Report, Our World in Data, projet Maddison. Les <span class="countryCount2"></span> pays et territoires couvrent toutes les naissances du monde ; données générées par tools/build-countries.mjs. C’est une simulation : elle montre des probabilités, pas des destins.</p>
     </div>
   </footer>
 </div>
@@ -209,6 +211,15 @@
         <h3>Indicateurs <small>0–100</small></h3>
         <div id="statBars"></div>
         <p class="tiny muted">Santé : risque de mourir et capacité à travailler. Bonheur : revenus, proches, santé, dettes. Savoir : examens, emplois, premier salaire. Relations : mariage, enfants, harcèlement, solitude.</p>
+      </section>
+      <section class="panel" id="actPanel">
+        <h3>Agir cette année <small id="actLeft"></small></h3>
+        <div class="seg compact" id="actSeg">
+          <label><input type="radio" name="actcat" value="pro" checked><span>Travail et argent</span></label>
+          <label><input type="radio" name="actcat" value="perso"><span>Vie personnelle</span></label>
+        </div>
+        <div class="acts" id="actList"></div>
+        <details class="acts-off"><summary>Actions impossibles pour l’instant</summary><ul id="actOff"></ul></details>
       </section>
       <section class="panel">
         <h3>Priorité de l’année</h3>
@@ -288,6 +299,19 @@
   </div>
 </div>
 
+<div class="modal" id="heirModal" hidden>
+  <div class="modal-box wide">
+    <div class="modal-head"><h2>Continuer la lignée</h2><button class="icon-btn" id="heirClose" aria-label="Fermer">✕</button></div>
+    <p class="muted" id="heirIntro"></p>
+    <h3>Avec quel enfant ?</h3>
+    <div class="choices" id="heirList"></div>
+    <h3>Le testament</h3>
+    <div class="choices" id="willList"></div>
+    <p class="notice" id="heirNote"></p>
+    <div class="cta-row"><button class="btn primary" id="heirGo">Vivre sa vie</button></div>
+  </div>
+</div>
+
 <div class="modal" id="helpModal" hidden>
   <div class="modal-box">
     <div class="modal-head"><h2>Besoin d’aide</h2><button class="icon-btn" id="helpClose" aria-label="Fermer">✕</button></div>
@@ -323,6 +347,7 @@
     </article>
     <div class="cta-row">
       <button class="btn primary" id="againBtn">Une autre vie</button>
+      <button class="btn primary" id="lineageBtn" hidden>Continuer la lignée</button>
       <button class="btn ghost" id="memorialBtn">Mettre au mémorial</button>
       <button class="btn ghost" id="keepBtn" hidden>Garder dans mes vies</button>
       <button class="btn ghost" id="cardBtn">Carte à partager</button>
@@ -335,8 +360,10 @@
 
 <div class="toast" id="toast" hidden></div>
 
+<script src="countries.js"></script>
 <script src="data.js"></script>
 <script src="sim.js"></script>
+<script src="economy.js"></script>
 <script src="common.js"></script>
 <script src="app.js"></script>
 </body>

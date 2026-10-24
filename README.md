@@ -2,7 +2,15 @@
 
 Simulation de vie en français, inspirée du concept de [1in8b.life](https://1in8b.life/fr/) et entièrement réécrite (code, textes et design originaux).
 
-Vous naissez au hasard parmi les bébés de l’année (ou parmi les 8 milliards d’humains), puis vous vivez une vie entière, année après année, guidée par les statistiques réelles de 58 pays (≈ 85 % des naissances mondiales).
+Vous naissez au hasard parmi les bébés de l’année (ou parmi les 8 milliards d’humains), puis vous vivez une vie entière, année après année, guidée par les statistiques réelles de tous les pays et territoires du monde (216), de 1900 à 2100.
+
+## Nouveautés (version 3)
+
+- **Tous les pays du monde** : 216 pays et territoires, avec 33 indicateurs chacun (naissances, espérance de vie par sexe, mortalité infantile et maternelle, PIB, Gini, école, université, emploi agricole et industriel, chômage, femmes au travail, urbanisation, internet, compte bancaire, inflation, taux d’intérêt, impôts, Bourse, VIH, tabac, homicides, bonheur…). Les données sont générées depuis la Banque mondiale et Our World in Data par `tools/` ; les valeurs manquantes sont estimées d’après la région et signalées.
+- **Passé réel et projections** : séries longues par pays tous les 10 ans (espérance de vie, mortalité des enfants, naissances, population, fécondité, PIB, années d’école) de 1900 aux projections de l’ONU pour 2100. Près de 90 événements historiques, dont des hyperinflations qui ruinent l’épargne.
+- **Agir sur sa vie** : trois actions par an, professionnelles (chercher un emploi parmi les 50 métiers qui existent ici et à cette époque, changer de métier, augmentation, heures sup, formation, reprendre des études, créer ou vendre une entreprise, partir travailler à l’étranger, ouvrir un compte, retraite anticipée) ou personnelles (amour, enfant, divorce, sport, bilan de santé, arrêter de fumer, voyager, amis, bénévolat, langues, déménager, financer les études des enfants…). Chaque action dit pourquoi elle est impossible quand elle l’est.
+- **Argent réaliste** : revenus du ménage (avec ceux du conjoint), impôts selon le pays et l’époque, loyer ville/campagne ou emprunt immobilier (apport, taux réel, mensualités), enfants, train de vie, épargne. Placements selon l’accès réel (compte bancaire, économies planifiées, époque) : liquide, épargne, tontine, obligations, actions du pays, fonds mondial, immobilier locatif, or, bétail, cryptos ; rendements réels avec les krachs historiques ; rééquilibrage annuel ; retraite selon le pays ; héritage ; entreprise (faillites, rachats) ; patrimoine comparé au reste du pays.
+- **Descendance** : à la mort, choix d’un testament (parts égales, tout à un enfant, moitié aux œuvres) et d’un enfant pour continuer. L’enfant revit depuis sa naissance ; la vie précédente meurt dans la sienne au même âge et de la même cause, et l’héritage arrive à ce moment-là. Lignée sur plusieurs générations.
 
 ## Fonctionnalités
 
@@ -43,6 +51,13 @@ C’est une PWA : ouverte dans Safari, « Partager → Sur l’écran d’accuei
 - Époques : points d’appui par région en 1900 et 1950 (ONU, Our World in Data, projet Maddison), projections vers 2100 ; tables de mortalité recalculées tous les 5 ans.
 
 Les valeurs sont approchées (vers 2023 ; ordres de grandeur pour le passé et le futur) : voir `data.js`.
+
+## Données
+
+```sh
+sh tools/fetch-sources.sh      # télécharge les sources dans tools/cache/
+node tools/build-countries.mjs # écrit countries.js
+```
 
 ## Lancer en local
 

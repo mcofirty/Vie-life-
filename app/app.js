@@ -198,7 +198,7 @@ function renderLives() {
   $("livesGroup").innerHTML = lives.slice(0, livesShown).map(r => {
     const c = BY_CODE[r.s.home];
     const cause = prefs.gentle && HEAVY_CAUSES.includes(r.s.cause) ? "cause non affichée" : r.s.cause;
-    const sub = livesTab === "mine" ? `${c.name} · ${ans(r.s.age)}${r.s.year ? ` · ${r.s.year}` : ""} · ${esc(cause)}` : `${c.name} · ${ans(r.s.age)} · 🕯️ ${r.candles || 0}${r.notes && r.notes.length ? ` · ${r.notes.length} mot${r.notes.length > 1 ? "s" : ""}` : ""}`;
+    const sub = livesTab === "mine" ? `${c.name} · ${ans(r.s.age)}${r.s.year ? ` · ${r.s.year}` : ""}${r.s.gen > 1 ? ` · génération ${r.s.gen}` : ""} · ${esc(cause)}` : `${c.name} · ${ans(r.s.age)} · 🕯️ ${r.candles || 0}${r.notes && r.notes.length ? ` · ${r.notes.length} mot${r.notes.length > 1 ? "s" : ""}` : ""}`;
     return `<button class="cell link" data-id="${r.id}"><span class="flag-cell">${c.flag}</span><span class="cell-main"><b>${esc(r.s.name)}${r.memorial ? " 🕯️" : ""}</b><small>${sub}</small></span><span class="cell-value">${r.shared ? "reçue" : new Date(r.date).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}</span><span class="chev"></span></button>`;
   }).join("");
 }
@@ -314,7 +314,7 @@ $("lifeSeg").addEventListener("click", e => {
   haptic();
   pane = b.dataset.v;
   $("lifeSeg").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b));
-  ["story", "me", "peers", "data"].forEach(p => $(`pane-${p}`).hidden = p !== pane);
+  ["story", "act", "me", "peers", "data"].forEach(p => $(`pane-${p}`).hidden = p !== pane);
   renderLife();
 });
 
@@ -482,6 +482,7 @@ function renderLife() {
   $("lifeHero").style.setProperty("--h2", `hsl(${(245 + h * 25).toFixed(0)} 60% ${(26 + h * 8).toFixed(0)}%)`);
 
   renderFeed();
+  if (pane === "act") renderActions();
   if (pane === "me") renderSituation();
   if (pane === "peers") renderPeers();
   if (pane === "data") renderData();
@@ -522,15 +523,19 @@ function renderSituation() {
   const rows = [
     ["Famille d’origine", L.familyLabel()],
     ["Études", L.schooling ? `en cours · ${EDU_LABEL[L.schooling]}` : EDU_LABEL[L.edu]],
-    ["Travail", L.retired ? "à la retraite" : L.job || (L.age < 6 ? "—" : "aucun")],
+    ["Travail", L.retired ? "à la retraite" : L.job || (L.homemaker ? "au foyer" : L.age < 6 ? "—" : "sans emploi")],
+    ["Lieu de vie", L.urban ? "en ville" : "à la campagne"],
   ];
+  if (L.lineage) rows.push(["Lignée", `génération ${L.lineage.gen}`]);
   if (L.smoker) rows.push(["Tabac", L.g("fumeur", "fumeuse")]);
   if (L.hivPos) rows.push(["VIH", L.hivTreated() ? "sous traitement" : "sans traitement"]);
   $("situation").innerHTML = rowsHtml(rows);
   $("moneyMini").innerHTML = rowsHtml([
     ["Revenu", L.income > 0 ? `${dollars(L.income)}/an` : "aucun", L.income > 0 ? `≈ ${euroMonth(L.income)} par mois en prix français` : ""],
     ["Épargne", dollars(L.savings)],
+    ...(L.house ? [["Logement", dollars(L.house.value), L.house.loan > 0 ? `emprunt : ${dollars(L.house.loan)}` : ""]] : []),
     ["Dettes", L.debt > 0 ? dollars(L.debt) : "aucune"],
+    ["Patrimoine", dollars(L.netWorth()), `plus riche que ${Math.round(L.wealthPct() * 100)} % du pays`],
   ]);
   const living = L.children.filter(k => k.alive).length;
   $("familyMini").innerHTML = rowsHtml([
@@ -556,23 +561,34 @@ function panelSheet(kind) {
       </div>
       <p class="group-footer">Une fois par an. Les liens comptent pour le mariage, les enfants et la solitude du grand âge.</p>`, { dismissable: true, onClose: renderLife });
   } else {
-    const price = L.housePrice();
+    const d = L.houseDeal(), port = portfolioRows(L), alloc = L.validAlloc(), budget = budgetRows(L);
     openSheet(`<h2 class="sheet-title">Dépenser et investir</h2>
       <div class="group">${rowsHtml(moneyRows(L).map(([k, v]) => [k, v.split(" · ")[0], v.split(" · ")[1]]))}</div>
       ${L.age < 16 && !L.job ? `<p class="group-footer">Encore enfant : ces choix compteront dès le premier revenu.</p>` : ""}
+      ${budget.length ? `<p class="group-header">Budget de l’année</p><div class="group">${rowsHtml(budget)}</div>` : ""}
       <p class="group-header">Train de vie</p>${choice("spend", SPEND, L.spend)}
-      <p class="group-header">Où placer l’épargne</p>${choice("invest", INVEST, L.invest)}
-      <div class="btn-row" style="margin-top:20px">
-        ${L.house ? `<button class="btn-gray" data-do="sell">Vendre le logement</button>` : `<button class="btn-gray" data-do="buy" ${L.canBuyHouse() ? "" : "disabled"}>Acheter un logement</button>`}
-        <button class="btn-gray" data-do="repay" ${L.debt > 0 && L.savings > 0 ? "" : "disabled"}>Rembourser les dettes</button>
+      <p class="group-header">Placements · répartition visée</p>
+      <div class="group">${port.map(r => `<div class="cell column"><div style="display:flex;justify-content:space-between;gap:8px"><b style="font-weight:600">${r.label}</b><span style="color:var(--label-2)">${dollars(r.value)}</span></div><small style="color:var(--label-2);font-size:13px">${r.available ? r.note : "Plus accessible : vendu au prochain rééquilibrage."}</small>${r.available ? `<div class="slider-row"><input type="range" min="0" max="100" step="5" value="${r.target}" data-asset="${r.id}"><output>${Math.round(alloc[r.id] || 0)} %</output></div>` : ""}</div>`).join("")}</div>
+      <p class="group-footer">${L.bank ? "Rééquilibré chaque année. Rendements réels (après inflation) ; krachs et hyperinflations suivent l’histoire." : "Sans compte en banque : liquide, or, bétail ou tontine seulement. Ouvrez un compte depuis « Agir »."}</p>
+      <p class="group-header">Logement</p>
+      <div class="group"><div class="cell column"><span>${L.house ? `${L.house.built ? "Maison construite soi-même" : "Propriétaire"} : ${dollars(L.house.value)}${L.house.loan > 0 ? `, reste ${dollars(L.house.loan)} (${dollars(L.house.payment)} par an, taux réel ${fmt(L.house.rate * 100, 1)} %)` : ""}.` : `Un logement ${L.urban ? "en ville" : "à la campagne"} : environ ${dollars(d.price)}. ${d.canBorrow ? `Apport ${dollars(d.down)}, emprunt ${dollars(d.loan)} sur 25 ans à ${fmt(d.rate * 100, 1)} %, soit ${dollars(d.payment)} par an.` : "Pas de crédit accessible : il faut payer comptant."} ${d.why}`}</span></div></div>
+      <div class="btn-row" style="margin-top:14px">
+        ${L.house ? `<button class="btn-gray" data-do="sell">Vendre le logement</button>` : `<button class="btn-gray" data-do="buy" ${d.ok ? "" : "disabled"}>Acheter</button>`}
+        <button class="btn-gray" data-do="repay" ${(L.debt > 0 || (L.house && L.house.loan > 0)) && L.savings > 0 ? "" : "disabled"}>Rembourser</button>
       </div>
-      <p class="group-footer">Un logement coûte environ ${dollars(price)} ici ; il faut en avoir mis de côté un quart, le reste est emprunté. Dollars PPA, prix constants. Les dettes pèsent sur le bonheur et la santé.</p>`, { dismissable: true, onClose: renderLife });
+      <p class="group-footer">Dollars PPA à prix constants. Les dettes pèsent sur le bonheur et la santé.</p>`, { dismissable: true, onClose: renderLife });
+    $("sheetBody").querySelectorAll("[data-asset]").forEach(i => i.addEventListener("input", () => {
+      L.alloc[i.dataset.asset] = +i.value;
+      L.rebalance();
+      const al = L.validAlloc();
+      $("sheetBody").querySelectorAll("[data-asset]").forEach(x => x.nextElementSibling.textContent = `${Math.round(al[x.dataset.asset] || 0)} %`);
+      saveCurrent(L);
+    }));
   }
   $("sheetBody").querySelectorAll("[data-choice]").forEach(b => b.addEventListener("click", () => {
     const v = b.dataset.v, name = b.dataset.choice;
     if (name === "kids") L.wantKids = v;
     if (name === "spend") L.spend = v;
-    if (name === "invest") L.invest = v;
     haptic(); saveCurrent(L); panelSheet(kind);
   }));
   $("sheetBody").querySelectorAll("[data-do]").forEach(b => b.addEventListener("click", () => {
@@ -581,6 +597,36 @@ function panelSheet(kind) {
     if (ok) { haptic(15); L.snapshot(); saveCurrent(L); toast({ visit: "Du temps avec les siens", help: "Famille aidée", buy: "Logement acheté", sell: "Logement vendu", repay: "Dettes remboursées" }[act]); }
     panelSheet(kind);
   }));
+}
+
+// ---------- Agir ----------
+let actCat = "pro";
+segmented("actcat", actCat, v => { actCat = v; renderActions(); });
+function renderActions() {
+  const L = life;
+  const acts = L.alive ? L.availableActions().filter(a => a.cat === actCat) : [];
+  $("actLeft").textContent = `Agir cette année · ${L.actionsLeft} action${L.actionsLeft > 1 ? "s" : ""} sur ${ACTIONS_PER_YEAR}`;
+  $("actList").innerHTML = acts.filter(a => a.ok).map(a => `<button class="cell link" data-act-id="${a.id}"><span class="cell-main"><b>${esc(a.label)}</b><small>${esc(a.desc)}</small></span><span class="chev"></span></button>`).join("")
+    || `<div class="cell"><span class="cell-main"><small>${L.actionsLeft ? "Rien de possible pour l’instant." : "Plus d’actions cette année : laissez passer le temps."}</small></span></div>`;
+  $("actOff").innerHTML = acts.filter(a => !a.ok).map(a => `<div class="cell"><span class="cell-main"><b style="color:var(--label-2)">${esc(a.label)}</b><small>${esc(a.why)}</small></span></div>`).join("") || `<div class="cell"><span class="cell-main"><small>Tout est possible.</small></span></div>`;
+}
+$("actList").addEventListener("click", e => {
+  const b = e.target.closest("[data-act-id]"); if (!b || !life) return;
+  const a = life.availableActions().find(x => x.id === b.dataset.actId);
+  if (!a || !a.ok) return;
+  haptic();
+  if (!a.hasChoices) return runAction(a.id);
+  const list = life.actionChoices(a.id);
+  openSheet(`<h2 class="sheet-title">${esc(a.label)}</h2><p class="group-footer" style="margin:-8px 4px 16px;text-align:center">${esc(a.desc)}</p>
+    <div class="group">${list.map(o => `<button class="cell link" data-choice-id="${esc(o.id)}" ${o.disabled ? "disabled" : ""}><span class="cell-main"><b>${esc(o.label)}</b><small>${esc(o.sub)}</small></span><span class="chev"></span></button>`).join("") || `<div class="cell"><span class="cell-main"><small>Rien à proposer pour l’instant.</small></span></div>`}</div>`, { dismissable: true });
+  $("sheetBody").querySelectorAll("[data-choice-id]").forEach(c => c.addEventListener("click", () => { closeSheet(); setTimeout(() => runAction(a.id, c.dataset.choiceId), 320); }));
+});
+function runAction(id, arg) {
+  const res = life.doAction(id, arg);
+  if (res) { haptic(12); toast(res); }
+  saveCurrent(life);
+  renderLife();
+  if (life.alive && life.queue.length) decisionSheet();
 }
 
 function renderPeers() {
@@ -665,6 +711,9 @@ function deathSheet(rec, mode) {
   const hideCause = prefs.gentle && HEAVY_CAUSES.includes(s.cause);
   const facts = [["Cause", hideCause ? "non affichée" : s.cause], ["Études", EDU_LABEL[s.edu]], ["Travail", s.job || "aucun"], ["Mariage", s.marriedEver ? "oui" : "non"], ["Enfants", kids]];
   if (s.grandkids) facts.push(["Petits-enfants", String(s.grandkids)]);
+  if (s.business) facts.push(["Entreprise", s.business]);
+  const dyn = rec.dyn, heirs = own && dyn && dyn.heirs ? dyn.heirs : [];
+  if (dyn && (dyn.gen > 1 || dyn.ancestors.length)) facts.push(["Lignée", `génération ${dyn.gen}`]);
   if (s.income > 0) facts.splice(3, 0, ["Dernier revenu", `${dollars(s.income)}/an`]);
   if (s.wealth != null) facts.splice(4, 0, ["Patrimoine", s.wealth >= 0 ? `${dollars(s.wealth)}${s.house ? " + logement" : ""}` : `dettes : ${dollars(-s.wealth)}`]);
   const refl = own ? (rec.reflections || []).filter(r => r.a) : [];
@@ -694,12 +743,14 @@ function deathSheet(rec, mode) {
     <p class="group-header">Les quatre autres bébés</p>
     <div class="group">${rec.peers.map(p => { const pc = BY_CODE[p.home]; const pg = (m, f) => p.sex === "m" ? m : f; return `<div class="cell"><span class="flag-cell">${pc.flag}</span><span class="cell-main"><b>${esc(p.name)}, ${pc.name}</b><small>${pg("Mort", "Morte")} à ${ans(p.age)} · ${esc(prefs.gentle && HEAVY_CAUSES.includes(p.cause) ? "cause non affichée" : p.cause)} · ${EDU_LABEL[p.edu]}${p.children ? ` · ${p.children} enfant${p.children > 1 ? "s" : ""}` : ""}${p.emigrated ? ` · ${inCountry(BY_CODE[p.code])}` : ""}</small></span></div>`; }).join("")}</div>
     ${rec.real && own ? `<p class="group-header">Cette vie et la vôtre</p><div class="group">${compareCells(countryAt(s.home, s.year ?? DATA_YEAR), BY_CODE[rec.real], s.sex)}</div>` : ""}
+    ${dyn && dyn.ancestors.length ? `<p class="group-header">Lignée</p><div class="group">${[...dyn.ancestors, { name: s.name, home: s.home, year: s.year, age: s.age }].map((a, i) => `<div class="cell"><span class="flag-cell">${BY_CODE[a.home].flag}</span><span class="cell-main"><b>${esc(a.name)}</b><small>Génération ${i + 1} · ${a.year} · ${ans(a.age)}</small></span></div>`).join("")}</div>` : ""}
     ${refl.length ? `<p class="group-header">Vos pauses</p><div class="group">${refl.map(r => `<div class="cell column"><small style="color:var(--label-2);font-size:13px">${esc(r.q)}</small><span>${esc(r.a)}</span></div>`).join("")}</div>` : ""}
     ${own ? `<p class="group-header">Quelques mots pour ${esc(s.name)}</p>
     <textarea id="lastWords" rows="2" placeholder="Ce que vous auriez voulu lui dire…" ${mode === "review" && rec.message ? "readonly" : ""}>${esc(rec.message || "")}</textarea>` : ""}
     ${isHeavy(rec) ? `<p class="help-note">${HELP_HTML}</p>` : ""}
     <div style="margin-top:20px">
-      ${mode === "new" ? `<button class="btn-filled" id="againBtn">Une autre vie</button>` : ""}
+      ${heirs.length ? `<button class="btn-filled" id="lineageBtn">${heirs.length === 1 ? `Continuer avec ${esc(heirs[0].name)}` : "Continuer la lignée"}</button>` : ""}
+      ${mode === "new" ? `<button class="${heirs.length ? "btn-gray" : "btn-filled"}" id="againBtn">Une autre vie</button>` : ""}
       ${mode === "stranger" ? `<button class="btn-filled" id="keepBtn">Garder dans mes vies</button>` : ""}
       ${mode === "shared" ? `<button class="btn-filled" id="keepBtn">Garder au mémorial</button>` : ""}
       ${own ? `<button class="btn-gray" id="memorialBtn">${rec.memorial ? "Retirer du mémorial" : "Mettre au mémorial"}</button>` : ""}
@@ -723,6 +774,7 @@ function deathSheet(rec, mode) {
     saveRecord(rec); haptic(15); toast("Vie gardée");
     deathSheet(rec, mode === "shared" ? "shared-kept" : "review");
   });
+  on("lineageBtn", () => { keepWords(); heirSheet(rec, mode); });
   on("cardBtn", () => shareCard("death", rec).then(r => r === "downloaded" && toast("Image enregistrée")));
   on("linkBtn", async () => { const r = await shareLink(rec); if (r === "copied") toast("Lien copié (sans vos réponses ni vos mots)"); });
   on("deleteBtn", () => { deleteRecord(rec.id); closeSheet(); renderLives(); toast("Vie supprimée"); });
@@ -739,6 +791,41 @@ function deathSheet(rec, mode) {
     sheetOpts.onClose = () => { keepWords(); renderLives(); if (location.hash.startsWith("#vie=")) history.replaceState(null, "", location.pathname + location.search); };
     on("doneBtn", closeSheet);
   }
+}
+
+// ---------- Descendance ----------
+const WILLS = {
+  egal: { label: "Parts égales", note: "Chaque enfant reçoit la même part." },
+  heritier: { label: "Tout à l’enfant choisi", note: "Les autres enfants n’ont rien." },
+  oeuvres: { label: "La moitié aux œuvres", note: "Une moitié pour des associations, le reste partagé." },
+};
+function heirSheet(rec, mode, heir = rec.dyn.heirs[0].name, will = "egal") {
+  const d = rec.dyn, opts = lineageFor(rec, heir, will);
+  openSheet(`<h2 class="sheet-title">Continuer la lignée</h2>
+    <p class="group-footer" style="margin:-8px 4px 16px;text-align:center">${esc(rec.s.name)} laisse ${dollars(d.estate)}. Vous revivez l’enfant choisi depuis sa naissance ; votre vie précédente mourra dans la sienne, au même âge.</p>
+    <p class="group-header">Avec quel enfant ?</p>
+    <div class="group">${d.heirs.map(h => `<button class="cell link choice-cell" data-heir="${esc(h.name)}"><span class="tick">${h.name === heir ? "✓" : ""}</span><span class="flag-cell">${BY_CODE[h.code].flag}</span><span class="cell-main"><b>${esc(h.name)}</b><small>${h.sex === "m" ? "Fils" : "Fille"} · né${h.sex === "m" ? "" : "e"} en ${h.year} · ${h.age} ans à la mort de ${esc(rec.s.name)}</small></span></button>`).join("")}</div>
+    <p class="group-header">Le testament</p>
+    <div class="group">${Object.entries(WILLS).map(([k, w]) => `<button class="cell link choice-cell" data-will="${k}"><span class="tick">${k === will ? "✓" : ""}</span><span class="cell-main"><b>${w.label}</b><small>${w.note}</small></span></button>`).join("")}</div>
+    <p class="group-footer">${esc(heir)} héritera d’environ ${dollars(opts.lineage.estate)} à ${opts.lineage.parent.deathAt} ans. Génération ${opts.lineage.gen}.</p>
+    <button class="btn-filled" id="heirGo" style="margin-top:16px">Vivre sa vie</button>
+    <button class="btn-plain" id="heirBack">Retour</button>`, { dismissable: false });
+  $("sheetBody").querySelectorAll("[data-heir]").forEach(b => b.onclick = () => { haptic(); heirSheet(rec, mode, b.dataset.heir, will); });
+  $("sheetBody").querySelectorAll("[data-will]").forEach(b => b.onclick = () => { haptic(); heirSheet(rec, mode, heir, b.dataset.will); });
+  $("heirBack").onclick = () => deathSheet(rec, mode);
+  $("heirGo").onclick = () => {
+    haptic(20);
+    closeSheet(); keepAwake(false); Music.stop();
+    $("lifeView").hidden = true; $("resumeGroup").hidden = true;
+    clearCurrent();
+    life = new Life({ ...opts, classroom: prefs.classroom });
+    peers = Array.from({ length: 4 }, () => simulateWhole({ mode: "births", year: opts.year, classroom: prefs.classroom }));
+    const v = $("drawView");
+    v.hidden = false; v.style.animation = "none"; void v.offsetWidth; v.style.animation = "";
+    $("drawKicker").textContent = `La lignée continue · génération ${opts.lineage.gen}`;
+    renderLives();
+    showPass();
+  };
 }
 
 // ---------- Démarrage ----------

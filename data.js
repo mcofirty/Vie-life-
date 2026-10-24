@@ -1,86 +1,18 @@
-// Statistiques approximatives (vers 2023), arrondies à partir des données publiques
-// de l'ONU (World Population Prospects), de la Banque mondiale, de l'OMS, de l'UNESCO,
-// de l'ONUDC, de l'UNICEF et du World Happiness Report.
-//
-// Colonnes :
-// code, nom, drapeau, région, naissances/an (milliers), population (millions),
-// espérance de vie hommes, femmes, mortalité infantile (‰), PIB/hab. (PPA $),
-// Gini, années de scolarité moyennes, accès au supérieur (%), homicides (/100 000),
-// satisfaction de vie (0-10), fécondité (enfants/femme), mariage avant 18 ans (% des filles),
-// mortalité maternelle (/100 000 naissances), VIH (% des 15-49 ans), tabac (% des adultes),
-// reste à charge des soins (% des dépenses de santé), emploi agricole (% des emplois)
-const COUNTRY_ROWS = [
-  ["IN", "Inde", "🇮🇳", "SAS", 23000, 1430, 70, 73, 26, 9000, 33, 6.6, 31, 2.9, 4.0, 2.0, 23, 103, 0.2, 27, 50, 43],
-  ["CN", "Chine", "🇨🇳", "EAS", 9000, 1410, 75, 81, 5, 22000, 37, 8.1, 70, 0.5, 5.9, 1.0, 3, 23, 0.1, 25, 35, 23],
-  ["NG", "Nigeria", "🇳🇬", "SSA", 7800, 224, 53, 55, 70, 5800, 35, 7.2, 12, 10, 4.9, 5.1, 30, 1047, 1.3, 5, 75, 35],
-  ["PK", "Pakistan", "🇵🇰", "SAS", 6900, 240, 65, 69, 52, 6300, 30, 4.5, 12, 4, 4.6, 3.4, 18, 154, 0.2, 20, 55, 37],
-  ["ID", "Indonésie", "🇮🇩", "EAS", 4500, 277, 69, 73, 17, 14000, 38, 8.6, 40, 0.4, 5.6, 2.1, 16, 173, 0.3, 37, 30, 29],
-  ["CD", "RD Congo", "🇨🇩", "SSA", 4300, 102, 58, 62, 62, 1300, 42, 7.1, 7, 13, 3.3, 6.1, 29, 547, 0.7, 13, 40, 55],
-  ["ET", "Éthiopie", "🇪🇹", "SSA", 3800, 126, 64, 68, 34, 2800, 35, 3.2, 10, 7.6, 4.1, 4.0, 40, 267, 0.9, 4, 35, 63],
-  ["US", "États-Unis", "🇺🇸", "NAM", 3600, 335, 75, 81, 5.4, 80000, 41, 13.6, 88, 6.4, 6.7, 1.6, 0, 21, 0.4, 23, 11, 2],
-  ["BD", "Bangladesh", "🇧🇩", "SAS", 3000, 172, 71, 75, 23, 8600, 32, 7.4, 23, 2.3, 4.3, 1.9, 51, 123, 0.1, 35, 73, 37],
-  ["BR", "Brésil", "🇧🇷", "LAT", 2500, 216, 72, 79, 13, 20000, 52, 8.3, 57, 21, 6.3, 1.6, 26, 72, 0.6, 13, 25, 9],
-  ["TZ", "Tanzanie", "🇹🇿", "SSA", 2300, 67, 64, 68, 33, 3000, 40, 6.4, 8, 6.5, 3.7, 4.6, 29, 238, 4.5, 8, 22, 64],
-  ["EG", "Égypte", "🇪🇬", "MENA", 2000, 112, 68, 73, 16, 16000, 32, 7.4, 37, 1.3, 4.2, 2.8, 17, 17, 0.1, 24, 59, 19],
-  ["MX", "Mexique", "🇲🇽", "LAT", 1800, 128, 72, 78, 11, 23000, 43, 9.2, 45, 25, 6.7, 1.8, 21, 59, 0.3, 13, 41, 12],
-  ["PH", "Philippines", "🇵🇭", "EAS", 1700, 117, 68, 74, 21, 11000, 41, 9.9, 35, 4.4, 6.0, 2.7, 15, 78, 0.2, 22, 45, 24],
-  ["UG", "Ouganda", "🇺🇬", "SSA", 1700, 49, 61, 66, 31, 2800, 43, 6.2, 5, 9, 4.4, 4.4, 34, 284, 5.1, 10, 38, 63],
-  ["AF", "Afghanistan", "🇦🇫", "SAS", 1500, 42, 60, 66, 43, 2000, 30, 2.5, 10, 6, 1.7, 4.6, 28, 620, 0.1, 20, 77, 45],
-  ["SD", "Soudan", "🇸🇩", "SSA", 1500, 48, 63, 68, 38, 3500, 34, 3.8, 17, 5, 4.0, 4.4, 34, 270, 0.1, 15, 60, 40],
-  ["KE", "Kenya", "🇰🇪", "SSA", 1500, 55, 60, 65, 30, 6000, 39, 6.7, 12, 5, 4.5, 3.3, 23, 530, 3.7, 11, 24, 33],
-  ["VN", "Vietnam", "🇻🇳", "EAS", 1400, 99, 70, 79, 16, 13000, 36, 8.4, 40, 1.5, 5.8, 1.9, 15, 124, 0.3, 23, 40, 29],
-  ["AO", "Angola", "🇦🇴", "SSA", 1300, 37, 59, 64, 46, 7000, 51, 5.4, 10, 4.8, 3.8, 5.1, 30, 222, 1.6, 10, 30, 56],
-  ["RU", "Russie", "🇷🇺", "EUR", 1300, 144, 66, 77, 4, 36000, 36, 12.8, 85, 6.8, 5.8, 1.4, 6, 14, 1.2, 26, 35, 6],
-  ["NE", "Niger", "🇳🇪", "SSA", 1200, 27, 61, 63, 61, 1500, 37, 2.1, 4, 4, 4.5, 6.7, 76, 441, 0.2, 9, 50, 70],
-  ["MZ", "Mozambique", "🇲🇿", "SSA", 1200, 34, 59, 65, 51, 1400, 54, 3.5, 7, 3.5, 5.2, 4.6, 53, 127, 11.5, 15, 10, 70],
-  ["IQ", "Irak", "🇮🇶", "MENA", 1200, 45, 69, 74, 21, 11000, 30, 7.3, 18, 9, 5.0, 3.4, 28, 76, 0.1, 21, 60, 18],
-  ["IR", "Iran", "🇮🇷", "MENA", 1100, 89, 72, 77, 11, 17000, 35, 10.6, 55, 2.5, 4.9, 1.7, 17, 22, 0.1, 13, 35, 17],
-  ["ZA", "Afrique du Sud", "🇿🇦", "SSA", 1100, 60, 60, 66, 25, 15000, 63, 11.4, 25, 42, 5.4, 2.3, 4, 127, 17, 20, 6, 20],
-  ["TR", "Turquie", "🇹🇷", "MENA", 1000, 86, 74, 80, 8, 41000, 42, 8.6, 90, 2.5, 5.0, 1.6, 15, 17, 0.1, 30, 17, 16],
-  ["CI", "Côte d’Ivoire", "🇨🇮", "SSA", 1000, 29, 57, 61, 52, 6500, 37, 5.3, 10, 9, 5.1, 4.3, 27, 480, 1.7, 10, 35, 45],
-  ["CM", "Cameroun", "🇨🇲", "SSA", 1000, 28, 60, 63, 46, 4400, 42, 6.3, 14, 1.4, 4.9, 4.4, 30, 438, 2.6, 9, 70, 43],
-  ["YE", "Yémen", "🇾🇪", "MENA", 1000, 34, 61, 66, 44, 2000, 37, 3.2, 10, 7, 3.6, 3.7, 32, 183, 0.1, 20, 80, 28],
-  ["MG", "Madagascar", "🇲🇬", "SSA", 950, 30, 63, 67, 36, 1800, 43, 5.1, 6, 2, 4.2, 3.8, 39, 392, 0.2, 28, 25, 74],
-  ["ML", "Mali", "🇲🇱", "SSA", 900, 23, 59, 61, 58, 2600, 36, 1.6, 5, 10, 4.2, 5.6, 54, 440, 0.8, 10, 35, 66],
-  ["MM", "Myanmar", "🇲🇲", "EAS", 900, 54, 64, 70, 34, 5000, 31, 6.4, 18, 3, 4.4, 2.1, 16, 179, 0.8, 44, 75, 46],
-  ["GH", "Ghana", "🇬🇭", "SSA", 880, 34, 62, 66, 33, 6500, 43, 7.4, 20, 2, 4.4, 3.5, 19, 263, 1.6, 4, 35, 38],
-  ["DZ", "Algérie", "🇩🇿", "MENA", 850, 45, 75, 78, 19, 13000, 28, 8.1, 55, 1.4, 5.3, 2.7, 4, 78, 0.1, 21, 30, 10],
-  ["BF", "Burkina Faso", "🇧🇫", "SSA", 760, 23, 59, 62, 51, 2500, 47, 2.1, 8, 1, 4.5, 4.7, 52, 264, 0.6, 14, 35, 73],
-  ["JP", "Japon", "🇯🇵", "EAS", 760, 124, 81, 87, 1.7, 46000, 33, 13.4, 65, 0.2, 6.1, 1.2, 0, 4, 0.1, 20, 12, 3],
-  ["TD", "Tchad", "🇹🇩", "SSA", 750, 18, 53, 56, 65, 1500, 37, 2.6, 3, 9, 4.4, 6.1, 61, 1063, 1.0, 10, 60, 72],
-  ["SO", "Somalie", "🇸🇴", "SSA", 750, 18, 55, 59, 70, 1500, 37, 1.5, 3, 5, 4.7, 6.2, 45, 621, 0.1, 15, 60, 80],
-  ["DE", "Allemagne", "🇩🇪", "EUR", 690, 84, 79, 83.5, 3, 66000, 32, 14.1, 76, 0.9, 6.9, 1.4, 0, 4, 0.1, 22, 12, 1],
-  ["FR", "France", "🇫🇷", "EUR", 680, 68, 80, 85.7, 3.5, 58000, 31, 11.6, 70, 1.3, 6.6, 1.7, 0, 8, 0.3, 32, 9, 2],
-  ["GB", "Royaume-Uni", "🇬🇧", "EUR", 660, 68, 79, 83, 3.6, 55000, 33, 13.4, 70, 1.0, 6.7, 1.5, 0, 10, 0.2, 14, 14, 1],
-  ["MA", "Maroc", "🇲🇦", "MENA", 640, 37, 73, 77, 15, 9500, 39, 6.0, 45, 1.4, 4.9, 2.3, 14, 72, 0.1, 22, 50, 33],
-  ["SN", "Sénégal", "🇸🇳", "SSA", 560, 18, 67, 71, 29, 4300, 36, 3.2, 15, 0.3, 5.0, 4.3, 31, 261, 0.3, 7, 50, 30],
-  ["NP", "Népal", "🇳🇵", "SAS", 560, 31, 69, 72, 23, 4700, 33, 5.1, 15, 2, 5.2, 2.0, 35, 174, 0.1, 27, 55, 62],
-  ["SA", "Arabie saoudite", "🇸🇦", "MENA", 550, 36, 77, 80, 6, 60000, 45, 11.3, 70, 0.8, 6.5, 2.4, 3, 16, 0.1, 15, 15, 2],
-  ["PE", "Pérou", "🇵🇪", "LAT", 520, 34, 74, 79, 11, 15000, 40, 9.9, 70, 6, 5.8, 2.2, 14, 69, 0.3, 8, 30, 27],
-  ["CO", "Colombie", "🇨🇴", "LAT", 510, 52, 74, 80, 11, 20000, 52, 8.9, 55, 25, 5.7, 1.7, 23, 75, 0.5, 8, 15, 15],
-  ["TH", "Thaïlande", "🇹🇭", "EAS", 500, 72, 73, 80, 7, 21000, 35, 8.7, 45, 2.3, 6.0, 1.2, 20, 29, 1.1, 21, 10, 30],
-  ["VE", "Venezuela", "🇻🇪", "LAT", 480, 28, 69, 77, 21, 7000, 45, 10.3, 50, 20, 5.6, 2.2, 22, 259, 0.5, 12, 45, 8],
-  ["AR", "Argentine", "🇦🇷", "LAT", 460, 46, 74, 80, 6, 27000, 41, 11.1, 95, 4.6, 6.2, 1.9, 16, 45, 0.4, 22, 27, 7],
-  ["IT", "Italie", "🇮🇹", "EUR", 380, 59, 81, 85, 2.3, 55000, 35, 10.7, 65, 0.5, 6.4, 1.2, 0, 5, 0.2, 23, 22, 4],
-  ["CA", "Canada", "🇨🇦", "NAM", 350, 39, 80, 84, 4.4, 58000, 32, 13.8, 78, 2.3, 6.9, 1.4, 0, 11, 0.2, 12, 14, 1],
-  ["ES", "Espagne", "🇪🇸", "EUR", 320, 48, 81, 86, 2.6, 49000, 34, 10.6, 95, 0.6, 6.4, 1.2, 0, 3, 0.4, 28, 21, 4],
-  ["HT", "Haïti", "🇭🇹", "LAT", 270, 11.7, 62, 67, 47, 3000, 41, 5.6, 2, 13, 3.6, 2.8, 15, 350, 1.7, 10, 45, 46],
-  ["PL", "Pologne", "🇵🇱", "EUR", 270, 37, 75, 82, 4, 44000, 29, 12.6, 70, 0.7, 6.4, 1.2, 0, 2, 0.1, 25, 18, 8],
-  ["KR", "Corée du Sud", "🇰🇷", "EAS", 230, 51, 80, 86, 2.5, 50000, 33, 12.5, 100, 0.5, 6.0, 0.7, 0, 8, 0.1, 20, 30, 5],
-  ["UA", "Ukraine", "🇺🇦", "EUR", 200, 37, 64, 75, 7, 13000, 26, 11.1, 80, 4, 4.9, 1.0, 9, 17, 1.0, 25, 50, 15],
-];
-
-const WORLD_BIRTHS_K = 132000;
-const WORLD_POP_M = 8100;
+// Données des pays : voir countries.js (généré par tools/build-countries.mjs à partir
+// de la Banque mondiale et d'Our World in Data). Ici : mise en forme, prénoms, causes
+// de décès, destinations d'émigration, événements historiques.
 
 const COUNTRIES = COUNTRY_ROWS.map(r => ({
-  code: r[0], name: r[1], flag: r[2], region: r[3],
-  births: r[4], pop: r[5], e0: { m: r[6], f: r[7] }, imr: r[8],
-  gdp: r[9], gini: r[10], school: r[11], tert: r[12], hom: r[13],
-  happy: r[14], tfr: r[15], cm: r[16],
-  mmr: r[17], hiv: r[18], smoke: r[19], oop: r[20], agri: r[21],
+  code: r[0], name: r[1], flag: r[2], region: r[3], in: r[4],
+  births: r[5], pop: r[6], e0: { m: r[7], f: r[8] }, imr: r[9],
+  gdp: r[10], gini: r[11], school: r[12], tert: r[13], hom: r[14],
+  happy: r[15], tfr: r[16], cm: r[17], mmr: r[18], hiv: r[19], smoke: r[20], oop: r[21], agri: r[22],
+  ind: r[23], unemp: r[24], urban: r[25], net: r[26], infl: r[27], lend: r[28], bank: r[29], tax: r[30], mcap: r[31], flp: r[32],
 }));
 const BY_CODE = Object.fromEntries(COUNTRIES.map(c => [c.code, c]));
+const WORLD_BIRTHS_K = COUNTRIES.reduce((s, c) => s + c.births, 0);
+const WORLD_POP_M = COUNTRIES.reduce((s, c) => s + c.pop, 0);
+const REGION_NAMES = { SAS: "Asie du Sud", EAS: "Asie de l’Est et du Sud-Est", SSA: "Afrique subsaharienne", MENA: "Moyen-Orient et Afrique du Nord", LAT: "Amérique latine et Caraïbes", EUR: "Europe et Asie centrale", NAM: "Amérique du Nord", OCE: "Océanie" };
 
 // Prénoms courants (sélection) par pays ou groupe de pays.
 const NAME_GROUPS = {
@@ -121,17 +53,53 @@ const NAME_GROUPS = {
   ES: [["Hugo", "Martín", "Lucas", "Mateo"], ["Lucía", "Sofía", "Martina", "Paula"]],
   SLAV: [["Aleksandr", "Dmitri", "Maksim", "Ivan"], ["Anastasia", "Sofia", "Maria", "Daria"]],
   PL: [["Jakub", "Antoni", "Jan", "Szymon"], ["Zuzanna", "Julia", "Zofia", "Hanna"]],
+  NILE: [["Deng", "Garang", "Majok", "Akol"], ["Nyandeng", "Achol", "Abuk", "Ayen"]],
+  WAFEN: [["Mohamed", "Abu", "Emmanuel", "Joseph", "Alhaji"], ["Fatmata", "Mariama", "Aminata", "Hawa", "Isatu"]],
+  CASIA: [["Arslan", "Timur", "Rustam", "Daniyar", "Alisher"], ["Aigerim", "Madina", "Dilnoza", "Aruzhan", "Zarina"]],
+  CAUC: [["Davit", "Giorgi", "Aram", "Levan", "Tigran"], ["Nino", "Ani", "Mariam", "Tamar", "Lilit"]],
+  WSLAV: [["Jakub", "Tomáš", "Jan", "Lukáš"], ["Tereza", "Eliška", "Anna", "Natálie"]],
+  BALK: [["Luka", "Stefan", "Marko", "Nikola", "Ivan"], ["Ana", "Milica", "Sara", "Elena", "Mia"]],
+  ALB: [["Ardit", "Arben", "Enea", "Dren"], ["Ariana", "Elira", "Jona", "Era"]],
+  RO: [["Andrei", "David", "Alexandru", "Ștefan"], ["Maria", "Elena", "Ioana", "Sofia"]],
+  HU: [["Bence", "Máté", "Levente", "Dominik"], ["Hanna", "Anna", "Jázmin", "Zoé"]],
+  GR: [["Giorgos", "Dimitris", "Nikos", "Kostas"], ["Maria", "Eleni", "Katerina", "Sofia"]],
+  NL: [["Daan", "Sem", "Lucas", "Finn"], ["Emma", "Julia", "Tess", "Sophie"]],
+  NORD: [["Lucas", "William", "Oskar", "Elias", "Mikael"], ["Alice", "Maja", "Ella", "Saga", "Aino"]],
+  BALT: [["Jonas", "Mantas", "Kristaps", "Martin"], ["Emilija", "Sofija", "Anna", "Laura"]],
+  PACIFIC: [["Sione", "Tevita", "Joseph", "John", "Josaia"], ["Mele", "Ana", "Mary", "Losana", "Grace"]],
+  LK: [["Kasun", "Nuwan", "Tharindu", "Dilshan"], ["Nimali", "Sanduni", "Ishara", "Tharushi"]],
+  MN: [["Bat-Erdene", "Temuulen", "Ganbaatar", "Tömör"], ["Anu", "Solongo", "Enkhjin", "Nomin"]],
+  MALAY: [["Muhammad", "Ahmad", "Amir", "Hafiz"], ["Nur", "Aisyah", "Siti", "Aina"]],
+  KH: [["Dara", "Sokha", "Vibol", "Rithy"], ["Sreymom", "Bopha", "Chanthou", "Sophea"]],
+  IL: [["David", "Noam", "Ariel", "Yosef"], ["Noa", "Tamar", "Maya", "Yael"]],
+  CARIB: [["Andre", "Jermaine", "Kevin", "Marlon"], ["Shanice", "Tanisha", "Kimberly", "Alicia"]],
 };
 const NAME_GROUP_OF = {
-  TZ: "EAF", KE: "EAF", UG: "EAF", AO: "LUSO", MZ: "LUSO",
-  NE: "SAHEL", ML: "SAHEL", BF: "SAHEL", TD: "SAHEL", SN: "SAHEL",
-  CI: "WAF", CM: "WAF", SO: "HORN", SD: "HORN",
-  EG: "ARAB", IQ: "ARAB", YE: "ARAB", DZ: "ARAB", MA: "ARAB", SA: "ARAB",
-  MX: "HISP", PE: "HISP", CO: "HISP", VE: "HISP", AR: "HISP",
-  US: "ANGLO", GB: "ANGLO", CA: "ANGLO", RU: "SLAV", UA: "SLAV",
+  TZ: "EAF", KE: "EAF", UG: "EAF", RW: "EAF", BI: "EAF", SS: "NILE", AO: "LUSO", MZ: "LUSO", CV: "LUSO", GW: "LUSO", ST: "LUSO", TL: "LUSO", PT: "LUSO",
+  NE: "SAHEL", ML: "SAHEL", BF: "SAHEL", TD: "SAHEL", SN: "SAHEL", GN: "SAHEL", MR: "SAHEL",
+  CI: "WAF", CM: "WAF", BJ: "WAF", TG: "WAF", GA: "WAF", CG: "WAF", CF: "WAF", GQ: "HISP",
+  LR: "WAFEN", SL: "WAFEN", GM: "WAFEN", ZM: "ZA", MW: "ZA", ZW: "ZA", BW: "ZA", NA: "ZA", LS: "ZA", SZ: "ZA", ER: "ET",
+  SO: "HORN", SD: "HORN", DJ: "HORN",
+  EG: "ARAB", IQ: "ARAB", YE: "ARAB", DZ: "ARAB", MA: "ARAB", SA: "ARAB", TN: "ARAB", LY: "ARAB", JO: "ARAB", SY: "ARAB", LB: "ARAB", PS: "ARAB",
+  KW: "ARAB", QA: "ARAB", AE: "ARAB", BH: "ARAB", OM: "ARAB", KM: "ARAB", MV: "ARAB", TJ: "IR",
+  KZ: "CASIA", UZ: "CASIA", TM: "CASIA", KG: "CASIA", AZ: "CASIA", AM: "CAUC", GE: "CAUC",
+  RU: "SLAV", UA: "SLAV", BY: "SLAV", CZ: "WSLAV", SK: "WSLAV", RS: "BALK", HR: "BALK", BA: "BALK", ME: "BALK", MK: "BALK", SI: "BALK", BG: "BALK",
+  AL: "ALB", XK: "ALB", RO: "RO", MD: "RO", HU: "HU", GR: "GR", CY: "GR", SM: "IT", AD: "ES",
+  AT: "DE", CH: "DE", LI: "DE", LU: "FR", BE: "FR", MC: "FR", NL: "NL", SE: "NORD", NO: "NORD", DK: "NORD", FI: "NORD", IS: "NORD", FO: "NORD", GL: "NORD",
+  LT: "BALT", LV: "BALT", EE: "BALT",
+  US: "ANGLO", GB: "ANGLO", CA: "ANGLO", AU: "ANGLO", NZ: "ANGLO", IE: "ANGLO", IM: "ANGLO", GI: "ANGLO", BM: "ANGLO",
+  JM: "CARIB", TT: "CARIB", BB: "CARIB", BS: "CARIB", BZ: "CARIB", GY: "CARIB", LC: "CARIB", VC: "CARIB", GD: "CARIB", AG: "CARIB", DM: "CARIB", KN: "CARIB",
+  KY: "CARIB", VG: "CARIB", VI: "CARIB", TC: "CARIB", SX: "CARIB", CW: "CARIB", AW: "CARIB",
+  PG: "PACIFIC", FJ: "PACIFIC", SB: "PACIFIC", VU: "PACIFIC", WS: "PACIFIC", TO: "PACIFIC", KI: "PACIFIC", FM: "PACIFIC", MH: "PACIFIC",
+  NR: "PACIFIC", PW: "PACIFIC", TV: "PACIFIC", GU: "PACIFIC", AS: "PACIFIC", MP: "PACIFIC", PF: "FR", NC: "FR", MF: "FR",
+  MX: "HISP", PE: "HISP", CO: "HISP", VE: "HISP", AR: "HISP", CL: "HISP", EC: "HISP", BO: "HISP", PY: "HISP", UY: "HISP", GT: "HISP", HN: "HISP",
+  SV: "HISP", NI: "HISP", CR: "HISP", PA: "HISP", CU: "HISP", DO: "HISP", PR: "HISP", SR: "NL",
+  LK: "LK", BT: "NP", MN: "MN", HK: "CN", MO: "CN", TW: "CN", SG: "CN", KP: "KR", MY: "MALAY", BN: "MALAY", LA: "TH", KH: "KH", IL: "IL",
 };
+// Langue la plus probable, à défaut, d'après la région.
+const NAME_GROUP_OF_REGION = { SAS: "IN", EAS: "ID", SSA: "WAF", MENA: "ARAB", LAT: "HISP", EUR: "ANGLO", NAM: "ANGLO", OCE: "PACIFIC" };
 function namesFor(code) {
-  return NAME_GROUPS[code] || NAME_GROUPS[NAME_GROUP_OF[code]] || NAME_GROUPS.ANGLO;
+  return NAME_GROUPS[code] || NAME_GROUPS[NAME_GROUP_OF[code]] || NAME_GROUPS[NAME_GROUP_OF_REGION[BY_CODE[code].region]] || NAME_GROUPS.ANGLO;
 }
 
 // Profils simplifiés des causes de décès par grande région et tranche d'âge
@@ -167,49 +135,39 @@ const CAUSES = {
 
 // Pays de destination possibles pour l'émigration, par région d'origine.
 const EMIGRATION = {
-  SAS: ["SA", "US", "GB", "CA"], SSA: ["FR", "ZA", "US", "GB"], MENA: ["FR", "DE", "SA", "ES"],
-  LAT: ["US", "ES", "AR", "CA"], EAS: ["JP", "KR", "US", "CA"], EUR: ["DE", "GB", "FR", "PL"], NAM: ["CA", "US"],
+  SAS: ["AE", "SA", "US", "GB", "CA", "QA", "KW", "AU"], SSA: ["FR", "ZA", "US", "GB", "IT", "BE", "CA", "DE"],
+  MENA: ["FR", "DE", "SA", "AE", "ES", "IT", "QA", "TR"], LAT: ["US", "ES", "AR", "CL", "CA", "IT"],
+  EAS: ["JP", "KR", "US", "CA", "AU", "SG", "TW"], EUR: ["DE", "GB", "FR", "US", "CH", "NL", "SE", "CA"],
+  NAM: ["CA", "US", "GB", "AU"], OCE: ["AU", "NZ", "US"],
 };
 
 // --- Époques ----------------------------------------------------------------
-// Points d'appui grossiers par grande région, pour remonter le temps (1900, 1950)
-// à partir des valeurs actuelles. Inspirés des séries longues de l'ONU, de
-// Our World in Data et du projet Maddison ; ce sont des ordres de grandeur.
-const DATA_YEAR = 2023;
 const MIN_YEAR = 1900, MAX_YEAR = 2100;
-const E0_ANCHORS = { EUR: [46, 64], NAM: [49, 68], LAT: [29, 51], EAS: [28, 44], SAS: [24, 37], SSA: [25, 37], MENA: [28, 42] };
-const E0_OVERRIDE = { JP: [44, 60], RU: [32, 57], UA: [36, 58], US: [48, 68], CA: [50, 69], AR: [40, 61], KR: [26, 43], CN: [26, 43], SA: [27, 40] };
-// Croissance annuelle moyenne du PIB par habitant : 1900-1950, 1950-2023.
-const GROWTH = { EUR: [0.012, 0.025], NAM: [0.016, 0.02], LAT: [0.015, 0.017], EAS: [0.006, 0.03], SAS: [0.0, 0.028], SSA: [0.008, 0.01], MENA: [0.008, 0.02] };
-const GROWTH_OVERRIDE = { CN: [0, 0.055], KR: [0.005, 0.06], JP: [0.015, 0.035], TH: [0.006, 0.04], VN: [0.004, 0.035], VE: [0.03, 0.0], CD: [0.008, -0.008], HT: [0.005, 0.0] };
-// Enfants par femme en 1900 et 1950.
-const TFR_ANCHORS = { EUR: [3.8, 2.7], NAM: [3.6, 3.3], LAT: [6.2, 5.9], EAS: [5.8, 5.6], SAS: [6, 6], SSA: [6.4, 6.5], MENA: [6.8, 6.8] };
-// Évolution des naissances : taux annuel moyen (passé) et (futur) par région.
-const BIRTH_TREND = { SSA: [0.025, 0.006], SAS: [0.012, -0.008], MENA: [0.012, -0.005], LAT: [0.006, -0.01], EAS: [-0.01, -0.014], EUR: [-0.008, -0.005], NAM: [-0.002, -0.002] };
 
 // --- Événements historiques ----------------------------------------------------
 // Guerres, famines, épidémies et crises qui ont touché les pays de la simulation.
 // excess : probabilité de décès supplémentaire par an (toute la population) ;
 // old : supplément pour les 65 ans et plus ; draft : part des hommes de 18 à 40 ans
 // mobilisés ; soldier : risque annuel supplémentaire pour eux ; econ : effet sur
-// les revenus ; happy : effet annuel sur le bonheur. Valeurs approchées.
+// les revenus ; infl : inflation annuelle (%) qui ronge l'argent liquide et l'épargne ;
+// happy : effet annuel sur le bonheur. Valeurs approchées.
 // Un événement touche les pays listés dans c (ou tous si world) ; « all » donne
 // les valeurs communes, complétées pays par pays.
 const HISTORY = [
   { id: "ww1", from: 1914, to: 1918, name: "la Première Guerre mondiale", text: "La Première Guerre mondiale éclate.", cause: "guerre", soldierCause: "mort au front",
-    c: { FR: { excess: 0.002, draft: 0.6, soldier: 0.04 }, DE: { excess: 0.003, draft: 0.6, soldier: 0.035 }, GB: { excess: 0.001, draft: 0.45, soldier: 0.025 }, IT: { excess: 0.002, draft: 0.5, soldier: 0.03 },
+    c: { AT: { excess: 0.003, draft: 0.55, soldier: 0.03 }, HU: { excess: 0.003, draft: 0.55, soldier: 0.03 }, CZ: { draft: 0.4, soldier: 0.03 }, SK: { draft: 0.4, soldier: 0.03 }, HR: { draft: 0.4, soldier: 0.03 }, SI: { draft: 0.4, soldier: 0.03 }, BA: { draft: 0.4, soldier: 0.03 }, BE: { excess: 0.002, draft: 0.2, soldier: 0.02 }, RS: { excess: 0.03, draft: 0.5, soldier: 0.05 }, RO: { from: 1916, excess: 0.01, draft: 0.4, soldier: 0.03 }, BG: { from: 1915, draft: 0.4, soldier: 0.02 }, AU: { draft: 0.3, soldier: 0.015 }, NZ: { draft: 0.3, soldier: 0.015 }, PT: { from: 1916, draft: 0.1, soldier: 0.01 }, GR: { from: 1917, draft: 0.2, soldier: 0.01 }, BY: { excess: 0.004, draft: 0.4, soldier: 0.03 }, LT: { excess: 0.003 }, LV: { excess: 0.003 }, FR: { excess: 0.002, draft: 0.6, soldier: 0.04 }, DE: { excess: 0.003, draft: 0.6, soldier: 0.035 }, GB: { excess: 0.001, draft: 0.45, soldier: 0.025 }, IT: { excess: 0.002, draft: 0.5, soldier: 0.03 },
       RU: { excess: 0.004, draft: 0.4, soldier: 0.03 }, UA: { excess: 0.004, draft: 0.4, soldier: 0.03 }, PL: { excess: 0.004, draft: 0.3, soldier: 0.03 }, TR: { excess: 0.02, draft: 0.4, soldier: 0.05 },
       CA: { draft: 0.3, soldier: 0.02 }, US: { from: 1917, draft: 0.2, soldier: 0.01 } }, happy: -3 },
   { id: "flu", from: 1918, to: 1920, name: "la grippe espagnole", text: "La grippe espagnole fait le tour du monde.", cause: "grippe espagnole", world: true, all: { excess: 0.008 },
     c: { IN: { excess: 0.025 }, BD: { excess: 0.025 }, PK: { excess: 0.025 }, ID: { excess: 0.015 }, IR: { excess: 0.03 } }, happy: -2 },
   { id: "rusciv", from: 1917, to: 1922, name: "la guerre civile russe", text: "Révolution, puis guerre civile : le pays se déchire.", cause: "guerre civile", c: { RU: { excess: 0.012, draft: 0.2, soldier: 0.03 }, UA: { excess: 0.015, draft: 0.2, soldier: 0.03 } }, happy: -5 },
   { id: "mexrev", from: 1910, to: 1920, name: "la révolution mexicaine", text: "La révolution mexicaine embrase le pays.", cause: "guerre civile", c: { MX: { excess: 0.006, draft: 0.15, soldier: 0.02 } }, happy: -3 },
-  { id: "crash", from: 1929, to: 1934, name: "la Grande Dépression", text: "La Grande Dépression : les usines ferment, le chômage explose.", c: { US: {}, CA: {}, DE: {}, GB: {}, FR: {}, AR: {}, BR: {}, MX: {}, PL: {}, IT: {}, ES: {}, JP: {} }, all: { econ: 0.75 }, jobLoss: 0.12, happy: -4 },
+  { id: "crash", from: 1929, to: 1934, name: "la Grande Dépression", text: "La Grande Dépression : les usines ferment, le chômage explose.", c: { AU: {}, NZ: {}, NL: {}, BE: {}, AT: {}, CL: {}, UY: {}, SE: {}, DK: {}, NO: {}, CU: {}, US: {}, CA: {}, DE: {}, GB: {}, FR: {}, AR: {}, BR: {}, MX: {}, PL: {}, IT: {}, ES: {}, JP: {} }, all: { econ: 0.75 }, jobLoss: 0.12, happy: -4 },
   { id: "holodomor", from: 1932, to: 1933, name: "la grande famine", text: "Une famine organisée ravage les campagnes.", cause: "famine", c: { UA: { excess: 0.06 }, RU: { excess: 0.006 } }, happy: -10 },
   { id: "spain", from: 1936, to: 1939, name: "la guerre d’Espagne", text: "La guerre civile éclate en Espagne.", cause: "guerre civile", c: { ES: { excess: 0.004, draft: 0.4, soldier: 0.03 } }, happy: -6 },
   { id: "sinojap", from: 1937, to: 1945, name: "la guerre sino-japonaise", text: "Le Japon envahit la Chine : des années de guerre commencent.", cause: "guerre", c: { CN: { excess: 0.006, draft: 0.15, soldier: 0.04 } }, happy: -5 },
   { id: "ww2", from: 1939, to: 1945, name: "la Seconde Guerre mondiale", text: "La Seconde Guerre mondiale commence.", cause: "guerre", soldierCause: "mort au combat",
-    c: { PL: { excess: 0.028, draft: 0.2, soldier: 0.04 }, UA: { from: 1941, excess: 0.03, draft: 0.5, soldier: 0.07 }, RU: { from: 1941, excess: 0.015, draft: 0.6, soldier: 0.08 }, DE: { excess: 0.006, draft: 0.65, soldier: 0.06 },
+    c: { NL: { from: 1940, excess: 0.004 }, BE: { from: 1940, excess: 0.002, draft: 0.1, soldier: 0.01 }, LU: { from: 1940, excess: 0.002 }, GR: { from: 1940, excess: 0.012 }, RS: { from: 1941, excess: 0.015 }, BA: { from: 1941, excess: 0.015 }, HR: { from: 1941, excess: 0.012 }, ME: { from: 1941, excess: 0.012 }, SI: { from: 1941, excess: 0.01 }, MK: { from: 1941, excess: 0.008 }, CZ: { excess: 0.004 }, SK: { excess: 0.002 }, HU: { from: 1941, excess: 0.006, draft: 0.3, soldier: 0.03 }, RO: { from: 1941, excess: 0.004, draft: 0.4, soldier: 0.03 }, BG: { from: 1941, excess: 0.001 }, LT: { from: 1940, excess: 0.015 }, LV: { from: 1940, excess: 0.015 }, EE: { from: 1940, excess: 0.012 }, BY: { from: 1941, excess: 0.04, draft: 0.3, soldier: 0.06 }, AT: { excess: 0.004, draft: 0.6, soldier: 0.05 }, NO: { from: 1940, excess: 0.001 }, DK: { from: 1940, excess: 0.0005 }, FI: { excess: 0.002, draft: 0.5, soldier: 0.02 }, AU: { draft: 0.35, soldier: 0.01 }, NZ: { draft: 0.4, soldier: 0.012 }, IN: { draft: 0.02, soldier: 0.01 }, MY: { from: 1941, excess: 0.01 }, SG: { from: 1942, excess: 0.01 }, HK: { from: 1941, excess: 0.01 }, TH: { from: 1941, excess: 0.001 }, PG: { from: 1942, excess: 0.005 }, KP: { from: 1941, excess: 0.003, draft: 0.1, soldier: 0.02 }, TW: { from: 1941, excess: 0.002 }, TL: { from: 1942, excess: 0.02 }, PL: { excess: 0.028, draft: 0.2, soldier: 0.04 }, UA: { from: 1941, excess: 0.03, draft: 0.5, soldier: 0.07 }, RU: { from: 1941, excess: 0.015, draft: 0.6, soldier: 0.08 }, DE: { excess: 0.006, draft: 0.65, soldier: 0.06 },
       FR: { excess: 0.002, draft: 0.35, soldier: 0.015 }, GB: { excess: 0.001, draft: 0.45, soldier: 0.012 }, IT: { from: 1940, excess: 0.003, draft: 0.45, soldier: 0.02 }, JP: { from: 1941, excess: 0.007, draft: 0.55, soldier: 0.05 },
       US: { from: 1941, draft: 0.4, soldier: 0.008 }, CA: { draft: 0.35, soldier: 0.008 }, PH: { from: 1941, excess: 0.012 }, ID: { from: 1942, excess: 0.012 }, MM: { from: 1942, excess: 0.008 }, KR: { from: 1941, excess: 0.003, draft: 0.1, soldier: 0.02 },
       VN: { from: 1944, excess: 0.02 }, ES: { excess: 0.0005 } }, happy: -6 },
@@ -217,9 +175,9 @@ const HISTORY = [
   { id: "partition", from: 1947, to: 1948, name: "la Partition", text: "La Partition de l’Inde jette des millions de personnes sur les routes.", cause: "violences de la Partition", c: { IN: { excess: 0.001 }, PK: { excess: 0.004 }, BD: { excess: 0.002 } }, happy: -5 },
   { id: "chinaciv", from: 1946, to: 1949, name: "la guerre civile chinoise", text: "La guerre civile reprend en Chine.", cause: "guerre civile", c: { CN: { excess: 0.003, draft: 0.1, soldier: 0.03 } }, happy: -4 },
   { id: "indochine", from: 1946, to: 1954, name: "la guerre d’Indochine", text: "La guerre d’Indochine commence.", cause: "guerre", c: { VN: { excess: 0.003, draft: 0.15, soldier: 0.02 } }, happy: -4 },
-  { id: "korea", from: 1950, to: 1953, name: "la guerre de Corée", text: "La guerre de Corée éclate.", cause: "guerre", c: { KR: { excess: 0.02, draft: 0.5, soldier: 0.04 } }, happy: -8 },
+  { id: "korea", from: 1950, to: 1953, name: "la guerre de Corée", text: "La guerre de Corée éclate.", cause: "guerre", c: { KP: { excess: 0.03, draft: 0.5, soldier: 0.05 }, KR: { excess: 0.02, draft: 0.5, soldier: 0.04 } }, happy: -8 },
   { id: "algeria", from: 1954, to: 1962, name: "la guerre d’Algérie", text: "La guerre d’Algérie commence.", cause: "guerre", c: { DZ: { excess: 0.005, draft: 0.1, soldier: 0.02 }, FR: { draft: 0.25, soldier: 0.002 } }, happy: -4 },
-  { id: "vietnam", from: 1955, to: 1975, name: "la guerre du Vietnam", text: "Le pays est coupé en deux ; la guerre s’installe.", cause: "guerre", c: { VN: { excess: 0.004, draft: 0.4, soldier: 0.02 }, US: { from: 1965, to: 1973, draft: 0.08, soldier: 0.005 } }, happy: -5 },
+  { id: "vietnam", from: 1955, to: 1975, name: "la guerre du Vietnam", text: "Le pays est coupé en deux ; la guerre s’installe.", cause: "guerre", c: { KH: { from: 1965, to: 1973, excess: 0.002 }, LA: { from: 1964, to: 1973, excess: 0.002 }, VN: { excess: 0.004, draft: 0.4, soldier: 0.02 }, US: { from: 1965, to: 1973, draft: 0.08, soldier: 0.005 } }, happy: -5 },
   { id: "leap", from: 1959, to: 1961, name: "la grande famine chinoise", text: "Le « Grand Bond en avant » tourne à la famine.", cause: "famine", c: { CN: { excess: 0.014 } }, happy: -10 },
   { id: "cultrev", from: 1966, to: 1976, name: "la Révolution culturelle", text: "La Révolution culturelle commence : écoles fermées, familles séparées.", cause: "violences politiques", c: { CN: { excess: 0.0005 } }, school: -0.3, happy: -3 },
   { id: "biafra", from: 1967, to: 1970, name: "la guerre du Biafra", text: "La guerre du Biafra éclate.", cause: "guerre", c: { NG: { excess: 0.005, draft: 0.05, soldier: 0.03 } }, happy: -6 },
@@ -230,31 +188,72 @@ const HISTORY = [
   { id: "afghan", from: 1979, to: 2021, name: "les guerres d’Afghanistan", text: "L’invasion soviétique ouvre des décennies de guerre.", cause: "guerre", c: { AF: { excess: 0.004, draft: 0.1, soldier: 0.02 } }, happy: -4 },
   { id: "iraniraq", from: 1980, to: 1988, name: "la guerre Iran-Irak", text: "La guerre entre l’Iran et l’Irak éclate.", cause: "guerre", c: { IR: { excess: 0.001, draft: 0.4, soldier: 0.015 }, IQ: { excess: 0.002, draft: 0.4, soldier: 0.02 } }, happy: -5 },
   { id: "ethfam", from: 1983, to: 1985, name: "la famine en Éthiopie", text: "Sécheresse et guerre : la famine frappe l’Éthiopie.", cause: "famine", c: { ET: { excess: 0.006 } }, happy: -8 },
-  { id: "ussr", from: 1991, to: 1998, name: "l’effondrement de l’URSS", text: "L’URSS s’effondre : salaires impayés, épargne envolée.", c: { RU: { excess: 0.003 }, UA: { excess: 0.003 } }, all: { econ: 0.6 }, jobLoss: 0.1, cause: "maladie cardiaque", happy: -6 },
+  { id: "ussr", from: 1991, to: 1998, infl: 300, name: "l’effondrement de l’URSS", text: "L’URSS s’effondre : salaires impayés, épargne envolée.", c: { BY: { excess: 0.002 }, KZ: { excess: 0.002 }, UZ: {}, KG: {}, TJ: { excess: 0.004 }, TM: {}, AZ: { excess: 0.001 }, AM: { excess: 0.001 }, GE: { excess: 0.002 }, MD: {}, LT: {}, LV: {}, EE: {}, RU: { excess: 0.003 }, UA: { excess: 0.003 } }, all: { econ: 0.6 }, jobLoss: 0.1, cause: "maladie cardiaque", happy: -6 },
   { id: "somalia", from: 1991, to: 2012, name: "la guerre civile somalienne", text: "L’État s’effondre et la guerre civile commence.", cause: "guerre civile", c: { SO: { excess: 0.004 } }, happy: -5 },
   { id: "algciv", from: 1991, to: 2002, name: "la décennie noire", text: "La « décennie noire » commence en Algérie.", cause: "violences politiques", c: { DZ: { excess: 0.0008 } }, happy: -4 },
   { id: "congo", from: 1996, to: 2003, name: "les guerres du Congo", text: "La guerre ravage l’est du pays.", cause: "guerre", c: { CD: { excess: 0.012 } }, happy: -6 },
-  { id: "asia97", from: 1997, to: 1998, name: "la crise financière asiatique", text: "La crise financière asiatique fait chuter la monnaie.", c: { ID: {}, TH: {}, KR: {} }, all: { econ: 0.8 }, jobLoss: 0.08, happy: -3 },
+  { id: "asia97", from: 1997, to: 1998, name: "la crise financière asiatique", text: "La crise financière asiatique fait chuter la monnaie.", c: { MY: {}, PH: {}, ID: {}, TH: {}, KR: {} }, all: { econ: 0.8 }, jobLoss: 0.08, happy: -3 },
   { id: "darfur", from: 2003, to: 2008, name: "la guerre du Darfour", text: "La guerre du Darfour éclate.", cause: "guerre", c: { SD: { excess: 0.003 } }, happy: -5 },
   { id: "iraq", from: 2003, to: 2011, name: "la guerre d’Irak", text: "Le pays est envahi ; des années de violence suivent.", cause: "guerre", c: { IQ: { excess: 0.002 } }, happy: -5 },
-  { id: "gfc", from: 2008, to: 2010, name: "la Grande Récession", text: "La crise financière de 2008 frappe l’économie.", c: { US: {}, GB: {}, ES: {}, IT: {}, FR: {}, DE: {}, CA: {}, JP: {}, MX: {}, PL: {} }, all: { econ: 0.92 }, jobLoss: 0.05, happy: -2 },
+  { id: "gfc", from: 2008, to: 2010, name: "la Grande Récession", text: "La crise financière de 2008 frappe l’économie.", c: { IE: {}, PT: {}, GR: {}, IS: {}, LV: {}, LT: {}, EE: {}, HU: {}, AT: {}, NL: {}, BE: {}, SE: {}, DK: {}, FI: {}, AU: {}, NZ: {}, KR: {}, US: {}, GB: {}, ES: {}, IT: {}, FR: {}, DE: {}, CA: {}, JP: {}, MX: {}, PL: {} }, all: { econ: 0.92 }, jobLoss: 0.05, happy: -2 },
   { id: "haiti", from: 2010, to: 2010, name: "le séisme", text: "Un séisme dévaste Port-au-Prince.", cause: "séisme", c: { HT: { excess: 0.02 } }, happy: -8 },
-  { id: "venez", from: 2014, to: 2024, name: "la crise vénézuélienne", text: "L’économie s’effondre ; beaucoup partent.", c: { VE: { excess: 0.001 } }, all: { econ: 0.6 }, jobLoss: 0.06, happy: -5, emigrate: 3 },
+  { id: "venez", from: 2014, to: 2024, name: "la crise vénézuélienne", text: "L’économie s’effondre ; beaucoup partent.", c: { VE: { excess: 0.001 } }, all: { econ: 0.6, infl: 400 }, jobLoss: 0.06, happy: -5, emigrate: 3 },
   { id: "yemen", from: 2015, to: 2024, name: "la guerre au Yémen", text: "La guerre éclate au Yémen.", cause: "guerre", c: { YE: { excess: 0.004 } }, happy: -6 },
   { id: "covid", from: 2020, to: 2021, name: "la pandémie de Covid-19", text: "La pandémie de Covid-19 : confinements, écoles fermées.", cause: "Covid-19", world: true, all: { excess: 0.0002, old: 0.008 }, happy: -2 },
   { id: "myanmar", from: 2021, to: 2025, name: "la guerre civile birmane", text: "Un coup d’État plonge le pays dans la guerre civile.", cause: "guerre civile", c: { MM: { excess: 0.001 } }, happy: -5 },
   { id: "ukraine", from: 2022, to: 2025, name: "la guerre en Ukraine", text: "La Russie envahit l’Ukraine.", cause: "guerre", soldierCause: "mort au front", c: { UA: { excess: 0.003, draft: 0.15, soldier: 0.04 }, RU: { draft: 0.03, soldier: 0.06 } }, happy: -6 },
   { id: "sudan", from: 2023, to: 2025, name: "la guerre au Soudan", text: "La guerre éclate entre l’armée et les paramilitaires.", cause: "guerre", c: { SD: { excess: 0.004 } }, happy: -6 },
+  { id: "finciv", from: 1918, to: 1918, name: "la guerre civile finlandaise", text: "La guerre civile éclate en Finlande.", cause: "guerre civile", c: { FI: { excess: 0.01 } }, happy: -6 },
+  { id: "volga", from: 1921, to: 1922, name: "la famine de 1921", text: "Après la guerre civile, la famine frappe la Volga et l’Ukraine.", cause: "famine", c: { RU: { excess: 0.02 }, UA: { excess: 0.015 }, KZ: { excess: 0.02 } }, happy: -8 },
+  { id: "weimar", from: 1922, to: 1923, name: "l’hyperinflation allemande", text: "Hyperinflation : la monnaie ne vaut plus rien, l’épargne est anéantie.", c: { DE: {}, AT: { from: 1921, to: 1922 } }, all: { econ: 0.75, infl: 100000 }, jobLoss: 0.08, happy: -6 },
+  { id: "kazfam", from: 1930, to: 1933, name: "la famine kazakhe", text: "La collectivisation forcée provoque une famine dans les steppes.", cause: "famine", c: { KZ: { excess: 0.08 } }, happy: -10 },
+  { id: "chaco", from: 1932, to: 1935, name: "la guerre du Chaco", text: "La guerre du Chaco oppose la Bolivie et le Paraguay.", cause: "guerre", c: { BO: { draft: 0.3, soldier: 0.03 }, PY: { draft: 0.3, soldier: 0.02 } }, happy: -4 },
+  { id: "purges", from: 1937, to: 1938, name: "la Grande Terreur", text: "Les purges staliniennes : arrestations, déportations.", cause: "répression politique", c: { RU: { excess: 0.003 }, UA: { excess: 0.003 }, BY: { excess: 0.003 }, GE: { excess: 0.002 } }, happy: -5 },
+  { id: "hung45", from: 1945, to: 1946, name: "l’hyperinflation hongroise", text: "Record mondial d’hyperinflation : les prix doublent chaque jour.", c: { HU: {} }, all: { econ: 0.6, infl: 1000000 }, happy: -6 },
+  { id: "greekciv", from: 1946, to: 1949, name: "la guerre civile grecque", text: "La guerre civile éclate en Grèce.", cause: "guerre civile", c: { GR: { excess: 0.003, draft: 0.2, soldier: 0.01 } }, happy: -5 },
+  { id: "war48", from: 1948, to: 1949, name: "la guerre de 1948", text: "Guerre de 1948 : des centaines de milliers de Palestiniens sont déplacés.", cause: "guerre", c: { IL: { draft: 0.3, soldier: 0.01 }, PS: { excess: 0.005 }, JO: {}, EG: { draft: 0.02, soldier: 0.01 } }, happy: -6 },
+  { id: "indep_id", from: 1945, to: 1949, name: "la guerre d’indépendance indonésienne", text: "La guerre d’indépendance contre les Pays-Bas.", cause: "guerre", c: { ID: { excess: 0.002 } }, happy: -3 },
+  { id: "violencia", from: 1948, to: 1958, name: "la Violencia", text: "La « Violencia » ensanglante les campagnes colombiennes.", cause: "violences politiques", c: { CO: { excess: 0.002 } }, happy: -4 },
+  { id: "congo60", from: 1960, to: 1965, name: "la crise congolaise", text: "Indépendance, sécessions et guerre civile.", cause: "guerre civile", c: { CD: { excess: 0.002 } }, happy: -5 },
+  { id: "id65", from: 1965, to: 1966, name: "les massacres de 1965", text: "Après une tentative de coup d’État, des violences politiques de masse.", cause: "violences politiques", c: { ID: { excess: 0.002 } }, happy: -5 },
+  { id: "sahel", from: 1972, to: 1974, name: "la grande sécheresse du Sahel", text: "La sécheresse détruit les récoltes et les troupeaux.", cause: "famine", c: { NE: { excess: 0.004 }, ML: { excess: 0.004 }, TD: { excess: 0.004 }, BF: { excess: 0.003 }, MR: { excess: 0.004 }, ET: { excess: 0.004 } }, happy: -6 },
+  { id: "bdfam", from: 1974, to: 1974, name: "la famine de 1974", text: "Inondations et famine au Bangladesh.", cause: "famine", c: { BD: { excess: 0.01 } }, happy: -8 },
+  { id: "chile", from: 1973, to: 1990, name: "la dictature militaire", text: "Coup d’État : une dictature militaire prend le pouvoir.", cause: "répression politique", c: { CL: { excess: 0.0001 }, AR: { from: 1976, to: 1983, excess: 0.0002 }, UY: { to: 1985 } }, happy: -3 },
+  { id: "khmer", from: 1975, to: 1979, name: "le régime khmer rouge", text: "Les Khmers rouges prennent le pouvoir : villes vidées, travaux forcés.", cause: "violences politiques", c: { KH: { excess: 0.06 } }, happy: -12 },
+  { id: "lebanon", from: 1975, to: 1990, name: "la guerre du Liban", text: "La guerre civile éclate au Liban.", cause: "guerre civile", c: { LB: { excess: 0.003 } }, happy: -5 },
+  { id: "eritrea", from: 1961, to: 1991, name: "la guerre d’indépendance de l’Érythrée", text: "La lutte pour l’indépendance de l’Érythrée.", cause: "guerre", c: { ER: { excess: 0.003, draft: 0.2, soldier: 0.02 }, ET: { from: 1974, excess: 0.002 } }, happy: -4 },
+  { id: "ugandaw", from: 1971, to: 1986, name: "les années de dictature et de guerre", text: "Dictature puis guerre civile en Ouganda.", cause: "violences politiques", c: { UG: { excess: 0.003 } }, happy: -5 },
+  { id: "centram", from: 1979, to: 1992, name: "les guerres d’Amérique centrale", text: "Guerre civile et violences politiques.", cause: "guerre civile", c: { SV: { excess: 0.004 }, NI: { from: 1978, to: 1990, excess: 0.003 }, GT: { from: 1960, to: 1996, excess: 0.002 } }, happy: -5 },
+  { id: "srilanka", from: 1983, to: 2009, name: "la guerre civile srilankaise", text: "La guerre civile éclate au Sri Lanka.", cause: "guerre civile", c: { LK: { excess: 0.0008 } }, happy: -3 },
+  { id: "latinhyper", from: 1985, to: 1994, name: "l’hyperinflation", text: "Hyperinflation : les prix s’envolent, l’épargne fond.", c: { BO: { to: 1986 }, BR: { from: 1986 }, PE: { from: 1988, to: 1991 }, AR: { from: 1989, to: 1990 }, NI: { from: 1987, to: 1991 } }, all: { econ: 0.85, infl: 2000 }, jobLoss: 0.06, happy: -5 },
+  { id: "chernobyl", from: 1986, to: 1986, name: "la catastrophe de Tchernobyl", text: "Explosion à la centrale de Tchernobyl : des villages sont évacués.", c: { UA: {}, BY: {} }, happy: -2 },
+  { id: "liberia", from: 1989, to: 2003, name: "les guerres civiles du Liberia", text: "La guerre civile éclate au Liberia.", cause: "guerre civile", c: { LR: { excess: 0.008 }, SL: { from: 1991, to: 2002, excess: 0.005 } }, happy: -7 },
+  { id: "kuwait", from: 1990, to: 1991, name: "la guerre du Golfe", text: "L’Irak envahit le Koweït ; une coalition intervient.", cause: "guerre", c: { KW: { excess: 0.001 }, IQ: { excess: 0.002, draft: 0.3, soldier: 0.02 } }, happy: -5 },
+  { id: "cuba91", from: 1991, to: 1995, name: "la « période spéciale »", text: "Sans l’aide soviétique, l’économie cubaine s’effondre : pénuries partout.", c: { CU: {} }, all: { econ: 0.65 }, happy: -5 },
+  { id: "yugo", from: 1991, to: 1995, name: "les guerres de Yougoslavie", text: "La Yougoslavie éclate ; la guerre commence.", cause: "guerre", c: { BA: { from: 1992, excess: 0.008, draft: 0.3, soldier: 0.02 }, HR: { excess: 0.001, draft: 0.3, soldier: 0.01 }, RS: { excess: 0.0005, infl: 1000000, econ: 0.5 }, ME: { infl: 1000000, econ: 0.5 }, XK: { from: 1998, to: 1999, excess: 0.005 } }, happy: -7 },
+  { id: "rwanda", from: 1994, to: 1994, name: "le génocide contre les Tutsi", text: "Le génocide contre les Tutsi : en cent jours, des centaines de milliers de morts.", cause: "génocide", c: { RW: { excess: 0.1 } }, happy: -15 },
+  { id: "burundi", from: 1993, to: 2005, name: "la guerre civile burundaise", text: "La guerre civile éclate au Burundi.", cause: "guerre civile", c: { BI: { excess: 0.003 } }, happy: -5 },
+  { id: "nkfam", from: 1994, to: 1998, name: "la grande famine nord-coréenne", text: "La famine frappe la Corée du Nord.", cause: "famine", c: { KP: { excess: 0.01 } }, happy: -10 },
+  { id: "erieth", from: 1998, to: 2000, name: "la guerre Érythrée-Éthiopie", text: "La guerre éclate entre l’Érythrée et l’Éthiopie.", cause: "guerre", c: { ER: { draft: 0.4, soldier: 0.02 }, ET: { draft: 0.05, soldier: 0.02 } }, happy: -4 },
+  { id: "arg01", from: 2001, to: 2002, name: "la crise argentine", text: "Le pays fait défaut ; les comptes en banque sont gelés (« corralito »).", c: { AR: {} }, all: { econ: 0.75, infl: 40 }, jobLoss: 0.1, happy: -6 },
+  { id: "tsunami", from: 2004, to: 2004, name: "le tsunami de l’océan Indien", text: "Un tsunami ravage les côtes de l’océan Indien.", cause: "tsunami", c: { LK: { excess: 0.002 }, ID: { excess: 0.0007 }, TH: { excess: 0.0001 }, MV: { excess: 0.0003 } }, happy: -4 },
+  { id: "zimb", from: 2007, to: 2009, name: "l’hyperinflation zimbabwéenne", text: "Hyperinflation : un billet de cent mille milliards de dollars.", c: { ZW: {} }, all: { econ: 0.5, infl: 1000000 }, jobLoss: 0.1, happy: -6 },
+  { id: "greece", from: 2010, to: 2016, name: "la crise de la dette grecque", text: "La crise de la dette : salaires et retraites coupés.", c: { GR: {}, CY: { from: 2012, to: 2014 } }, all: { econ: 0.78 }, jobLoss: 0.08, happy: -4 },
+  { id: "syria", from: 2011, to: 2024, name: "la guerre en Syrie", text: "La révolte devient guerre civile ; des millions de personnes fuient.", cause: "guerre", c: { SY: { excess: 0.006, draft: 0.2, soldier: 0.03, econ: 0.4 } }, happy: -8, emigrate: 4 },
+  { id: "libya", from: 2011, to: 2020, name: "la guerre en Libye", text: "La guerre civile éclate en Libye.", cause: "guerre civile", c: { LY: { excess: 0.001 } }, happy: -5 },
+  { id: "ssudan", from: 2013, to: 2020, name: "la guerre civile sud-soudanaise", text: "Deux ans après l’indépendance, la guerre civile éclate.", cause: "guerre civile", c: { SS: { excess: 0.006 }, CF: { to: 2016, excess: 0.004 } }, happy: -7 },
+  { id: "ebola", from: 2014, to: 2015, name: "l’épidémie d’Ebola", text: "L’épidémie d’Ebola frappe l’Afrique de l’Ouest.", cause: "Ebola", c: { GN: { excess: 0.0002 }, LR: { excess: 0.0007 }, SL: { excess: 0.0005 } }, happy: -3 },
+  { id: "isis", from: 2014, to: 2017, name: "la guerre contre l’État islamique", text: "L’État islamique s’empare d’une partie du pays.", cause: "guerre", c: { IQ: { excess: 0.002 }, SY: {} }, happy: -5 },
+  { id: "sahelwar", from: 2012, to: 2025, name: "les violences armées au Sahel", text: "Des groupes armés s’étendent dans le Sahel.", cause: "violences armées", c: { ML: { excess: 0.0006 }, BF: { from: 2015, excess: 0.0008 }, NE: { from: 2015, excess: 0.0004 }, NG: { from: 2009, excess: 0.0003 } }, happy: -3 },
+  { id: "somfam", from: 2011, to: 2011, name: "la famine de 2011", text: "Sécheresse et guerre : la famine frappe la Somalie.", cause: "famine", c: { SO: { excess: 0.02 } }, happy: -10 },
+  { id: "turkinfl", from: 2018, to: 2024, name: "la crise de la livre turque", text: "La livre s’effondre ; l’inflation dépasse 50 %.", c: { TR: { infl: 45 }, AR: { infl: 90, econ: 0.9 }, IR: { infl: 40, econ: 0.85 }, LB: { from: 2019, infl: 150, econ: 0.6 }, EG: { from: 2022, infl: 30 }, NG: { from: 2023, infl: 25 } }, happy: -3 },
+  { id: "tigray", from: 2020, to: 2022, name: "la guerre du Tigré", text: "La guerre éclate dans la région du Tigré.", cause: "guerre", c: { ET: { excess: 0.003 } }, happy: -5 },
+  { id: "haitigangs", from: 2021, to: 2025, name: "la crise des gangs", text: "Les gangs prennent le contrôle de Port-au-Prince.", cause: "violences armées", c: { HT: { excess: 0.0006 } }, happy: -5 },
+  { id: "gaza", from: 2023, to: 2025, name: "la guerre à Gaza", text: "La guerre ravage la bande de Gaza.", cause: "guerre", c: { PS: { excess: 0.02 }, IL: { excess: 0.0002, draft: 0.1, soldier: 0.003 } }, happy: -10 },
   // Projections : le climat se réchauffe (scénarios du GIEC), sans événements inventés.
   { id: "heat", from: 2035, to: 2100, name: "le réchauffement", text: "Les étés deviennent plus chauds qu’autrefois ; les canicules se multiplient.", cause: "coup de chaleur",
     c: { IN: { old: 0.002 }, PK: { old: 0.002 }, BD: { old: 0.002 }, NG: { old: 0.001 }, NE: { old: 0.002 }, ML: { old: 0.002 }, TD: { old: 0.002 }, SD: { old: 0.002 }, IQ: { old: 0.002 }, SA: { old: 0.001 }, EG: { old: 0.001 }, YE: { old: 0.001 } }, happy: -0.5 },
 ];
 
-// Préposition devant le nom du pays : « en France », « au Mali », « aux États-Unis », « à Haïti ».
-const PREP_AU = new Set(["NG", "PK", "BD", "BR", "MX", "KE", "VN", "NE", "MZ", "YE", "CM", "ML", "MM", "GH", "BF", "TD", "JP", "GB", "MA", "SN", "NP", "PE", "VE", "CA", "SD"]);
-const PREP_AUX = new Set(["US", "PH"]);
-const PREP_A = new Set(["MG", "HT"]);
-function inCountry(c) {
-  const p = PREP_AUX.has(c.code) ? "aux" : PREP_AU.has(c.code) ? "au" : PREP_A.has(c.code) ? "à" : "en";
-  return `${p} ${c.name}`;
-}
+// Préposition devant le nom du pays : « en France », « au Mali », « aux États-Unis », « à Cuba ».
+function inCountry(c) { return c.in; }
