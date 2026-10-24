@@ -805,28 +805,32 @@ const WILLS = {
 };
 function openHeirs() {
   const rec = reviewRecord, d = rec.dyn;
-  $("heirIntro").textContent = `${rec.s.name} laisse ${dollars(d.estate)} (après dettes). Vous allez revivre depuis la naissance l’enfant choisi : votre vie précédente mourra dans la sienne, au même âge et de la même cause.`;
+  $("heirIntro").textContent = `${rec.s.name} laisse ${dollars(d.estate)} (après dettes). Vous continuez avec l’enfant choisi : soit à l’âge qu’il a à la mort de ${rec.s.name}, soit en revivant son enfance.`;
   $("heirList").innerHTML = d.heirs.map((h, i) => `<label class="choice"><input type="radio" name="heir" value="${esc(h.name)}"${i === 0 ? " checked" : ""}><span><b>${esc(h.name)}</b><small>${h.sex === "m" ? "Fils" : "Fille"} · ${h.age} ans à la mort de ${esc(rec.s.name)} · ${h.sex === "m" ? "né" : "née"} en ${h.year} ${inCountry(BY_CODE[h.code])}</small></span></label>`).join("");
+  $("startList").innerHTML = `<label class="choice"><input type="radio" name="hstart" value="now" checked><span><b>Reprendre sa vie là où elle en est</b><small>Son enfance s’est déroulée sans vous ; vous continuez au moment de la mort de ${esc(rec.s.name)}.</small></span></label>
+    <label class="choice"><input type="radio" name="hstart" value="birth"><span><b>Revivre depuis sa naissance</b><small>Votre vie précédente mourra dans la sienne, au même âge et de la même cause.</small></span></label>`;
   $("willList").innerHTML = Object.entries(WILLS).map(([k, w], i) => `<label class="choice"><input type="radio" name="will" value="${k}"${i === 0 ? " checked" : ""}><span><b>${w.label}</b><small>${w.note}</small></span></label>`).join("");
   updateHeirNote();
   $("heirModal").hidden = false;
 }
 function updateHeirNote() {
   const rec = reviewRecord, name = document.querySelector("input[name=heir]:checked").value, will = document.querySelector("input[name=will]:checked").value;
-  const opts = lineageFor(rec, name, will);
-  $("heirNote").textContent = `${name} héritera d’environ ${dollars(opts.lineage.estate)} à ${opts.lineage.parent.deathAt} ans (après droits de succession). Génération ${opts.lineage.gen}.`;
+  const opts = lineageFor(rec, name, will), now = document.querySelector("input[name=hstart]:checked").value === "now";
+  $("heirNote").textContent = `${name} héritera d’environ ${dollars(opts.lineage.estate)} à ${opts.lineage.parent.deathAt} ans (après droits de succession). ${now ? `Vous reprenez sa vie à ${opts.lineage.parent.deathAt} ans, en ${opts.year + opts.lineage.parent.deathAt}.` : `Vous revivez sa vie depuis ${opts.year}.`} Génération ${opts.lineage.gen}.`;
+  $("heirGo").textContent = now ? `Reprendre la vie de ${name}` : "Vivre sa vie";
 }
 $("heirModal").addEventListener("change", updateHeirNote);
 $("heirClose").addEventListener("click", () => $("heirModal").hidden = true);
 $("lineageBtn").addEventListener("click", openHeirs);
 $("heirGo").addEventListener("click", () => {
   const rec = reviewRecord, name = document.querySelector("input[name=heir]:checked").value, will = document.querySelector("input[name=will]:checked").value;
-  const opts = lineageFor(rec, name, will);
+  const opts = lineageFor(rec, name, will), now = document.querySelector("input[name=hstart]:checked").value === "now";
   $("heirModal").hidden = true;
   closeDeath();
   clearCurrent();
   life = new Life({ ...opts, classroom: prefs.classroom });
   peers = Array.from({ length: 4 }, () => simulateWhole({ mode: "births", year: opts.year, classroom: prefs.classroom }));
+  if (now) { fastForwardHeir(life); beginLife(); return; }
   showScreen("draw");
   $("drawKicker").textContent = `La lignée continue · génération ${opts.lineage.gen} · ${opts.year}`;
   showBirth();

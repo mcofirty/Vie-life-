@@ -669,6 +669,18 @@ function lineageFor(rec, heirName, will) {
   };
 }
 
+// Reprendre la vie d'un descendant là où elle en est : son enfance se déroule
+// d'elle-même jusqu'à la mort du parent dont on vient de jouer la vie.
+function fastForwardHeir(L) {
+  const until = L.protectUntil || 0, wasAuto = L.auto;
+  L.auto = true;
+  while (L.alive && L.age < until) { L.step(); L.autoResolveAll(); }
+  L.auto = wasAuto;
+  L.actionsLeft = ACTIONS_PER_YEAR;
+  if (L.alive) L.say(`Vous reprenez la vie de ${L.name}, à ${L.age} ans.`, "family", true);
+  return L;
+}
+
 // --- Actions personnelles et professionnelles -------------------------------------
 const adult = L => L.age >= 18 || "Réservé aux adultes.";
 const working = L => !!L.job || !!L.business;

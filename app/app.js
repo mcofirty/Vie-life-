@@ -884,19 +884,25 @@ const WILLS = {
   heritier: { label: "Tout à l’enfant choisi", note: "Les autres enfants n’ont rien." },
   oeuvres: { label: "La moitié aux œuvres", note: "Une moitié pour des associations, le reste partagé." },
 };
-function heirSheet(rec, mode, heir = rec.dyn.heirs[0].name, will = "egal") {
+function heirSheet(rec, mode, heir = rec.dyn.heirs[0].name, will = "egal", start = "now") {
   const d = rec.dyn, opts = lineageFor(rec, heir, will);
   openSheet(`<h2 class="sheet-title">Continuer la lignée</h2>
-    <p class="group-footer" style="margin:-8px 4px 16px;text-align:center">${esc(rec.s.name)} laisse ${dollars(d.estate)}. Vous revivez l’enfant choisi depuis sa naissance ; votre vie précédente mourra dans la sienne, au même âge.</p>
+    <p class="group-footer" style="margin:-8px 4px 16px;text-align:center">${esc(rec.s.name)} laisse ${dollars(d.estate)}. Continuez avec l’enfant choisi, là où en est sa vie ou depuis sa naissance.</p>
     <p class="group-header">Avec quel enfant ?</p>
     <div class="group">${d.heirs.map(h => `<button class="cell link choice-cell" data-heir="${esc(h.name)}"><span class="tick">${h.name === heir ? "✓" : ""}</span><span class="flag-cell">${BY_CODE[h.code].flag}</span><span class="cell-main"><b>${esc(h.name)}</b><small>${h.sex === "m" ? "Fils" : "Fille"} · né${h.sex === "m" ? "" : "e"} en ${h.year} · ${h.age} ans à la mort de ${esc(rec.s.name)}</small></span></button>`).join("")}</div>
+    <p class="group-header">Comment continuer ?</p>
+    <div class="group">
+      <button class="cell link choice-cell" data-start="now"><span class="tick">${start === "now" ? "✓" : ""}</span><span class="cell-main"><b>Reprendre sa vie là où elle en est</b><small>À ${opts.lineage.parent.deathAt} ans, en ${opts.year + opts.lineage.parent.deathAt} ; son enfance s’est déroulée sans vous.</small></span></button>
+      <button class="cell link choice-cell" data-start="birth"><span class="tick">${start === "birth" ? "✓" : ""}</span><span class="cell-main"><b>Revivre depuis sa naissance</b><small>Votre vie précédente mourra dans la sienne, au même âge.</small></span></button>
+    </div>
     <p class="group-header">Le testament</p>
     <div class="group">${Object.entries(WILLS).map(([k, w]) => `<button class="cell link choice-cell" data-will="${k}"><span class="tick">${k === will ? "✓" : ""}</span><span class="cell-main"><b>${w.label}</b><small>${w.note}</small></span></button>`).join("")}</div>
     <p class="group-footer">${esc(heir)} héritera d’environ ${dollars(opts.lineage.estate)} à ${opts.lineage.parent.deathAt} ans. Génération ${opts.lineage.gen}.</p>
-    <button class="btn-filled" id="heirGo" style="margin-top:16px">Vivre sa vie</button>
+    <button class="btn-filled" id="heirGo" style="margin-top:16px">${start === "now" ? `Reprendre la vie de ${esc(heir)}` : "Vivre sa vie"}</button>
     <button class="btn-plain" id="heirBack">Retour</button>`, { dismissable: false });
-  $("sheetBody").querySelectorAll("[data-heir]").forEach(b => b.onclick = () => { haptic(); heirSheet(rec, mode, b.dataset.heir, will); });
-  $("sheetBody").querySelectorAll("[data-will]").forEach(b => b.onclick = () => { haptic(); heirSheet(rec, mode, heir, b.dataset.will); });
+  $("sheetBody").querySelectorAll("[data-heir]").forEach(b => b.onclick = () => { haptic(); heirSheet(rec, mode, b.dataset.heir, will, start); });
+  $("sheetBody").querySelectorAll("[data-start]").forEach(b => b.onclick = () => { haptic(); heirSheet(rec, mode, heir, will, b.dataset.start); });
+  $("sheetBody").querySelectorAll("[data-will]").forEach(b => b.onclick = () => { haptic(); heirSheet(rec, mode, heir, b.dataset.will, start); });
   $("heirBack").onclick = () => deathSheet(rec, mode);
   $("heirGo").onclick = () => {
     haptic(20);
@@ -905,6 +911,8 @@ function heirSheet(rec, mode, heir = rec.dyn.heirs[0].name, will = "egal") {
     clearCurrent();
     life = new Life({ ...opts, classroom: prefs.classroom });
     peers = Array.from({ length: 4 }, () => simulateWhole({ mode: "births", year: opts.year, classroom: prefs.classroom }));
+    renderLives();
+    if (start === "now") { fastForwardHeir(life); setTimeout(() => beginLife(), 320); return; }
     const v = $("drawView");
     v.hidden = false; v.style.animation = "none"; void v.offsetWidth; v.style.animation = "";
     $("drawKicker").textContent = `La lignée continue · génération ${opts.lineage.gen}`;

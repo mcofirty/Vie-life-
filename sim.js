@@ -305,7 +305,7 @@ class Life {
   g(m, f) { return this.sex === "m" ? m : f; }
   // Un prénom qui n'est pas déjà porté dans la famille (si possible).
   freshName(sex, code = this.code) {
-    const used = new Set([this.name, this.partner, ...(this.parents || []).map(p => p.name), ...(this.sibs || []).map(x => x.name), ...this.children.map(k => k.name)]);
+    const used = new Set([this.name, this.partner, ...(this.parents || []).map(p => p.name), ...(this.sibs || []).map(x => x.name), ...this.children.map(k => k.name), ...this.children.map(k => k.other)]);
     let nm;
     for (let i = 0; i < 8; i++) { nm = drawName(code, sex); if (!used.has(nm)) break; }
     return nm;
