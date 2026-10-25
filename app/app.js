@@ -190,7 +190,8 @@ PAGES.forEach(p => {
 });
 $("appVersion").textContent = APP_VERSION;
 $("notesBtn").addEventListener("click", () => openSheet(`<h2 class="sheet-title">Notes de version</h2>
-  <div class="group"><div class="cell column"><b>Version ${APP_VERSION}</b><small style="color:var(--label-2)">Naître dans le passé (1900-2000), aujourd’hui ou dans le futur (jusqu’en 2100). Événements historiques réels : guerres, famines, épidémies, crises. Famille (parents, frères et sœurs, enfants, petits-enfants) et argent (train de vie, épargne, placements, logement, dettes). Nouvelles décisions : soins, tabac, poste loin des siens, mobilisation. Mortalité maternelle, VIH, emploi agricole. Mode automatique, musique douce, pas de scènes effrayantes, mode classe. Moments gardés ☆, décision en attente, prochaine décision. Mémorial (bougies, mots), cartes et liens de partage, transfert des vies, reprise d’une vie après fermeture. Vitesse ×12, durée 1 h 30.</small></div>
+  <div class="group"><div class="cell column"><b>Version ${APP_VERSION}</b><small style="color:var(--label-2)">Récits de vie : plus de 700 moments qui racontent le quotidien selon le niveau de vie (de la survie à la grande aisance), le pays et sa culture, l’époque, la ville ou la campagne et l’âge. Fêtes, plats de famille, école et examens, métiers, trajets, argent, migrations, santé, noces, histoire vécue en direct, climat. Fils narratifs sur plusieurs années et petites décisions (prêter à un cousin, tontine, partir en ville ou dans le Golfe). Niveau de vie affiché dans l’argent et l’acte de naissance.</small></div>
+  <div class="cell column"><b>Version 2.0</b><small style="color:var(--label-2)">Naître dans le passé (1900-2000), aujourd’hui ou dans le futur (jusqu’en 2100). Événements historiques réels : guerres, famines, épidémies, crises. Famille (parents, frères et sœurs, enfants, petits-enfants) et argent (train de vie, épargne, placements, logement, dettes). Nouvelles décisions : soins, tabac, poste loin des siens, mobilisation. Mortalité maternelle, VIH, emploi agricole. Mode automatique, musique douce, pas de scènes effrayantes, mode classe. Moments gardés ☆, décision en attente, prochaine décision. Mémorial (bougies, mots), cartes et liens de partage, transfert des vies, reprise d’une vie après fermeture. Vitesse ×12, durée 1 h 30.</small></div>
   <div class="cell column"><b>Version 1.0</b><small style="color:var(--label-2)">Première version de l’application.</small></div></div>`, { dismissable: true }));
 $("privacyBtn").addEventListener("click", () => openSheet(`<h2 class="sheet-title">Confidentialité</h2>
   <p class="group-footer" style="margin:0 4px 16px;font-size:15px">Pas de compte, pas de publicité, pas de mesure d’audience. Vos vies, vos réponses et vos réglages restent sur cet appareil. Un lien de partage contient la vie elle-même, sans vos réponses aux pauses ni vos derniers mots : rien n’est envoyé à un serveur.</p>`, { dismissable: true }));
@@ -552,7 +553,7 @@ function helpSheet() {
   openSheet(`<h2 class="sheet-title">Besoin d’aide</h2><p class="help-note" style="margin-top:0">${HELP_HTML}</p>`, { dismissable: true });
 }
 
-const KIND_ICON = { birth: "birth", edu: "edu", work: "work", family: "family", move: "move", death: "death", history: "ticket", money: "money", health: "health" };
+const KIND_ICON = { birth: "birth", edu: "edu", work: "work", family: "family", move: "move", death: "death", history: "ticket", money: "money", health: "health", life: "home", culture: "leisure" };
 
 function renderLife() {
   const L = life, c = L.here;
