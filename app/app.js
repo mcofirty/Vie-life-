@@ -569,6 +569,7 @@ function renderLife() {
   const h = L.stats.happy / 100;
   $("lifeHero").style.setProperty("--glow", (0.15 + h * 0.6).toFixed(2));
 
+  renderDash();
   renderFeed();
   if (pane === "act") renderActions();
   if (pane === "me") renderSituation();
@@ -686,6 +687,22 @@ function panelSheet(kind) {
     panelSheet(kind);
   }));
 }
+
+// ---------- Tableau de bord ----------
+function renderDash() {
+  const d = dashboardData(life);
+  $("dash").innerHTML = `<div class="dash-money">${d.money.map(m => `<button class="tile ${m.tone || ""}" data-dash="money"><small>${m.label}</small><b>${esc(m.value)}</b>${m.sub ? `<span>${esc(m.sub)}</span>` : ""}</button>`).join("")}</div>
+    <div class="dash-status">${d.status.map(s => `<div class="stat-card"><small>${icon(s.icon)}${s.label}</small><b>${esc(s.value)}</b></div>`).join("")}</div>
+    ${d.todo.length ? `<div class="dash-todo">${d.todo.map(t => `<div class="todo ${t.tone}"><span>${esc(t.text)}</span>${t.act ? `<button data-dash="${t.act}">${t.btn}</button>` : ""}</div>`).join("")}</div>` : ""}`;
+}
+$("dash").addEventListener("click", e => {
+  const b = e.target.closest("[data-dash]"); if (!b || !life) return;
+  haptic();
+  const a = b.dataset.dash;
+  if (a === "decision") decisionSheet();
+  if (a === "money") panelSheet("money");
+  if (a === "agir") { $("lifeSeg").querySelector('[data-v="act"]').click(); $("lifeSeg").scrollIntoView({ behavior: "smooth", block: "start" }); }
+});
 
 // ---------- Agir ----------
 let actCat = "pro";

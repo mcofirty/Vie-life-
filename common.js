@@ -133,6 +133,35 @@ function moneyRows(L) {
   if (L.retired) rows.push(["Pension", L.pension > 0 ? `${dollars(L.pension)} par an` : "aucune"]);
   return rows;
 }
+// Tableau de bord : l'essentiel de la situation, et ce qui demande votre attention.
+function dashboardData(L) {
+  const c = L.here, liquid = ["cash", "deposit", "tontine"].reduce((s, k) => s + (L.assets[k] || 0), 0);
+  const invested = Math.max(0, L.savings - liquid), net = L.netWorth();
+  const pi = L.married && L.partnerInfo ? L.partnerInfo.income || 0 : 0;
+  const money = [
+    { id: "salary", label: L.retired ? "Pension" : L.business ? "Revenu de l’entreprise" : "Salaire", value: L.income > 0 ? `${dollars(L.income)}/an` : "aucun", sub: L.income > 0 ? `≈ ${euroMonth(L.income)} par mois${pi ? ` · foyer ${dollars(L.income + pi)}` : ""}` : pi ? `foyer ${dollars(pi)}/an` : "" },
+    { id: "net", label: "Patrimoine", value: dollars(net), sub: `plus riche que ${Math.round(L.wealthPct() * 100)} % du pays`, tone: net < 0 ? "bad" : "" },
+    { id: "cash", label: "Disponible", value: dollars(liquid), sub: invested > 0 ? `+ ${dollars(invested)} placés` : L.debt > 0 ? `dettes ${dollars(L.debt)}` : "" , tone: liquid < 1 && L.debt > 0 ? "bad" : "" },
+  ];
+  const activity = !L.alive ? "—" : L.schooling ? `Études · ${EDU_LABEL[L.schooling]}` : L.retired ? "À la retraite" : L.business ? L.business.label : L.job ? capFirst(L.job) : L.homemaker ? "Au foyer" : L.age < 6 ? "Petite enfance" : L.age < 15 ? "Enfant, hors de l’école" : "Sans emploi";
+  const kids = L.children.filter(k => k.alive);
+  const status = [
+    { icon: L.schooling ? "edu" : "work", label: L.schooling ? "Études" : "Travail", value: activity },
+    { icon: "couple", label: "Couple", value: L.married ? `${L.g("Marié", "Mariée")} à ${L.partner}` : L.age < 16 ? "—" : L.marriedEver ? L.g("Seul (séparé ou veuf)", "Seule (séparée ou veuve)") : L.g("Célibataire", "Célibataire") },
+    { icon: "child", label: "Enfants", value: kids.length ? `${kids.length} · ${kids.map(k => `${k.name} ${L.age - k.born}`).join(", ")}` : "Aucun" },
+    { icon: "home", label: "Logement", value: `${L.house ? "Propriétaire" : L.age < 23 && !L.married && L.parents.some(p => p.alive) ? "Chez les parents" : "Locataire"} · ${L.urban ? "en ville" : "à la campagne"}` },
+  ];
+  const todo = [];
+  if (L.alive && L.queue.length) todo.push({ tone: "act", text: `Décision en attente : ${L.queue[0].text}`, act: "decision", btn: "Décider" });
+  if (L.alive && L.actionsLeft > 0 && L.age >= 6) todo.push({ tone: "info", text: `${L.actionsLeft} action${L.actionsLeft > 1 ? "s" : ""} possible${L.actionsLeft > 1 ? "s" : ""} cette année`, act: "agir", btn: "Agir" });
+  if (L.alive && !L.job && !L.business && !L.schooling && !L.retired && !L.homemaker && L.age >= 16) todo.push({ tone: "warn", text: "Sans emploi : chercher du travail ?", act: "agir", btn: "Chercher" });
+  if (L.debt > Math.max(L.netIncome(), 1)) todo.push({ tone: "warn", text: `Dettes élevées : ${dollars(L.debt)}`, act: "money", btn: "Gérer" });
+  if (L.alive && L.stats.health < 35) todo.push({ tone: "warn", text: "Santé fragile : un bilan, du sport ?", act: "agir", btn: "Agir" });
+  if (L.smoker) todo.push({ tone: "warn", text: `${L.g("Fumeur", "Fumeuse")} : le risque augmente avec l’âge.`, act: "agir", btn: "Arrêter" });
+  for (const x of activeEvents(L.code, L.calYear)) todo.push({ tone: "warn", text: `Le pays traverse ${x.ev.name}.` });
+  return { money, status, todo };
+}
+
 // Le budget de l'année passée, poste par poste.
 function budgetRows(L) {
   const b = L.budget;

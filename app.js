@@ -456,6 +456,7 @@ function renderLife() {
     ["Frères et sœurs", L.siblings || "aucun"],
   ].map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("");
 
+  renderDash();
   renderStory();
   renderActions();
   renderWorld();
@@ -464,6 +465,21 @@ function renderLife() {
   renderSurvival();
   if (!$("panelModal").hidden && !$("panelModal").dataset.kind.startsWith("choices:")) openPanel($("panelModal").dataset.kind);
 }
+
+// Tableau de bord : argent, situation, et ce qui demande votre attention.
+function renderDash() {
+  const d = dashboardData(life);
+  $("dash").innerHTML = `<div class="dash-money">${d.money.map(m => `<div class="tile ${m.tone || ""}"><small>${m.label}</small><b>${esc(m.value)}</b>${m.sub ? `<span>${esc(m.sub)}</span>` : ""}</div>`).join("")}</div>
+    <div class="dash-status">${d.status.map(s => `<div class="chip-row"><small>${s.label}</small><b>${esc(s.value)}</b></div>`).join("")}</div>
+    <ul class="dash-todo">${d.todo.map(t => `<li class="${t.tone}"><span>${esc(t.text)}</span>${t.act ? `<button class="btn small ${t.tone === "act" ? "primary" : "ghost"}" data-dash="${t.act}">${t.btn}</button>` : ""}</li>`).join("") || `<li class="calm"><span>Rien d’urgent : laissez passer le temps.</span></li>`}</ul>`;
+}
+$("dash").addEventListener("click", e => {
+  const b = e.target.closest("[data-dash]"); if (!b || !life) return;
+  const a = b.dataset.dash;
+  if (a === "decision") showDecision();
+  if (a === "money") openPanel("money");
+  if (a === "agir") { $("actPanel").scrollIntoView({ behavior: "smooth", block: "center" }); $("actPanel").classList.remove("flash"); void $("actPanel").offsetWidth; $("actPanel").classList.add("flash"); }
+});
 
 // Agir : trois actions par an, selon la vie et le pays.
 function renderActions() {
