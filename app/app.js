@@ -84,6 +84,7 @@ const tabbar = $("tabbar"), lens = $("tabLens"), tabs = [...tabbar.querySelector
 const activeTab = () => tabs.find(t => t.classList.contains("on"));
 
 function placeLens(btn = activeTab(), x) {
+  if (!lens || !btn) return;
   lens.style.width = `${btn.offsetWidth}px`;
   lens.style.transform = `translateX(${x ?? btn.offsetLeft}px)`;
 }
