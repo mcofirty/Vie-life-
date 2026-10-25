@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="app.css?v=5">
+<link rel="stylesheet" href="app.css?v=6">
 </head>
 <body>
 
@@ -51,19 +51,34 @@
 
     <p class="group-header">Avant de naître</p>
     <div class="group">
+      <label class="cell link">
+        <span class="cell-icon" style="--c: var(--purple)"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 10.4V6h-2v7.4l5 3 1-1.7z"/></svg></span>
+        <span class="cell-main"><b>Quand naître</b></span>
+        <span class="cell-value" id="eraLabel"></span>
+        <span class="chev"></span>
+        <select id="eraSel" class="overlay-select"></select>
+      </label>
+      <label class="cell link" id="yearCell">
+        <span class="cell-icon" style="--c: var(--indigo)"><svg viewBox="0 0 24 24"><path d="M7 2v2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2h-2V2h-2v2H9V2zM5 9h14v11H5z"/></svg></span>
+        <span class="cell-main"><b>Année de naissance</b></span>
+        <span class="cell-value" id="yearLabel"></span>
+        <span class="chev"></span>
+        <select id="yearSel" class="overlay-select"></select>
+      </label>
       <div class="cell column">
         <span class="cell-label">Tirage du pays</span>
         <div class="segmented" data-name="mode">
           <button data-v="births" class="on">Bébés de l’année</button>
-          <button data-v="pop">8 milliards d’humains</button>
+          <button data-v="pop">Tous les humains</button>
         </div>
       </div>
       <div class="cell column">
         <span class="cell-label">Durée d’une vie</span>
         <div class="segmented" data-name="dur">
           <button data-v="15">15 min</button>
-          <button data-v="30" class="on">30 min</button>
-          <button data-v="60">1 h</button>
+          <button data-v="30">30 min</button>
+          <button data-v="60" class="on">1 h</button>
+          <button data-v="90">1 h 30</button>
         </div>
       </div>
       <label class="cell link">
@@ -74,11 +89,20 @@
         <select id="realCountry" class="overlay-select"><option value="">Ne pas comparer</option></select>
       </label>
     </div>
+    <p class="group-footer" id="eraNote"></p>
     <p class="group-footer">Choisir votre vrai pays permet de comparer cette vie à la vôtre. Rien ne quitte cet appareil.</p>
+
+    <div class="group" style="margin-top:20px">
+      <button class="cell link" id="strangerBtn">
+        <span class="cell-icon" style="--c: var(--teal)"><svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zm0 2c-4 0-8 2-8 5v1h16v-1c0-3-4-5-8-5z"/></svg></span>
+        <span class="cell-main"><b>Rencontrer une vie au hasard</b><small>Une vie entière, vécue par quelqu’un d’autre</small></span>
+        <span class="chev"></span>
+      </button>
+    </div>
 
     <p class="group-header">Comment ça marche</p>
     <div class="feature-scroller">
-      <article class="feature" style="--c: var(--orange)"><span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20v-8M12 20V5M19 20v-5"/></svg></span><h3>Données réelles</h3><p>Espérance de vie, revenus, école, violence, fécondité : 58 pays.</p></article>
+      <article class="feature" style="--c: var(--orange)"><span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20v-8M12 20V5M19 20v-5"/></svg></span><h3>Données réelles</h3><p>Tous les pays du monde, de 1900 à 2100 : Banque mondiale, ONU, Our World in Data.</p></article>
     </div>
 
     <p class="group-footer warn">La maladie, la mort d’un enfant, la violence, le mariage forcé ou le suicide surviennent ici aussi souvent que dans les statistiques. Rien n’est montré en détail. Dès 15 ans.</p>
@@ -109,9 +133,29 @@
       <h3>Aucune vie pour l’instant</h3>
       <p>Les vies que vous vivez jusqu’au bout apparaîtront ici.</p>
     </div>
+    <div class="segmented" data-name="livesTab" style="margin-bottom:16px">
+      <button data-v="mine" class="on">Mes vies</button>
+      <button data-v="memorial">Mémorial</button>
+      <button data-v="shared">Reçues</button>
+    </div>
+    <div class="group" id="sortGroup">
+      <label class="cell link">
+        <span class="cell-main"><b>Trier</b></span>
+        <span class="cell-value" id="sortLabel"></span>
+        <span class="chev"></span>
+        <select id="sortSel" class="overlay-select"></select>
+      </label>
+    </div>
     <div class="group" id="livesGroup"></div>
+    <div class="group" id="moreGroup" hidden><button class="cell link" id="moreBtn"><span class="cell-main"><b style="color:var(--tint)">Voir plus</b></span></button></div>
+    <p class="group-footer" id="livesNote">Gardées uniquement sur cet appareil.</p>
+    <div class="group" style="margin-top:24px">
+      <button class="cell link" id="strangerBtn2"><span class="cell-main"><b>Rencontrer une vie au hasard</b></span><span class="chev"></span></button>
+      <button class="cell link" id="exportBtn"><span class="cell-main"><b>Transférer mes vies</b><small>Enregistrer un fichier à ouvrir sur un autre appareil</small></span><span class="chev"></span></button>
+      <label class="cell link"><span class="cell-main"><b>Importer des vies</b><small>Ouvrir un fichier de vies</small></span><span class="chev"></span><input type="file" id="importInput" accept="application/json,.json" class="overlay-select"></label>
+    </div>
     <div class="group" id="clearGroup" hidden><button class="cell destructive" id="clearPast">Effacer toutes les vies</button></div>
-    <p class="group-footer">Gardées uniquement sur cet appareil.</p>
+    <p class="group-footer">Les vies du mémorial restent, même si vous effacez les autres.</p>
   </div>
 </section>
 
@@ -143,12 +187,27 @@
         <input type="checkbox" class="switch" id="optPauses" checked>
       </label>
       <label class="cell">
+        <span class="cell-icon" style="--c: var(--teal)"><svg viewBox="0 0 24 24"><path d="M12 3v10.6A4 4 0 1014 17V7h4V3z"/></svg></span>
+        <span class="cell-main"><b>Musique douce</b></span>
+        <input type="checkbox" class="switch" id="optMusic">
+      </label>
+      <label class="cell">
+        <span class="cell-icon" style="--c: var(--blue)"><svg viewBox="0 0 24 24"><path d="M12 2L4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5z"/></svg></span>
+        <span class="cell-main"><b>Pas de scènes effrayantes</b><small>Les passages les plus durs sont repliés</small></span>
+        <input type="checkbox" class="switch" id="optGentle">
+      </label>
+      <label class="cell">
+        <span class="cell-icon" style="--c: var(--green)"><svg viewBox="0 0 24 24"><path d="M12 3L1 9l11 6 9-4.9V17h2V9zM5 13.2v4L12 21l7-3.8v-4L12 17z"/></svg></span>
+        <span class="cell-main"><b>Mode classe</b><small>Pour les enseignants</small></span>
+        <input type="checkbox" class="switch" id="optClassroom">
+      </label>
+      <label class="cell">
         <span class="cell-icon" style="--c: var(--pink)"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 019 9h-2a7 7 0 00-14 0H3a9 9 0 019-9zm-7 11h3v7H5zm11 0h3v7h-3z"/></svg></span>
         <span class="cell-main"><b>Vibrations</b></span>
         <input type="checkbox" class="switch" id="optHaptics" checked>
       </label>
     </div>
-    <p class="group-footer">En mode automatique, les décisions se prennent toutes seules : il suffit de regarder.</p>
+    <p class="group-footer">En mode automatique, vous fixez une priorité par an et les décisions se prennent toutes seules. Le mode classe met de côté les thèmes les plus lourds (suicide, homicide, surdose, mariage d’enfants, harcèlement) et désactive le partage.</p>
 
     <p class="group-header">Besoin d’aide</p>
     <div class="group">
@@ -160,7 +219,9 @@
 
     <p class="group-header">À propos</p>
     <div class="group">
-      <div class="cell"><span class="cell-main"><b>Version</b></span><span class="cell-value">1.0</span></div>
+      <div class="cell"><span class="cell-main"><b>Version</b></span><span class="cell-value" id="appVersion"></span></div>
+      <button class="cell link" id="notesBtn"><span class="cell-main"><b>Notes de version</b></span><span class="chev"></span></button>
+      <button class="cell link" id="privacyBtn"><span class="cell-main"><b>Confidentialité</b></span><span class="chev"></span></button>
       <a class="cell link" href="../"><span class="cell-main"><b>Version web</b></span><span class="chev"></span></a>
     </div>
     <p class="group-footer">Valeurs approchées (vers 2023) : ONU World Population Prospects, Banque mondiale, OMS, UNESCO, ONUDC, UNICEF, World Happiness Report. Le moment de la mort suit une table de mortalité calée sur chaque pays et chaque sexe. C’est une simulation : elle montre des probabilités, pas des destins.</p>
@@ -193,9 +254,11 @@
       <div class="pass-grid" id="passGrid"></div>
       <p class="pass-family" id="passFamily"></p>
     </article>
+    <div class="pass-details" id="passDetails" hidden></div>
   </div>
   <div class="draw-actions" id="drawActions" hidden>
     <button class="btn-filled" id="startLife">Commencer cette vie</button>
+    <button class="btn-gray" id="passCard">Carte à partager</button>
     <button class="btn-plain" id="cancelDraw">Annuler</button>
   </div>
 </section>
@@ -206,6 +269,7 @@
     <button class="circle-btn" id="quitBtn" aria-label="Fermer"><svg viewBox="0 0 24 24"><path d="M6.4 5L12 10.6 17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4-5.6-5.6L6.4 19 5 17.6l5.6-5.6L5 6.4z"/></svg></button>
     <div class="life-who"><b id="lfName"></b><small id="lfCountry"></small></div>
     <button class="chip" id="autoChip" aria-pressed="false">Auto</button>
+    <button class="circle-btn" id="menuBtn" aria-label="Menu"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
   </header>
 
   <div class="life-scroll" id="lifeScroll">
@@ -219,18 +283,36 @@
 
     <div class="segmented life-seg" id="lifeSeg">
       <button data-v="story" class="on">Récit</button>
+      <button data-v="act">Agir</button>
       <button data-v="me">Situation</button>
-      <button data-v="peers">Les autres</button>
+      <button data-v="peers">Autres</button>
       <button data-v="data">Données</button>
     </div>
 
     <div class="pane" id="pane-story"><ol class="feed" id="feed"></ol></div>
+
+    <div class="pane" id="pane-act" hidden>
+      <p class="group-header" id="actLeft"></p>
+      <div class="segmented" data-name="actcat" style="margin:0 0 12px">
+        <button data-v="pro" class="on">Travail et argent</button>
+        <button data-v="perso">Vie personnelle</button>
+      </div>
+      <div class="group" id="actList"></div>
+      <p class="group-header">Impossible pour l’instant</p>
+      <div class="group" id="actOff"></div>
+    </div>
 
     <div class="pane" id="pane-me" hidden>
       <p class="group-header">Priorité de l’année</p>
       <div class="priority" id="priority"></div>
       <p class="group-header">Situation</p>
       <div class="group" id="situation"></div>
+      <p class="group-header">Argent</p>
+      <div class="group" id="moneyMini"></div>
+      <div class="group"><button class="cell link" data-act="money"><span class="cell-main"><b style="color:var(--tint)">Dépenser et investir</b></span><span class="chev"></span></button></div>
+      <p class="group-header">Famille et vie</p>
+      <div class="group" id="familyMini"></div>
+      <div class="group"><button class="cell link" data-act="family"><span class="cell-main"><b style="color:var(--tint)">Famille et vie</b></span><span class="chev"></span></button></div>
     </div>
 
     <div class="pane" id="pane-peers" hidden>
@@ -239,6 +321,8 @@
     </div>
 
     <div class="pane" id="pane-data" hidden>
+      <p class="group-header" id="worldHeader">Le monde autour</p>
+      <div class="group" id="world"></div>
       <p class="group-header">Grille de vie · 1 case = 1 an</p>
       <div class="card"><div class="grid100" id="grid100"></div></div>
       <p class="group-header">Courbe de survie</p>
@@ -250,6 +334,7 @@
     </div>
   </div>
 
+  <button class="pending" id="pendingBtn" hidden>Une décision vous attend</button>
   <footer class="life-controls">
     <button class="pill" id="speedBtn">×1</button>
     <button class="play" id="playBtn" aria-label="Pause"><svg viewBox="0 0 24 24" id="playIcon"><path d="M7 5h3.5v14H7zm6.5 0H17v14h-3.5z"/></svg></button>
@@ -266,8 +351,11 @@
 
 <div class="toast" id="toast" hidden></div>
 
-<script src="../data.js?v=5"></script>
-<script src="../sim.js?v=5"></script>
-<script src="app.js?v=5"></script>
+<script src="../countries.js?v=6"></script>
+<script src="../data.js?v=6"></script>
+<script src="../sim.js?v=6"></script>
+<script src="../economy.js?v=6"></script>
+<script src="../common.js?v=6"></script>
+<script src="app.js?v=6"></script>
 </body>
 </html>
