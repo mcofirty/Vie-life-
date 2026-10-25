@@ -367,6 +367,7 @@ Object.assign(Life.prototype, {
     this.job = jobLabel(j, this.sex);
     this.jobInfo = { id: j.id, sector: j.sector, informal: !!j.informal, self: !!j.self };
     this.homemaker = false;
+    if (this.firstJobAt == null) this.firstJobAt = this.age;
     this.computeIncome();
   },
   // Premier emploi, ou retour à l'emploi : un métier tiré selon l'économie du pays.
@@ -406,6 +407,7 @@ Object.assign(Life.prototype, {
     for (const k in this.assets) this.assets[k] *= 0.6;
     if (this.house) { this.addMoney(Math.max(0, this.house.value - this.house.loan) * 0.5 - this.house.value * 0.05); this.house = null; this.say("Le logement est vendu et partagé.", "money"); }
     this.married = false; this.partner = null; this.partnerInfo = null; this.homemaker = false; this.bump("happy", -10);
+    this.divorcedAt = this.age;
     return true;
   },
   haveChild() {
@@ -691,7 +693,7 @@ Object.assign(Life.prototype, {
 const EDU_SHORT = { none: "sans école", primaire: "école primaire", secondaire: "lycée", universite: "université" };
 // Tout ce qu'on peut dire d'une naissance : famille, foyer, lieu, statistiques.
 function birthDetails(L) {
-  const c = L.country, y = L.year, inc = L.householdIncome();
+  const c = L.country, y = L.year, inc = L.householdIncome(), level = L.livingStandard();
   const parentLine = p => `${p.name}, ${ans(p.age)} · ${p.job || (p.home ? "au foyer" : "sans emploi")}${p.edu ? ` · ${EDU_SHORT[p.edu]}` : ""}${p.previous ? " · votre vie précédente" : ""}`;
   const sibs = L.sibs.filter(s => s.born < 0);
   const family = [
@@ -704,6 +706,7 @@ function birthDetails(L) {
     ["Lieu", L.urban ? "en ville" : "à la campagne"],
     ["Logement", L.housingAtBirth()],
     ["Revenu du foyer", inc > 0 ? `≈ ${money(inc)} par an · ≈ ${(Math.round(inc * 0.72 / 12 / 10) * 10).toLocaleString("fr-FR")} € par mois aux prix français` : "presque aucun revenu monétaire"],
+    ["Niveau de vie", `${capFirst(TIER_LABEL[L.livingTier(level)])} · ≈ ${money(level)} par personne et par an`],
     ["Compte en banque", c.bank >= 70 ? "courant dans le pays" : c.bank >= 30 ? "un adulte sur deux environ" : "rare"],
   ];
   const events = activeEvents(L.code, y).map(x => x.ev.name);

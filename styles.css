@@ -265,6 +265,7 @@ caption { caption-side: top; text-align: left; padding: 8px 10px; color: var(--m
 .story li.history .t { color: var(--ink-2); font-style: italic; }
 .story li.money .t { color: var(--gold); }
 .story li.health .t { color: var(--ink-2); }
+.story li.culture .t { color: var(--accent); }
 .star { border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 1.05rem; padding: 0; line-height: 1.4; }
 .star[aria-pressed="true"] { color: var(--gold); }
 .reveal { border: 1px dashed var(--line); background: var(--bg-2); color: var(--ink-2); font: 500 .85rem var(--sans); border-radius: 8px; padding: .25em .6em; cursor: pointer; }

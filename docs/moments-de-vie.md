@@ -1,0 +1,1965 @@
+# Moments de vie — bible et catalogue
+
+> Généré par `node tools/catalogue-moments.mjs` à partir de `moments.js`. Ne pas modifier à la main : modifier `moments.js`, puis relancer le script (et `node tools/check-moments.mjs` pour vérifier).
+
+**749 moments**, 784 textes au total, 437 propres à un pays, une culture ou une région, 12 petites décisions et 5 fils narratifs.
+
+## La bible
+
+Entre deux grands événements (une naissance, un mariage, une guerre), une vie est faite de scènes ordinaires. Ces scènes changent d’un bout à l’autre du monde et de l’échelle des revenus. Elles disent mieux que les chiffres ce que veut dire naître ici plutôt que là. Le récit en tire environ une ou deux par an.
+
+### Ce qui décide d’une scène
+
+1. **Le niveau de vie**, en six paliers. C’est le revenu du foyer par personne (échelle racine carrée de la taille du foyer), en dollars à parité de pouvoir d’achat. Pour un enfant, c’est celui de sa famille.
+   - **survie** : moins de 1 500 $ par an (≈ 4 $ par jour)
+   - **précarité** : de 1 500 à 4 000 $
+   - **modeste** : de 4 000 à 10 000 $
+   - **classe moyenne** : de 10 000 à 25 000 $
+   - **aisance** : de 25 000 à 60 000 $
+   - **grande aisance** : plus de 60 000 $
+2. **La place dans le pays.** On peut vivre mieux qu’un ouvrier de Dacca et faire la queue aux Restos du cœur à Paris. La pauvreté relative a ses propres scènes : les fins de mois, le chauffage éteint, les baskets de marque. La richesse dans un pays pauvre aussi : les domestiques, la résidence fermée, l’école privée bilingue. À l’inverse, les scènes de pauvreté (paliers survie et précarité) ne concernent jamais le quart le plus aisé du pays.
+3. **Le pays et sa culture** : les plats de famille, les fêtes, les transports (danfo, matatu, jeepney, marchroutka), les examens (gaokao, suneung, bac, WAEC, ENEM), le service militaire, les risques naturels, les institutions. Les fêtes et les plats suivent le pays d’origine : un émigré garde son Aïd ou son Têt.
+4. **L’époque** : la radio, la télévision en noir et blanc, le téléphone qu’on attend des mois, le premier portable, le smartphone, le paiement par téléphone (M-Pesa, QR codes, UPI, Pix), l’intelligence artificielle. Et l’histoire vécue en direct : la Lune, la chute du Mur, les indépendances, le premier vote des femmes, les Coupes du monde, les Jeux olympiques, l’euro.
+5. **La ville ou la campagne**, **l’âge**, et **la situation** : école, métier (agriculteur, vendeuse au marché, ouvrière du textile, chauffeur VTC, infirmière…), couple, enfants, parents qui vieillissent, retraite, émigration.
+
+### Le ton
+
+- Des phrases courtes, au présent, sans sujet, comme le reste du récit : « Repique le riz à la main, les pieds dans l’eau. »
+- Le détail concret plutôt que l’adjectif : un bidon jaune, un cahier d’écolier chez le boutiquier, la carpe dans la baignoire.
+- Ni misérabilisme ni carte postale. La pauvreté a aussi ses joies (le poulet du dimanche, la tontine qui tombe), la richesse ses angles morts (l’employée qui a laissé ses enfants au village).
+- Les chiffres seulement quand ils parlent : 48 °C, cent élèves dans la classe, trente heures debout dans le train du Nouvel An.
+- Le futur suit les projections (réchauffement, vieillissement, technologies qui se diffusent), sans événements inventés.
+- Les passages les plus durs (travail forcé, violences, dépression) sont marqués : repliés avec « pas de scènes effrayantes », absents en mode classe.
+
+### Comment le récit les choisit
+
+Chaque année, le moteur retient les moments possibles : âge, époque, pays, palier, place, situation, et délai depuis la dernière fois (15 ans par défaut). Il raconte d’abord ceux qui ne peuvent pas attendre : une date (la finale de 1998), un âge précis (les quinze ans, les cent ans), un mariage. Viennent ensuite les suites des fils narratifs, puis un ou deux autres, tirés au sort, en préférant ce qui est propre au pays. Les petites décisions passent par les décisions habituelles du jeu ; en mode automatique, elles sont prises au hasard selon des penchants réalistes.
+
+Les fils narratifs courent sur plusieurs années : un parent qui part travailler à l’étranger puis revient, des grands-parents qui élèvent l’enfant pendant que les parents sont à l’usine, un enfant émigré qui envoie de l’argent, un prêt à un cousin remboursé ou perdu, une tontine.
+
+## Catalogue
+
+- [Premiers pas](#premiers-pas) (27)
+- [Maison et confort](#maison-et-confort) (30)
+- [Eau, lumière, énergie](#eau-lumière-énergie) (20)
+- [À table](#à-table) (20)
+- [Plats de famille](#plats-de-famille) (71)
+- [À l’école](#à-lécole) (37)
+- [Enfance](#enfance) (27)
+- [Adolescence](#adolescence) (31)
+- [Études supérieures](#études-supérieures) (13)
+- [Aux champs](#aux-champs) (25)
+- [Économie informelle](#économie-informelle) (18)
+- [Usines et chantiers](#usines-et-chantiers) (14)
+- [Bureaux et services](#bureaux-et-services) (31)
+- [Service public](#service-public) (12)
+- [Sciences et technique](#sciences-et-technique) (5)
+- [À son compte](#à-son-compte) (5)
+- [Au foyer](#au-foyer) (3)
+- [Trajets](#trajets) (21)
+- [Argent au quotidien](#argent-au-quotidien) (42)
+- [Migrations](#migrations) (25)
+- [Santé et soins](#santé-et-soins) (21)
+- [Couple et mariage](#couple-et-mariage) (35)
+- [Être parent](#être-parent) (24)
+- [Parents qui vieillissent](#parents-qui-vieillissent) (5)
+- [Croyances et fêtes](#croyances-et-fêtes) (36)
+- [Loisirs et sport](#loisirs-et-sport) (28)
+- [L’histoire en direct](#lhistoire-en-direct) (41)
+- [Nature et climat](#nature-et-climat) (16)
+- [Insécurité](#insécurité) (7)
+- [Technologies](#technologies) (16)
+- [Vieillesse](#vieillesse) (27)
+- [Petites décisions](#petites-décisions) (16)
+
+### Premiers pas
+
+- **natte-fratrie** _(vie quotidienne)_ — 1–5 ans · niveau de vie : survie à précarité · un frère ou une sœur
+  - « Dort sur une natte à même le sol, serré(e) contre ses frères et sœurs. »
+- **natte-mere** _(vie quotidienne)_ — 1–4 ans · niveau de vie : survie · sa mère vivante, pas un frère ou une sœur
+  - « Dort sur une natte contre sa mère, sous l’unique couverture de la maison. »
+- **dos-mere** _(vie quotidienne)_ — 1–2 ans · niveau de vie : survie à modeste · Afrique subsaharienne · sa mère vivante
+  - « Passe ses journées sur le dos de sa mère, noué(e) dans un pagne, pendant qu’elle travaille. »
+- **habits-aines** _(vie quotidienne)_ — 2–9 ans · niveau de vie : survie à précarité · un grand frère ou une grande sœur
+  - « Porte les vêtements de ‹fratrie›, reprisés jusqu’à la corde. »
+  - « Hérite des sandales trop grandes de ‹fratrie› ; on bourre le bout avec du tissu. »
+- **jouets-fil** _(vie quotidienne)_ — 3–9 ans · niveau de vie : survie à précarité · Afrique subsaharienne, Asie du Sud, Amérique latine et Caraïbes
+  - « Fabrique ses propres jouets : une voiture en fil de fer, des roues en capsules de bouteille. »
+  - « Pousse une vieille roue de vélo avec un bâton dans la poussière, des heures durant. »
+- **poupee-mais** _(vie quotidienne)_ — 3–8 ans · niveau de vie : survie à précarité · à la campagne
+  - « Fait des poupées avec des épis de maïs et des bouts de tissu. »
+- **moustiquaire** _(santé)_ — 1–5 ans · à partir de 2005 · pays au revenu moyen sous 8 000 $ · Afrique subsaharienne
+  - « Dort sous une moustiquaire distribuée au dispensaire ; sa mère vérifie chaque soir qu’elle n’a pas de trou. »
+  - Effets : santé +1
+- **vaccins-village** _(santé)_ — 1–3 ans · à partir de 1975 · pays au revenu moyen sous 6 000 $ · à la campagne
+  - « Reçoit ses vaccins quand l’équipe de vaccination passe au village, une fois par an. »
+  - Effets : santé +1
+- **polio** _(santé)_ — 1–5 ans · à partir de 1995 · Inde, Pakistan, Afghanistan, Nigeria
+  - « Reçoit les gouttes contre la polio des mains d’une volontaire, qui marque son petit doigt à l’encre violette. »
+- **croissance** _(santé)_ — 1–5 ans · niveau de vie : survie · pays au revenu moyen sous 5 000 $
+  - « Grandit moins vite que les autres enfants : à la saison de la soudure, la nourriture manque. »
+  - Effets : santé −2
+- **creche** _(vie quotidienne)_ — 1–3 ans · à partir de 1965 · niveau de vie : classe moyenne à grande aisance · pays au revenu moyen au-dessus de 20 000 $
+  - « Entre à la crèche ; les premières semaines, pleure chaque matin à la porte. »
+  - « Passe ses journées chez une assistante maternelle du quartier, avec trois autres petits. »
+- **tablette** _(vie quotidienne)_ — 2–5 ans · à partir de 2012 · niveau de vie : classe moyenne à grande aisance
+  - « Regarde des dessins animés sur la tablette de ses parents, plus qu’ils ne voudraient l’avouer. »
+- **dessins-animes** _(vie quotidienne)_ — 3–6 ans · de 1960 à 2011 · niveau de vie : modeste à grande aisance
+  - « Regarde ses premiers dessins animés à la télévision, assis(e) beaucoup trop près de l’écran. »
+- **jouets-trop** _(vie quotidienne)_ — 2–7 ans · niveau de vie : aisance à grande aisance
+  - « Reçoit pour son anniversaire plus de jouets qu’il n’en faut ; certains restent dans leur carton. »
+- **perdu-marche** _(vie quotidienne)_ — 3–7 ans
+  - « Se perd au marché ; on le/la retrouve trois heures plus tard, en train de manger des beignets chez une inconnue. »
+- **chevreau** _(vie quotidienne)_ — 3–8 ans · à la campagne
+  - « Assiste à la naissance d’un chevreau et décide de lui donner le prénom de son meilleur ami. »
+  - « Passe ses journées avec les poules de la cour ; chacune a un nom. »
+- **nordic-sieste** _(vie quotidienne)_ — 1–2 ans · à partir de 1950 · pays nordiques
+  - « Fait la sieste dehors dans son landau, même par −10 °C, comme presque tous les bébés du pays. »
+- **jp-maternelle** _(vie quotidienne)_ — 3–5 ans · à partir de 1960 · Japon
+  - « Entre à la maternelle en uniforme, avec un chapeau jaune pour être vu(e) des voitures. »
+- **fr-cantine** _(vie quotidienne)_ — 3–6 ans · à partir de 1960 · France
+  - « Mange à la cantine de la maternelle : entrée, plat, fromage, dessert, comme les grands. »
+- **acte-naissance** _(vie quotidienne)_ — 5–9 ans · jusqu’en 2005 · niveau de vie : survie · Afrique subsaharienne, Asie du Sud · une fois dans la vie
+  - « N’a pas d’acte de naissance : on le/la déclare des années plus tard, à une date un peu au hasard. »
+- **anniv-non** _(vie quotidienne)_ — 4–10 ans · jusqu’en 1995 · niveau de vie : survie à précarité
+  - « Personne ne fête les anniversaires à la maison ; la date exacte de sa naissance, d’ailleurs, on ne la sait pas bien. »
+- **anniv-gateau** _(vie quotidienne)_ — 3–10 ans · à partir de 1950 · niveau de vie : modeste à aisance
+  - « Fête son anniversaire avec un gâteau de la boulangerie et des bougies qu’il faut souffler deux fois. »
+- **anniv-magicien** _(vie quotidienne)_ — 4–10 ans · niveau de vie : grande aisance · les 10 % les plus aisés du pays
+  - « Fête son anniversaire avec un magicien, un château gonflable et cinquante invités qu’il/elle connaît à peine. »
+- **nounous** _(vie quotidienne)_ — 1–8 ans · les 8 % les plus aisés du pays · pays au revenu moyen sous 30 000 $
+  - « Grandit entre une nounou, un chauffeur et une cuisinière ; ses parents rentrent tard. »
+- **grands-parents-cn** _(famille)_ — 2–8 ans · de 1988 à 2032 · niveau de vie : survie à classe moyenne · Chine · à la campagne · ses deux parents vivants · ouvre le fil « leftBehind » · une fois dans la vie
+  - « Ses parents partent travailler dans les usines de la côte ; ce sont ses grands-parents qui l’élèvent au village. »
+  - Effets : liens −3, bonheur −2
+- **parents-nouvel-an** _(famille)_ — 3–17 ans · ses deux parents vivants · suite du fil « leftBehind »
+  - « Ses parents rentrent pour le Nouvel An : une semaine de fête, puis le train repart sans lui/elle. »
+  - Effets : bonheur −1, liens +1
+- **parents-reviennent** _(famille)_ — 12–20 ans · ses deux parents vivants · suite du fil « leftBehind » (au moins 5 ans après)
+  - « Ses parents reviennent vivre au village ; on a presque désappris à vivre ensemble. »
+  - Effets : liens +2
+
+### Maison et confort
+
+- **toit-tole** _(vie quotidienne)_ — 3–75 ans · niveau de vie : survie à précarité · pays au revenu moyen sous 15 000 $ · Afrique subsaharienne, Asie du Sud, Amérique latine et Caraïbes, Asie de l’Est et du Sud-Est, Océanie
+  - « La pluie traverse le toit de tôle ; on place des bassines sous les fuites et on dort entre les gouttes. »
+  - « À la saison chaude, la tôle du toit transforme la maison en four ; on dort dehors sur des nattes. »
+- **toit-fuit** _(vie quotidienne)_ — 3–75 ans · niveau de vie : survie à précarité · Europe et Asie centrale, Amérique du Nord, Moyen-Orient et Afrique du Nord
+  - « Le toit fuit à chaque orage ; on place des bassines et l’on dort entre les gouttes. »
+- **piece-unique** _(vie quotidienne)_ — 3–60 ans · niveau de vie : survie à précarité · pays au revenu moyen sous 20 000 $ · en ville
+  - « Toute la famille vit dans une seule pièce ; on déplie les matelas le soir et on les empile le matin. »
+  - « Un rideau coupe l’unique pièce en deux : d’un côté on dort, de l’autre on cuisine et on reçoit. »
+- **bidonville** _(vie quotidienne)_ — 5–60 ans · à partir de 1950 · niveau de vie : survie à précarité · pays au revenu moyen sous 15 000 $ · en ville
+  - « Vit dans un quartier construit sans permis, où les ruelles deviennent des rivières à chaque averse. »
+  - « Le quartier n’a pas d’adresse officielle ; pour recevoir une lettre, on donne le nom de la boutique d’à côté. »
+- **toilettes-partagees** _(vie quotidienne)_ — 5–60 ans · niveau de vie : survie à précarité · pays au revenu moyen sous 12 000 $ · en ville
+  - « Partage les toilettes avec quarante voisins ; le matin, on fait la queue, un seau à la main. »
+- **maison-terre** _(vie quotidienne)_ — 6–70 ans · niveau de vie : survie à précarité · pays au revenu moyen sous 8 000 $ · à la campagne
+  - « Aide à refaire les murs de terre de la maison avant la saison des pluies, comme chaque année. »
+- **maison-dur** _(vie quotidienne)_ — 22–60 ans · niveau de vie : modeste à classe moyenne · pays au revenu moyen sous 15 000 $ · une fois dans la vie
+  - « Remplace petit à petit les murs de terre par des parpaings, une rangée à chaque paie ; la maison grandit avec les années. »
+  - Effets : bonheur +2
+- **chambre-fratrie** _(vie quotidienne)_ — 5–17 ans · niveau de vie : précarité à classe moyenne · un frère ou une sœur
+  - « Partage sa chambre avec ‹fratrie› ; une ligne imaginaire coupe la pièce en deux. »
+- **chambre-a-soi** _(vie quotidienne)_ — 6–17 ans · niveau de vie : classe moyenne à grande aisance · une fois dans la vie
+  - « A enfin une chambre à lui/elle, avec des posters au mur et une porte qu’on peut fermer. »
+- **multigen** _(vie quotidienne)_ — 5–70 ans · niveau de vie : survie à classe moyenne · Asie du Sud, Moyen-Orient et Afrique du Nord, Afrique subsaharienne
+  - « Trois générations sous le même toit : grands-parents, oncles, cousins ; on n’est jamais seul(e), jamais au calme. »
+  - « La cour commune résonne de toute la famille élargie : on y cuisine, on s’y dispute, on s’y réconcilie. »
+  - Effets : liens +2
+- **residence-fermee** _(vie quotidienne)_ — 5–70 ans · à partir de 1980 · les 15 % les plus aisés du pays · pays au revenu moyen sous 30 000 $ · Amérique latine et Caraïbes, Afrique subsaharienne, Asie du Sud, Moyen-Orient et Afrique du Nord · en ville
+  - « Vit dans une résidence fermée, avec gardiens et groupe électrogène, à l’abri du reste de la ville. »
+- **domestique-maison** _(vie quotidienne)_ — 5–80 ans · les 20 % les plus aisés du pays · pays au revenu moyen sous 30 000 $ · Amérique latine et Caraïbes, Asie du Sud, Moyen-Orient et Afrique du Nord, Afrique subsaharienne, Asie de l’Est et du Sud-Est
+  - « À la maison, une employée prépare les repas et fait le ménage ; elle a laissé ses propres enfants au village. »
+- **maison-vacances** _(vie quotidienne)_ — 5–80 ans · niveau de vie : grande aisance · les 10 % les plus aisés du pays
+  - « Passe les étés dans la maison de famille au bord de la mer : les mêmes voisins, les mêmes jeux, chaque année. »
+- **chauffage-eteint** _(argent)_ — 20–85 ans · les 18 % les plus modestes du pays · pays au revenu moyen au-dessus de 20 000 $ · Europe et Asie centrale, Amérique du Nord
+  - « Garde le chauffage éteint jusqu’en décembre pour tenir le budget ; à la maison, on vit en pull. »
+  - Effets : santé −1
+- **loyer-moitie** _(argent)_ — 22–50 ans · entre 5 et 50 % du pays · pays au revenu moyen au-dessus de 30 000 $ · en ville · locataire
+  - « Le loyer avale presque la moitié du salaire ; le reste se compte au centime près. »
+- **dossier-location** _(vie quotidienne)_ — 20–35 ans · à partir de 1990 · France, Allemagne, Pays-Bas, Belgique, Suède, Irlande, Royaume-Uni · en ville · locataire
+  - « Visite vingt appartements avant d’en obtenir un, avec un dossier épais comme un annuaire. »
+- **chambre-bonne** _(vie quotidienne)_ — 18–25 ans · France · en ville · à l’université
+  - « Loue une chambre de bonne de 9 m² sous les toits ; les toilettes sont sur le palier. »
+- **colocation** _(vie quotidienne)_ — 19–30 ans · à partir de 1975 · pays au revenu moyen au-dessus de 20 000 $ · en ville · jamais marié·e
+  - « Vit en colocation avec trois inconnus devenus amis ; la vaisselle est un sujet diplomatique. »
+- **chez-parents-30** _(vie quotidienne)_ — 27–33 ans · à partir de 1990 · Italie, Espagne, Portugal, Grèce, Croatie, Slovaquie, Malte · jamais marié·e, un parent vivant
+  - « Approche de la trentaine et vit encore chez ses parents, comme beaucoup de jeunes du pays : les loyers sont trop chers. »
+- **jp-studio** _(vie quotidienne)_ — 18–35 ans · Japon · en ville · jamais marié·e
+  - « Vit seul(e) dans un studio de 20 m², à une heure de train du bureau ; le futon se replie chaque matin. »
+- **sg-hdb** _(vie quotidienne)_ — 5–80 ans · à partir de 1965 · Singapour
+  - « Vit dans un appartement HDB, comme près de quatre Singapouriens sur cinq ; on connaît les voisins de palier depuis vingt ans. »
+- **hk-petit** _(vie quotidienne)_ — 8–60 ans · niveau de vie : modeste à aisance · Hong Kong, Macao
+  - « Vit à quatre dans 35 m² ; ici, c’est presque grand. »
+- **hk-cercueil** _(vie quotidienne)_ — 25–85 ans · à partir de 1990 · les 10 % les plus modestes du pays · Hong Kong
+  - « Loue une « maison-cercueil » : un lit dans une case, une étagère, une ampoule. »
+  - Effets : bonheur −2
+- **pret-immo-nappe** _(argent)_ — 28–45 ans · à partir de 1960 · entre 35 et 75 % du pays · pays au revenu moyen au-dessus de 20 000 $ · locataire, en couple
+  - « Calcule les mensualités d’un prêt immobilier sur un coin de nappe, un dimanche soir. »
+- **hlm** _(vie quotidienne)_ — 5–60 ans · à partir de 1960 · les 35 % les plus modestes du pays · France · en ville
+  - « Grandit dans une tour de HLM ; l’ascenseur est en panne une semaine sur deux, mais les fenêtres donnent loin. »
+- **barres-beton** _(vie quotidienne)_ — 5–70 ans · à partir de 1960 · ex-URSS, ex-bloc de l’Est · en ville
+  - « Vit dans un immeuble de cinq étages en panneaux de béton, tous pareils, où l’on connaît chaque voisin. »
+- **kommunalka** _(vie quotidienne)_ — 5–60 ans · de 1920 à 1990 · niveau de vie : survie à classe moyenne · Russie, Ukraine, Biélorussie · en ville
+  - « Vit dans un appartement communautaire : une chambre par famille, une cuisine pour cinq familles, et des disputes pour la salle de bains. »
+- **datcha** _(culture et fêtes)_ — 5–80 ans · à partir de 1950 · niveau de vie : modeste à aisance · Russie, Ukraine, Biélorussie
+  - « Passe l’été à la datcha : le potager, le bania, les confitures, les moustiques. »
+- **favela** _(vie quotidienne)_ — 5–60 ans · à partir de 1940 · les 30 % les plus modestes du pays · Brésil · en ville
+  - « Vit dans une favela accrochée à la colline ; d’en haut, la vue sur la ville est la plus belle de toutes. »
+- **chawl** _(vie quotidienne)_ — 5–60 ans · niveau de vie : précarité à modeste · Inde · en ville
+  - « Vit dans un chawl : une pièce par famille, et un long balcon commun où tout le monde se croise. »
+
+### Eau, lumière, énergie
+
+- **eau-puits** _(vie quotidienne)_ — 5–14 ans · niveau de vie : survie à précarité · pays au revenu moyen sous 10 000 $ · à la campagne
+  - « Va chercher l’eau au puits avant l’école, un bidon jaune sur la tête. »
+  - « Marche chaque matin jusqu’à la rivière avec un seau ; l’eau pèse plus lourd que la veille. »
+  - Effets : santé −1
+- **eau-puits-f** _(vie quotidienne)_ — 8–40 ans · niveau de vie : survie à précarité · pays au revenu moyen sous 10 000 $ · à la campagne · femmes
+  - « Fait trois allers-retours au point d’eau chaque jour ; c’est le travail des femmes et des filles, dit-on. »
+  - Effets : santé −1
+- **eau-quelques-heures** _(vie quotidienne)_ — 6–70 ans · niveau de vie : survie à modeste · Inde, Pakistan, Yémen, Jordanie, Palestine, Nigeria, Kenya, Tanzanie, Bangladesh, Népal, Liban, Irak, Syrie, Zimbabwe, Zambie · en ville
+  - « L’eau du robinet ne coule que quelques heures, deux jours par semaine ; on remplit tous les bidons de la maison. »
+- **eau-bonbonnes** _(vie quotidienne)_ — 10–80 ans · à partir de 1990 · niveau de vie : modeste à aisance · Mexique, Indonésie, Inde, Égypte, Thaïlande, Vietnam, Chine, Nigeria · en ville
+  - « Fait livrer chaque semaine des bonbonnes d’eau de 20 litres : ici, l’eau du robinet ne se boit pas. »
+- **lampe-petrole** _(vie quotidienne)_ — 4–60 ans · jusqu’en 2030 · niveau de vie : survie à précarité · pays au revenu moyen sous 6 000 $ · à la campagne
+  - « La maison n’a pas l’électricité ; on fait ses devoirs à la lampe à pétrole, qui pique les yeux et noircit le plafond. »
+- **lampe-solaire** _(vie quotidienne)_ — 6–60 ans · à partir de 2012 · niveau de vie : survie à modeste · pays au revenu moyen sous 8 000 $ · Afrique subsaharienne, Asie du Sud · à la campagne · une fois dans la vie
+  - « Une petite lampe solaire remplace la lampe à pétrole ; on peut lire le soir sans tousser. »
+  - Effets : savoir +1, santé +1
+- **electricite-arrive** _(vie quotidienne)_ — 3–80 ans · de 1925 à 2030 · pays au revenu moyen entre 1 500 et 12 000 $ · à la campagne · une fois dans la vie
+  - « L’électricité arrive au village : tout le monde se réunit pour voir s’allumer la première ampoule. »
+  - Effets : bonheur +3
+- **route-goudron** _(vie quotidienne)_ — 6–80 ans · de 1950 à 2060 · pays au revenu moyen entre 2 000 et 14 000 $ · à la campagne · une fois dans la vie
+  - « Une route goudronnée relie enfin le village à la ville ; le trajet passe de quatre heures à une. »
+- **robinet-cour** _(vie quotidienne)_ — 6–80 ans · de 1950 à 2060 · niveau de vie : précarité à classe moyenne · pays au revenu moyen entre 2 000 et 16 000 $ · à la campagne · une fois dans la vie
+  - « Un robinet est installé dans la cour : fini les allers-retours au puits. »
+  - Effets : santé +1, bonheur +2
+- **bois-chauffe** _(vie quotidienne)_ — 8–70 ans · niveau de vie : survie à précarité · pays au revenu moyen sous 8 000 $ · à la campagne · femmes
+  - « Part chercher du bois de chauffe à des kilomètres, le fagot sur la tête ; la forêt recule chaque année. »
+- **fumee-cuisine** _(santé)_ — 20–70 ans · niveau de vie : survie à précarité · pays au revenu moyen sous 8 000 $ · à la campagne · femmes
+  - « Cuisine sur un feu de bois dans une pièce sans cheminée ; la fumée fait tousser toute la famille. »
+  - Effets : santé −1
+- **gazinière** _(vie quotidienne)_ — 20–70 ans · à partir de 1960 · niveau de vie : modeste à classe moyenne · les 70 % les plus modestes du pays · pays au revenu moyen entre 3 000 et 20 000 $ · une fois dans la vie
+  - « Achète une cuisinière à gaz : fini la fumée du bois dans les yeux. »
+  - Effets : santé +1
+- **ujjwala** _(vie quotidienne)_ — 20–70 ans · à partir de 2016 · niveau de vie : survie à modeste · Inde · à la campagne · femmes · une fois dans la vie
+  - « Reçoit une bouteille de gaz grâce à un programme du gouvernement : fini le feu de bois qui pique les yeux. »
+  - Effets : santé +1
+- **ng-generateur** _(vie quotidienne)_ — 6–80 ans · à partir de 1990 · Nigeria · en ville
+  - « Le courant public va et vient ; le soir, le quartier vit au rythme des groupes électrogènes, et tout le monde crie « Up NEPA ! » quand la lumière revient. »
+- **za-delestage** _(vie quotidienne)_ — 6–90 ans · de 2008 à 2024 · Afrique du Sud
+  - « Délestage : le courant est coupé deux heures, plusieurs fois par jour, selon un calendrier aimanté sur le frigo. »
+- **pk-coupures** _(vie quotidienne)_ — 6–90 ans · de 2007 à 2018 · Pakistan
+  - « L’été, le courant est coupé six heures par jour ; quand les ventilateurs s’arrêtent, tout le monde monte dormir sur le toit. »
+- **np-coupures** _(vie quotidienne)_ — 6–90 ans · de 2006 à 2016 · Népal
+  - « Jusqu’à seize heures de coupure de courant par jour en hiver ; on vit avec les horaires imprimés dans le journal. »
+- **lb-generateur** _(vie quotidienne)_ — 6–90 ans · à partir de 1990 · Liban
+  - « L’électricité publique ne vient que quelques heures par jour ; on paie un abonnement au générateur du quartier. »
+- **coupure-match** _(vie quotidienne)_ — 6–80 ans · à partir de 1970 · niveau de vie : précarité à classe moyenne · pays au revenu moyen entre 2 000 et 15 000 $ · sauf Nigeria, Afrique du Sud, Pakistan, Népal, Liban · en ville
+  - « Une coupure de courant tombe en plein match ; tout le quartier gronde, puis sort parler dans la rue. »
+- **clim** _(vie quotidienne)_ — 20–70 ans · à partir de 2000 · niveau de vie : modeste à aisance · Asie du Sud, Moyen-Orient et Afrique du Nord, Afrique subsaharienne, Asie de l’Est et du Sud-Est · une fois dans la vie
+  - « Achète un climatiseur ; la première nuit au frais semble irréelle. »
+  - Effets : santé +1
+
+### À table
+
+- **ventre-vide** _(vie quotidienne)_ — 3–80 ans · niveau de vie : survie · les 60 % les plus modestes du pays
+  - « Certains soirs, on se couche le ventre vide ; on apprend à ne pas en parler. »
+  - « Mange une fois par jour, quand il y a de quoi. »
+  - « Partage une assiette de riz à quatre ; les plus petits passent en premier. »
+  - Effets : santé −1, bonheur −1
+- **soudure** _(vie quotidienne)_ — 3–80 ans · niveau de vie : survie à précarité · les 60 % les plus modestes du pays · pays au revenu moyen sous 6 000 $ · à la campagne
+  - « C’est la soudure : les greniers sont vides et la récolte n’est pas mûre ; on ne mange qu’une fois par jour jusqu’à la moisson. »
+  - Effets : santé −1
+- **saute-repas** _(vie quotidienne)_ — 20–60 ans · niveau de vie : survie à précarité · les 60 % les plus modestes du pays · un enfant mineur
+  - « Saute un repas pour que les enfants mangent à leur faim ; personne ne s’en aperçoit. »
+  - Effets : santé −1, liens +1
+- **viande-fetes** _(vie quotidienne)_ — 4–80 ans · niveau de vie : précarité
+  - « La viande, c’est pour les jours de fête ; le reste du temps, des céréales, des légumes, et ce qu’on trouve. »
+- **poulet-dimanche** _(vie quotidienne)_ — 4–80 ans · niveau de vie : modeste · pays au revenu moyen sous 15 000 $
+  - « Le dimanche, on tue un poulet ; c’est jour de fête à la maison. »
+- **sachets** _(argent)_ — 10–80 ans · à partir de 1985 · niveau de vie : survie à précarité · Asie du Sud, Afrique subsaharienne, Asie de l’Est et du Sud-Est, Amérique latine et Caraïbes
+  - « Achète l’huile, le savon et le shampoing en petits sachets, au jour le jour : jamais assez d’argent d’un coup pour un flacon entier. »
+  - « Achète trois cigarettes, une louche d’huile, un cube de bouillon : ici, tout se vend à l’unité. »
+- **cahier-boutique** _(argent)_ — 18–80 ans · niveau de vie : survie à précarité
+  - « À la fin du mois, prend à crédit chez le boutiquier du coin, qui note tout dans un cahier d’écolier. »
+- **supermarche** _(vie quotidienne)_ — 6–80 ans · à partir de 1960 · niveau de vie : classe moyenne à aisance
+  - « Les courses du samedi au supermarché, le chariot plein et la liste qu’on oublie toujours. »
+  - « Le grand plein de courses du mois : deux chariots, et la voiture qui ploie à l’arrière. »
+- **resto-monde** _(vie quotidienne)_ — 18–70 ans · à partir de 1985 · niveau de vie : aisance à grande aisance · pays au revenu moyen au-dessus de 25 000 $
+  - « Découvre les sushis, les currys et les tacos sans quitter sa ville ; le monde entier tient dans sa rue. »
+- **resto-chic** _(vie quotidienne)_ — 25–85 ans · niveau de vie : grande aisance · les 10 % les plus aisés du pays
+  - « Dîne dans des restaurants où le menu n’affiche pas les prix. »
+- **jardin-potager** _(vie quotidienne)_ — 30–85 ans · niveau de vie : précarité à classe moyenne · à la campagne
+  - « Cultive un potager derrière la maison : les tomates de l’été, c’est de l’argent qu’on ne dépense pas. »
+- **restos-coeur** _(argent)_ — 18–85 ans · à partir de 1986 · les 12 % les plus modestes du pays · France
+  - « Va chercher un colis aux Restos du cœur ; on y croise des visages qu’on n’aurait pas imaginés là. »
+- **food-bank-gb** _(argent)_ — 18–85 ans · à partir de 2010 · les 15 % les plus modestes du pays · Royaume-Uni
+  - « Pousse la porte d’une banque alimentaire, en espérant ne croiser personne qu’il/elle connaît. »
+- **food-bank-us** _(argent)_ — 18–85 ans · à partir de 1980 · les 15 % les plus modestes du pays · États-Unis, Canada
+  - « Fait la queue à la banque alimentaire de la paroisse, entre deux services au travail. »
+- **tafel** _(argent)_ — 18–85 ans · à partir de 1993 · les 12 % les plus modestes du pays · Allemagne, Autriche
+  - « Fait ses courses à la Tafel : des invendus, quelques pièces, et beaucoup de pudeur. »
+- **bons-alimentaires** _(argent)_ — 18–85 ans · à partir de 1964 · les 20 % les plus modestes du pays · États-Unis · un enfant mineur
+  - « Paie une partie des courses avec des bons alimentaires ; à la caisse, on baisse les yeux. »
+- **cantine-gratuite** _(vie quotidienne)_ — 6–15 ans · les 20 % les plus modestes du pays · France, Royaume-Uni, Finlande, Suède · à l’école
+  - « Mange gratuitement à la cantine : c’est souvent le seul repas complet de la journée. »
+- **repas-ecole-in** _(vie quotidienne)_ — 6–13 ans · à partir de 2003 · niveau de vie : survie à modeste · Inde · à l’école
+  - « Le repas de midi est servi à l’école publique : riz, lentilles, parfois un œuf ; pour beaucoup d’élèves, c’est la raison de venir. »
+  - Effets : santé +1
+- **libreta** _(vie quotidienne)_ — 6–90 ans · à partir de 1962 · Cuba
+  - « Chaque mois, la libreta, le carnet de rationnement : un peu de riz, de haricots, de sucre, et la queue à la bodega. »
+- **kp-rations** _(vie quotidienne)_ — 6–90 ans · Corée du Nord
+  - « Les rations de l’État s’amenuisent ; on complète avec des herbes cueillies dans les collines. »
+  - Effets : santé −1
+
+### Plats de famille
+
+- **plat-fr** _(vie quotidienne)_ — 4–90 ans · France, Belgique, Luxembourg, Monaco (pays d’origine)
+  - « Le gratin de sa grand-mère, le dimanche midi, et la croûte qu’on se dispute. »
+  - « Le pot-au-feu de l’hiver, qui embaume la maison dès le matin. »
+- **plat-it** _(vie quotidienne)_ — 4–90 ans · Italie, Saint-Marin (pays d’origine)
+  - « Les pâtes fraîches du dimanche, roulées à la main par sa grand-mère, et la sauce qui mijote depuis l’aube. »
+- **plat-es** _(vie quotidienne)_ — 4–90 ans · Espagne, Andorre (pays d’origine)
+  - « La paella du dimanche, préparée par son père dans une poêle immense, au milieu de la cour. »
+  - « Les tapas du soir, debout au comptoir, avec la moitié du quartier. »
+- **plat-pt** _(vie quotidienne)_ — 4–90 ans · Portugal, Cap-Vert (pays d’origine)
+  - « La morue de Noël, et les mille façons de la préparer selon la famille. »
+- **plat-gr** _(vie quotidienne)_ — 4–90 ans · Grèce, Chypre (pays d’origine)
+  - « L’agneau de Pâques à la broche ; tout le village tourne autour du feu, un verre à la main. »
+- **plat-de** _(vie quotidienne)_ — 4–90 ans · Allemagne, Autriche, Suisse, Liechtenstein (pays d’origine)
+  - « Le café et les gâteaux du dimanche après-midi chez les grands-parents, avec la nappe brodée. »
+- **plat-gb** _(vie quotidienne)_ — 4–90 ans · Royaume-Uni, Irlande, Île de Man, Gibraltar (pays d’origine)
+  - « Le rôti du dimanche, avec ses Yorkshire puddings et une sauce trop épaisse. »
+- **plat-nl** _(vie quotidienne)_ — 4–90 ans · Pays-Bas (pays d’origine)
+  - « Le hareng cru du marché, qu’on avale la tête en arrière, et les frites à la mayonnaise. »
+- **plat-nordic** _(vie quotidienne)_ — 4–90 ans · pays nordiques, Îles Féroé, Groenland, Estonie (pays d’origine)
+  - « La cueillette des myrtilles et des champignons en forêt, à la fin de l’été ; les confitures tiennent jusqu’au printemps. »
+- **plat-pl** _(vie quotidienne)_ — 4–90 ans · Pologne, Lituanie, Lettonie (pays d’origine)
+  - « La veille de Noël, douze plats sans viande, et la carpe qui nage dans la baignoire en attendant son heure. »
+- **plat-ru** _(vie quotidienne)_ — 4–90 ans · Russie, Ukraine, Biélorussie (pays d’origine)
+  - « Le bortsch de sa grand-mère, avec une cuillère de smetana par-dessus. »
+- **plat-balkans** _(vie quotidienne)_ — 4–90 ans · Serbie, Croatie, Bosnie-Herzégovine, Monténégro, Macédoine du Nord, Slovénie, Bulgarie, Roumanie, Moldavie (pays d’origine)
+  - « Les sarmale de l’hiver, les feuilles de chou farcies qu’on prépare par dizaines pour toute la famille. »
+- **plat-hu** _(vie quotidienne)_ — 4–90 ans · Hongrie (pays d’origine)
+  - « Le goulasch qui mijote dans un chaudron, dehors, un dimanche de fête. »
+- **plat-cz** _(vie quotidienne)_ — 4–90 ans · Tchéquie, Slovaquie (pays d’origine)
+  - « Les knedlíky et la sauce du dimanche, et la bière qu’on laisse goûter aux enfants du bout des lèvres. »
+- **plat-al** _(vie quotidienne)_ — 4–90 ans · Albanie, Kosovo (pays d’origine)
+  - « Le byrek du matin, acheté tout chaud à la boulangerie du coin. »
+- **plat-tr** _(vie quotidienne)_ — 4–90 ans · Turquie (pays d’origine)
+  - « Le petit déjeuner du week-end : vingt petites assiettes sur la table, et du thé à volonté. »
+- **plat-ir** _(vie quotidienne)_ — 4–90 ans · Iran (pays d’origine)
+  - « Le tahdig, la croûte de riz dorée au fond de la marmite, que tous les enfants se disputent. »
+- **plat-af** _(vie quotidienne)_ — 4–90 ans · Afghanistan (pays d’origine)
+  - « Le qabuli palaw des grands jours, le riz aux carottes et aux raisins secs, servi sur un immense plat. »
+- **plat-eg** _(vie quotidienne)_ — 4–90 ans · Égypte (pays d’origine)
+  - « Le koshari du coin de la rue : du riz, des lentilles, des pâtes, et tout le monde l’adore. »
+- **plat-maghreb** _(vie quotidienne)_ — 4–90 ans · Maroc, Algérie, Tunisie, Libye, Mauritanie (pays d’origine)
+  - « Le couscous du vendredi, partagé dans le grand plat après la prière. »
+- **plat-levant** _(vie quotidienne)_ — 4–90 ans · Liban, Syrie, Jordanie, Palestine, Irak (pays d’origine)
+  - « Les mezzés du vendredi, et le pain encore chaud du four du quartier. »
+- **plat-golfe** _(vie quotidienne)_ — 4–90 ans · pays du Golfe, Yémen (pays d’origine)
+  - « Le riz et l’agneau partagés sur un grand plateau, assis en cercle sur le tapis. »
+- **plat-il** _(vie quotidienne)_ — 4–90 ans · Israël (pays d’origine)
+  - « Le repas du vendredi soir : la hallah, les bougies, et toute la famille autour de la table. »
+- **plat-in** _(vie quotidienne)_ — 4–90 ans · Inde (pays d’origine)
+  - « Le dal et les chapatis chauds, mangés avec les doigts ; sa mère ne s’assoit qu’une fois tout le monde servi. »
+- **plat-pk** _(vie quotidienne)_ — 4–90 ans · Pakistan (pays d’origine)
+  - « Le biryani des mariages, servi par montagnes, et la bataille pour les morceaux de viande. »
+- **plat-bd** _(vie quotidienne)_ — 4–90 ans · Bangladesh (pays d’origine)
+  - « Le riz au poisson, et l’ilish des grands jours, plein d’arêtes et de souvenirs. »
+- **plat-np** _(vie quotidienne)_ — 4–90 ans · Népal, Bhoutan (pays d’origine)
+  - « Le dal bhat deux fois par jour : « vingt-quatre heures d’énergie », dit le dicton. »
+- **plat-lk** _(vie quotidienne)_ — 4–90 ans · Sri Lanka, Maldives (pays d’origine)
+  - « Le riz et ses currys, dix petits bols autour de l’assiette, et le sambol de noix de coco. »
+- **plat-cn** _(vie quotidienne)_ — 4–90 ans · Chine, Taïwan, Hong Kong, Macao, Singapour (pays d’origine)
+  - « Les raviolis du Nouvel An, pliés en famille jusqu’à minuit ; celui qui trouve la pièce cachée aura de la chance toute l’année. »
+- **plat-jp** _(vie quotidienne)_ — 4–90 ans · Japon (pays d’origine)
+  - « Le bento préparé chaque matin par sa mère, avec des saucisses taillées en forme de pieuvre. »
+- **plat-kr** _(vie quotidienne)_ — 4–90 ans · Corée du Sud (pays d’origine)
+  - « Le kimjang : chaque automne, toute la famille prépare des centaines de choux de kimchi pour l’hiver. »
+- **plat-vn** _(vie quotidienne)_ — 4–90 ans · Vietnam (pays d’origine)
+  - « Le phở du matin, avalé sur un petit tabouret en plastique au bord du trottoir. »
+- **plat-th** _(vie quotidienne)_ — 4–90 ans · Thaïlande, Laos (pays d’origine)
+  - « Le som tam pilé au mortier, si épicé que les yeux pleurent, et le riz gluant roulé entre les doigts. »
+- **plat-kh** _(vie quotidienne)_ — 4–90 ans · Cambodge (pays d’origine)
+  - « Le poisson séché et le prahok, dont l’odeur fait fuir les visiteurs et revenir les exilés. »
+- **plat-mm** _(vie quotidienne)_ — 4–90 ans · Myanmar (pays d’origine)
+  - « La mohinga du matin, la soupe de poisson et de nouilles achetée au coin de la rue. »
+- **plat-id** _(vie quotidienne)_ — 4–90 ans · Indonésie, Malaisie, Brunei, Timor oriental (pays d’origine)
+  - « Le nasi goreng du soir, acheté au chariot ambulant qui annonce son passage en tapant sur un bol. »
+- **plat-ph** _(vie quotidienne)_ — 4–90 ans · Philippines (pays d’origine)
+  - « Le lechon des grandes fêtes, et le riz à chaque repas, même au petit déjeuner. »
+- **plat-mn** _(vie quotidienne)_ — 4–90 ans · Mongolie (pays d’origine)
+  - « Les buuz du Nouvel An, des centaines de raviolis à la vapeur préparés en famille. »
+- **plat-asie-centrale** _(vie quotidienne)_ — 4–90 ans · Ouzbékistan, Tadjikistan, Kazakhstan, Kirghizstan, Turkménistan, Azerbaïdjan (pays d’origine)
+  - « Le plov des grandes occasions, cuit par les hommes dans un chaudron immense, au petit matin. »
+- **plat-ge** _(vie quotidienne)_ — 4–90 ans · Géorgie (pays d’origine)
+  - « Les festins sans fin : les toasts du tamada, et les khinkalis qu’on mange avec les doigts sans renverser le bouillon. »
+- **plat-am** _(vie quotidienne)_ — 4–90 ans · Arménie (pays d’origine)
+  - « Le lavash cuit contre les parois du four en terre, et les brochettes du dimanche. »
+- **plat-ng** _(vie quotidienne)_ — 4–90 ans · Nigeria (pays d’origine)
+  - « Le riz jollof des grands jours, et les débats sans fin pour savoir qui le cuisine le mieux, du Nigeria ou du Ghana. »
+- **plat-gh** _(vie quotidienne)_ — 4–90 ans · Ghana (pays d’origine)
+  - « Le fufu pilé à deux, au rythme du pilon, et la soupe d’arachide. »
+- **plat-sn** _(vie quotidienne)_ — 4–90 ans · Sénégal, Gambie (pays d’origine)
+  - « Le thiéboudienne partagé autour du grand plat, chacun mangeant la part qui est devant lui. »
+- **plat-ml** _(vie quotidienne)_ — 4–90 ans · Mali, Burkina Faso, Niger, Tchad, Guinée (pays d’origine)
+  - « Le tô de mil et sa sauce gombo, mangé à la main dans la calebasse commune. »
+- **plat-ci** _(vie quotidienne)_ — 4–90 ans · Côte d’Ivoire, Togo, Bénin (pays d’origine)
+  - « L’attiéké au poisson braisé, acheté au maquis du coin, le vendredi soir. »
+- **plat-cm** _(vie quotidienne)_ — 4–90 ans · Cameroun, Gabon, Guinée équatoriale (pays d’origine)
+  - « Le ndolé du dimanche, et le plantain mûr qui fond dans la bouche. »
+- **plat-et** _(vie quotidienne)_ — 4–90 ans · Éthiopie, Érythrée (pays d’origine)
+  - « L’injera partagée, et le gursha : la bouchée qu’on glisse dans la bouche de ceux qu’on aime. »
+- **plat-eaf** _(vie quotidienne)_ — 4–90 ans · Kenya, Tanzanie, Ouganda, Rwanda, Burundi (pays d’origine)
+  - « L’ugali et les sukuma wiki presque chaque jour, et la viande grillée les jours de fête. »
+- **plat-za** _(vie quotidienne)_ — 4–90 ans · Afrique du Sud, Botswana, Namibie, Lesotho, Eswatini (pays d’origine)
+  - « Le braai du week-end : la viande grillée, les voisins, la musique jusqu’à la nuit. »
+- **plat-nshima** _(vie quotidienne)_ — 4–90 ans · Zambie, Malawi, Zimbabwe, Mozambique (pays d’origine)
+  - « La bouillie de maïs épaisse à chaque repas, nshima ou sadza selon le voisin ; sans elle, on n’a pas vraiment mangé. »
+- **plat-congo** _(vie quotidienne)_ — 4–90 ans · RD Congo, Congo, Angola, République centrafricaine (pays d’origine)
+  - « Le fufu de manioc et les feuilles de pondu, le plat de tous les jours. »
+- **plat-mg** _(vie quotidienne)_ — 4–90 ans · Madagascar, Comores (pays d’origine)
+  - « Le riz trois fois par jour ; ici, un repas sans riz n’est pas un repas. »
+- **plat-so** _(vie quotidienne)_ — 4–90 ans · Somalie, Djibouti (pays d’origine)
+  - « Le riz à la viande de chèvre, et la banane qu’on mange avec, comme le veut la tradition. »
+- **plat-sd** _(vie quotidienne)_ — 4–90 ans · Soudan, Soudan du Sud (pays d’origine)
+  - « La kissra, la galette fine de sorgho, et les fèves du matin. »
+- **plat-mx** _(vie quotidienne)_ — 4–90 ans · Mexique (pays d’origine)
+  - « Les tamales de Noël, préparés à la chaîne par toutes les femmes de la famille. »
+- **plat-camerique** _(vie quotidienne)_ — 4–90 ans · Guatemala, Honduras, Nicaragua, Belize (pays d’origine)
+  - « Les tortillas de maïs à chaque repas, chaudes, dans un torchon plié. »
+- **plat-sv** _(vie quotidienne)_ — 4–90 ans · Salvador (pays d’origine)
+  - « Les pupusas du dimanche soir, au fromage et aux haricots, avec le chou mariné. »
+- **plat-cu** _(vie quotidienne)_ — 4–90 ans · Cuba, République dominicaine, Porto Rico, Panama, Costa Rica (pays d’origine)
+  - « Le riz aux haricots noirs, et le cochon de lait des grandes fêtes. »
+- **plat-br** _(vie quotidienne)_ — 4–90 ans · Brésil (pays d’origine)
+  - « La feijoada du samedi, qui dure tout l’après-midi. »
+- **plat-ar** _(vie quotidienne)_ — 4–90 ans · Argentine, Uruguay, Paraguay (pays d’origine)
+  - « L’asado du dimanche : son père surveille la braise pendant des heures, et le maté passe de main en main. »
+- **plat-cl** _(vie quotidienne)_ — 4–90 ans · Chili (pays d’origine)
+  - « Les empanadas du 18 septembre, pour la fête nationale, et les cerfs-volants dans le ciel. »
+- **plat-pe** _(vie quotidienne)_ — 4–90 ans · Pérou (pays d’origine)
+  - « Le ceviche du dimanche, le meilleur du monde selon tout le quartier. »
+- **plat-andes** _(vie quotidienne)_ — 4–90 ans · Bolivie, Équateur (pays d’origine)
+  - « La soupe de quinoa, et les pommes de terre séchées au gel des hauts plateaux. »
+- **plat-co** _(vie quotidienne)_ — 4–90 ans · Colombie, Venezuela (pays d’origine)
+  - « Les arepas du matin, chaudes, avec du fromage qui file. »
+- **plat-jm** _(vie quotidienne)_ — 4–90 ans · Jamaïque, Trinité-et-Tobago, Barbade, Bahamas, Sainte-Lucie, Grenade, Saint-Vincent-et-les-Grenadines, Antigua-et-Barbuda, Dominique, Saint-Kitts-et-Nevis, Guyana (pays d’origine)
+  - « Le poulet grillé lentement du dimanche, et le riz aux pois. »
+- **plat-ht** _(vie quotidienne)_ — 4–90 ans · Haïti (pays d’origine)
+  - « La soupe joumou du 1er janvier, la soupe de l’indépendance, que toutes les familles préparent. »
+- **plat-us** _(vie quotidienne)_ — 4–90 ans · États-Unis (pays d’origine)
+  - « Les grillades du 4 juillet dans le jardin, et les feux d’artifice qu’on regarde allongé sur le capot. »
+- **plat-ca** _(vie quotidienne)_ — 4–90 ans · Canada (pays d’origine)
+  - « Le printemps à la cabane à sucre, et la tire d’érable qu’on enroule sur un bâton dans la neige. »
+- **plat-au** _(vie quotidienne)_ — 4–90 ans · Australie, Nouvelle-Zélande (pays d’origine)
+  - « Le barbecue de Noël, en plein été, sur la plage. »
+- **plat-pacifique** _(vie quotidienne)_ — 4–90 ans · Fidji, Samoa, Tonga, Papouasie-Nouvelle-Guinée, Îles Salomon, Vanuatu, Kiribati, Samoa américaines (pays d’origine)
+  - « Le four creusé dans la terre des grands jours : la viande et les tubercules cuisent des heures sous les pierres chaudes. »
+
+### À l’école
+
+- **marche-ecole** _(école)_ — 6–14 ans · pays au revenu moyen sous 10 000 $ · à la campagne · à l’école
+  - « Marche une heure pour aller à l’école, et une heure pour rentrer ; pieds nus jusqu’à la saison des pluies. »
+  - « Traverse la rivière à gué pour aller à l’école ; quand l’eau monte, il n’y a pas classe. »
+- **classe-cent** _(école)_ — 6–13 ans · pays au revenu moyen sous 6 000 $ · Afrique subsaharienne, Asie du Sud · à l’école primaire
+  - « Cent élèves dans la classe ; on s’assoit à trois par banc et on récite en chœur. »
+- **ecole-arbre** _(école)_ — 6–11 ans · de 1950 à 2025 · niveau de vie : survie à précarité · pays au revenu moyen sous 4 000 $ · Afrique subsaharienne · à la campagne · à l’école primaire
+  - « L’école se fait sous un grand arbre, faute de bâtiment ; quand il pleut, il n’y a pas classe. »
+- **uniforme** _(argent)_ — 6–12 ans · niveau de vie : survie à modeste · Afrique subsaharienne, Asie du Sud, Amérique latine et Caraïbes, Asie de l’Est et du Sud-Est · à l’école
+  - « La famille économise des semaines pour acheter l’uniforme de l’école et une paire de chaussures noires. »
+  - Effets : dépense 0,01 × revenu médian
+- **frais-renvoye** _(école)_ — 7–17 ans · à partir de 1975 · niveau de vie : survie à précarité · Afrique subsaharienne · à l’école
+  - « Est renvoyé(e) de l’école une semaine : les frais du trimestre ne sont pas payés. »
+  - Effets : savoir −1, bonheur −2
+- **lampadaire** _(école)_ — 8–17 ans · niveau de vie : survie à précarité · pays au revenu moyen sous 8 000 $ · en ville · à l’école
+  - « Révise le soir sous le seul lampadaire de la rue, avec d’autres élèves venus chercher la lumière. »
+- **lunettes** _(santé)_ — 7–16 ans · niveau de vie : précarité à grande aisance · à l’école · une fois dans la vie
+  - « Porte enfin des lunettes : le tableau redevient net, et les notes remontent. »
+  - Effets : savoir +2
+- **pas-lunettes** _(école)_ — 7–16 ans · niveau de vie : survie · à l’école · une fois dans la vie
+  - « Voit mal le tableau, mais personne ne pense aux lunettes ; on le/la croit simplement distrait(e). »
+  - Effets : savoir −1
+- **instit** _(école)_ — 6–16 ans · à l’école · une fois dans la vie
+  - « A une institutrice qui croit en lui/elle plus que personne ; des années plus tard, il/elle se souviendra de son nom. »
+  - « Un professeur le/la retient après la classe pour lui prêter des livres. »
+  - Effets : savoir +2, bonheur +1
+- **bibli** _(école)_ — 8–18 ans · à partir de 1920 · niveau de vie : modeste à grande aisance · à l’école
+  - « Dévore tous les livres de la bibliothèque municipale, rayon après rayon. »
+  - Effets : savoir +2
+- **recitation** _(école)_ — 8–13 ans · à l’école
+  - « Remporte le concours de récitation de l’école ; la médaille en carton reste accrochée au mur des années. »
+  - Effets : bonheur +2
+- **ecole-privee-riche** _(école)_ — 6–17 ans · à partir de 1985 · les 15 % les plus aisés du pays · pays au revenu moyen sous 40 000 $ · Amérique latine et Caraïbes, Afrique subsaharienne, Asie du Sud, Moyen-Orient et Afrique du Nord, Asie de l’Est et du Sud-Est · à l’école
+  - « Va dans une école privée bilingue où les frais d’une année dépassent ce que gagne un ouvrier. »
+- **agenda-plein** _(école)_ — 6–12 ans · à partir de 1970 · niveau de vie : aisance à grande aisance · à l’école
+  - « Piano le lundi, foot le mercredi, natation le samedi : son agenda d’enfant est plus chargé que celui de ses parents. »
+- **piscine** _(école)_ — 5–10 ans · à partir de 1950 · pays au revenu moyen au-dessus de 15 000 $
+  - « Apprend à nager à la piscine municipale, avec une planche en mousse et beaucoup d’eau avalée. »
+- **nager-riviere** _(école)_ — 5–12 ans · à la campagne
+  - « Apprend à nager dans la rivière avec les autres enfants, sans maître-nageur. »
+- **voyage-scolaire** _(école)_ — 10–17 ans · à partir de 1960 · niveau de vie : classe moyenne à grande aisance · à l’école
+  - « Part en voyage scolaire à l’étranger ; revient avec un porte-clés et un premier amour. »
+- **rentree-baskets** _(école)_ — 9–16 ans · à partir de 1980 · les 20 % les plus modestes du pays · pays au revenu moyen au-dessus de 20 000 $ · à l’école
+  - « À la rentrée, n’a pas les baskets de marque des autres ; on se moque, il/elle serre les dents. »
+  - Effets : bonheur −2
+- **covid-en-ligne** _(école)_ — 6–22 ans · en 2020, 2021 · niveau de vie : classe moyenne à grande aisance · en études · une fois dans la vie
+  - « L’école se fait en ligne pendant la pandémie, depuis sa chambre, caméra éteinte. »
+- **covid-perdu** _(école)_ — 6–17 ans · en 2020, 2021 · niveau de vie : survie à modeste · à l’école · une fois dans la vie
+  - « Les écoles ferment pendant la pandémie ; sans ordinateur ni internet, l’année est presque perdue. »
+  - Effets : savoir −2
+- **filles-maison** _(école)_ — 7–13 ans · niveau de vie : survie à précarité · femmes · enfant hors de l’école, un frère ou une sœur
+  - « Ses frères vont à l’école ; elle reste à la maison pour aider sa mère et garder les petits. »
+- **aide-champs** _(école)_ — 7–14 ans · niveau de vie : survie à précarité · à la campagne · à l’école
+  - « Manque l’école à la saison des récoltes pour aider aux champs ; la maîtresse a l’habitude. »
+  - Effets : savoir −1
+- **chevres** _(école)_ — 6–12 ans · niveau de vie : survie à précarité · Afrique subsaharienne, Asie du Sud, Moyen-Orient et Afrique du Nord · à la campagne · enfant hors de l’école
+  - « Garde les chèvres de la famille du matin au soir, avec un bâton et une fronde. »
+- **jp-seisme-exercice** _(école)_ — 6–15 ans · à partir de 1960 · Japon · à l’école
+  - « Exercice de séisme à l’école : on se cache sous les tables, un coussin ignifugé sur la tête. »
+- **us-confinement** _(école)_ — 6–17 ans · à partir de 2000 · États-Unis · à l’école · passage difficile
+  - « Fait des exercices de confinement en classe, au cas où un tireur entrerait dans l’école. »
+- **hagwon** _(école)_ — 10–18 ans · à partir de 1995 · Corée du Sud · à l’école
+  - « Enchaîne l’école et le hagwon, les cours privés du soir ; rentre à la maison vers 23 heures. »
+  - Effets : savoir +2, bonheur −2
+- **juku** _(école)_ — 10–18 ans · à partir de 1970 · niveau de vie : modeste à grande aisance · Japon · à l’école
+  - « Après l’école, file au juku, l’école du soir, pour préparer les examens d’entrée. »
+  - Effets : savoir +2, bonheur −1
+- **cours-particuliers** _(école)_ — 10–18 ans · niveau de vie : modeste à aisance · Égypte, Grèce, Inde, Chine, Turquie, Iran, Vietnam · à l’école
+  - « Prend des cours particuliers presque tous les soirs ; la famille y consacre une bonne part de ses revenus. »
+  - Effets : savoir +2, dépense 0,02 × revenu médian
+- **gaokao** _(école)_ — à 17 ans · à partir de 1977 · Chine · au collège ou au lycée · une fois dans la vie · raconté dès que possible
+  - « Passe le gaokao : deux jours d’examen qui décideront de toute sa vie, dit-on ; les parents attendent devant les grilles. »
+- **suneung** _(école)_ — à 17 ans · à partir de 1994 · Corée du Sud · au collège ou au lycée · une fois dans la vie · raconté dès que possible
+  - « Le jour du suneung, les avions cessent de décoller pendant l’épreuve d’anglais ; tout le pays retient son souffle. »
+- **bac** _(école)_ — à 17 ans · à partir de 1950 · France · au collège ou au lycée · une fois dans la vie · raconté dès que possible
+  - « Passe le bac ; toute la famille attend les résultats devant le panneau du lycée. »
+- **kota** _(école)_ — 16–17 ans · à partir de 1995 · niveau de vie : modeste à aisance · Inde · au collège ou au lycée · une fois dans la vie
+  - « Part préparer les concours d’ingénieur à Kota, dans une chambre minuscule, douze heures de révision par jour. »
+  - Effets : savoir +3, bonheur −3
+- **waec** _(école)_ — à 17 ans · à partir de 1955 · Nigeria, Ghana, Sierra Leone, Liberia, Gambie · au collège ou au lycée · une fois dans la vie · raconté dès que possible
+  - « Passe le WAEC, l’examen de fin d’études de l’Afrique de l’Ouest anglophone ; les résultats tardent des mois. »
+- **enem** _(école)_ — à 17 ans · à partir de 1998 · Brésil · au collège ou au lycée · une fois dans la vie · raconté dès que possible
+  - « Passe l’ENEM avec des millions d’autres lycéens ; les grilles ferment à l’heure pile, et certains arrivent en courant. »
+- **tr-concours** _(école)_ — à 17 ans · à partir de 1975 · Turquie · au collège ou au lycée · une fois dans la vie · raconté dès que possible
+  - « Passe le concours national d’entrée à l’université, avec deux millions de candidats ; son rang décidera de tout. »
+- **jp-examens** _(école)_ — à 17 ans · à partir de 1950 · Japon · au collège ou au lycée · une fois dans la vie · raconté dès que possible
+  - « Passe les examens d’entrée à l’université ; sa mère a acheté un porte-bonheur au sanctuaire. »
+- **matura** _(école)_ — à 17 ans · à partir de 1950 · Allemagne, Autriche, Suisse, Pologne, Tchéquie, Slovaquie, Hongrie, Italie, Croatie, Slovénie, Serbie · au collège ou au lycée · une fois dans la vie · raconté dès que possible
+  - « Passe les épreuves de fin de lycée ; le soir, toute la classe fête le diplôme jusqu’à l’aube. »
+- **premier-universite** _(école)_ — 18–50 ans · premier·ère de la famille à l’université · une fois dans la vie · raconté dès que possible
+  - « Devient le premier/la première de la famille à aller à l’université ; ses parents le racontent à tout le monde. »
+  - Effets : bonheur +3
+
+### Enfance
+
+- **foot-chiffons** _(vie quotidienne)_ — 6–14 ans · niveau de vie : survie à modeste
+  - « Joue au foot dans la rue avec un ballon de chiffons et de sacs plastique. »
+  - « Joue au foot pieds nus sur un terrain de terre ; les buts sont deux tongs posées par terre. »
+- **foot-club** _(vie quotidienne)_ — 6–14 ans · niveau de vie : modeste à grande aisance · pays au revenu moyen au-dessus de 8 000 $
+  - « S’inscrit au club de foot du quartier ; les parents crient plus fort que l’entraîneur. »
+- **velo** _(vie quotidienne)_ — 5–11 ans · à partir de 1920 · niveau de vie : précarité à classe moyenne · une fois dans la vie
+  - « Reçoit un vélo, d’occasion mais repeint : le plus beau cadeau de son enfance. »
+  - Effets : bonheur +2
+- **manguier** _(vie quotidienne)_ — 5–12 ans · pays tropicaux · une fois dans la vie
+  - « Tombe du manguier en voulant attraper le plus beau fruit ; un bras dans le plâtre pour six semaines. »
+  - Effets : santé −1
+- **garde-petits** _(vie quotidienne)_ — 7–14 ans · niveau de vie : survie à modeste · un petit frère ou une petite sœur
+  - « Garde ‹fratrie› toute la journée pendant que les parents travaillent ; a déjà des responsabilités d’adulte. »
+- **dispute-fratrie** _(vie quotidienne)_ — 5–15 ans · à partir de 1975 · niveau de vie : modeste à grande aisance · un frère ou une sœur
+  - « Se dispute avec ‹fratrie› pour la télécommande ; les parents confisquent la télévision. »
+- **grands-parents-ete** _(vie quotidienne)_ — 5–13 ans · à partir de 1950 · France, Italie, Espagne, Portugal, Belgique
+  - « Passe les grandes vacances chez ses grands-parents, à la campagne : les vélos, les cousins, les orages. »
+- **colo** _(vie quotidienne)_ — 7–14 ans · à partir de 1950 · niveau de vie : modeste à aisance · France
+  - « Part en colonie de vacances ; écrit une carte par semaine, et pleure le jour du retour. »
+- **camp-ete** _(vie quotidienne)_ — 8–15 ans · à partir de 1950 · niveau de vie : classe moyenne à grande aisance · États-Unis, Canada
+  - « Passe l’été dans un camp au bord d’un lac : canoë, feux de camp, et des chansons ridicules. »
+- **roadtrip** _(vie quotidienne)_ — 6–16 ans · à partir de 1955 · niveau de vie : classe moyenne à grande aisance · États-Unis, Canada, Australie
+  - « Traverse le pays en voiture avec la famille, à l’arrière, en comptant les plaques d’immatriculation. »
+- **console** _(vie quotidienne)_ — 8–18 ans · à partir de 1985 · niveau de vie : classe moyenne à grande aisance
+  - « Passe des heures sur sa console de jeux ; son record ne tient que jusqu’au dimanche suivant. »
+- **salle-jeux** _(vie quotidienne)_ — 9–17 ans · de 1995 à 2015 · niveau de vie : précarité à classe moyenne · pays au revenu moyen entre 3 000 et 20 000 $
+  - « Économise ses pièces pour jouer aux jeux vidéo dans la salle du quartier, à l’heure. »
+- **cinema** _(vie quotidienne)_ — 6–14 ans · à partir de 1915 · niveau de vie : précarité à grande aisance · une fois dans la vie
+  - « Va au cinéma pour la première fois ; n’en dort pas de la nuit. »
+- **cinema-ambulant** _(vie quotidienne)_ — 6–14 ans · de 1950 à 2010 · niveau de vie : survie à modeste · à la campagne · une fois dans la vie
+  - « Un cinéma ambulant tend un drap blanc sur la place du village : tout le monde vient voir le film, assis par terre. »
+- **radio-famille** _(vie quotidienne)_ — 4–15 ans · de 1925 à 1965 · niveau de vie : modeste à grande aisance · une fois dans la vie
+  - « Le soir, la famille se réunit autour du poste de radio pour écouter les nouvelles et les feuilletons. »
+- **tele-voisins** _(vie quotidienne)_ — 4–15 ans · de 1950 à 1980 · niveau de vie : précarité à classe moyenne · une fois dans la vie
+  - « La seule télévision de la rue est chez les voisins : le soir, on s’y entasse à vingt devant l’écran. »
+- **travail-enfant** _(travail)_ — 10–14 ans · niveau de vie : survie · enfant hors de l’école
+  - « À ‹âge› ans, travaille déjà comme un adulte, du lever au coucher du soleil. »
+- **feux-rouges** _(travail)_ — 8–14 ans · niveau de vie : survie · Amérique latine et Caraïbes, Asie du Sud, Afrique subsaharienne · en ville · enfant hors de l’école
+  - « Vend des chewing-gums aux feux rouges ; apprend à lire l’humeur des conducteurs mieux que les lettres. »
+- **decharge** _(travail)_ — 8–40 ans · à partir de 1960 · niveau de vie : survie · pays au revenu moyen sous 10 000 $ · en ville
+  - « Trie les déchets de la décharge pour revendre le plastique et le métal ; l’odeur ne part jamais vraiment. »
+  - Effets : santé −1
+- **zabbaleen** _(travail)_ — 8–60 ans · niveau de vie : survie à précarité · Égypte · en ville
+  - « Trie les ordures de la ville avec sa famille, comme tout le quartier des chiffonniers du Caire. »
+- **briqueterie** _(travail)_ — 8–40 ans · niveau de vie : survie · Inde, Pakistan, Népal, Bangladesh · à la campagne · passage difficile
+  - « Moule des briques avec ses parents dans une briqueterie, pour rembourser une dette qui ne diminue jamais. »
+  - Effets : santé −2, bonheur −2
+- **cobalt** _(travail)_ — 10–40 ans · à partir de 2005 · niveau de vie : survie · RD Congo · passage difficile
+  - « Creuse dans une mine artisanale de cobalt, sans casque ni masque ; le minerai finira dans des batteries de téléphones. »
+  - Effets : santé −2
+- **orpaillage** _(travail)_ — 10–40 ans · à partir de 1980 · niveau de vie : survie à précarité · Mali, Burkina Faso, Ghana, Guinée, Niger, Soudan, Côte d’Ivoire · à la campagne
+  - « Part chercher de l’or sur un site d’orpaillage ; on creuse des puits étroits, et on espère. »
+  - Effets : santé −1
+- **talibe** _(vie quotidienne)_ — 5–14 ans · niveau de vie : survie · Sénégal, Mali, Gambie, Guinée, Mauritanie · hommes · passage difficile
+  - « Est confié à un maître coranique ; chaque matin, il mendie dans la rue avec une boîte de conserve. »
+  - Effets : bonheur −3, santé −1
+- **restavek** _(vie quotidienne)_ — 6–14 ans · niveau de vie : survie · Haïti · passage difficile
+  - « Est envoyé(e) vivre chez une famille de la ville comme restavèk : le ménage contre un toit, sans école. »
+  - Effets : bonheur −4
+- **petite-bonne** _(travail)_ — 8–15 ans · niveau de vie : survie · Maroc, Bénin, Togo, Côte d’Ivoire, Sénégal, Indonésie, Philippines, Bangladesh, Guatemala, Pérou, Bolivie · femmes · passage difficile
+  - « Est placée comme petite bonne chez une famille aisée ; elle envoie son maigre salaire à ses parents. »
+  - Effets : bonheur −3
+- **naadam** _(culture et fêtes)_ — 5–12 ans · Mongolie · à la campagne · une fois dans la vie
+  - « Court la course de chevaux du Naadam, sur des kilomètres de steppe, comme les autres enfants jockeys. »
+
+### Adolescence
+
+- **reseaux-nuit** _(vie quotidienne)_ — 13–19 ans · à partir de 2012 · niveau de vie : modeste à grande aisance
+  - « Passe ses nuits sur les réseaux sociaux ; le matin, les yeux piquent en classe. »
+- **sms** _(vie quotidienne)_ — 13–19 ans · de 2000 à 2011 · niveau de vie : modeste à grande aisance
+  - « Envoie des dizaines de SMS par jour, en abrégeant tous les mots pour économiser le forfait. »
+- **cassette** _(vie quotidienne)_ — 12–18 ans · de 1970 à 2000 · niveau de vie : modeste à grande aisance
+  - « Enregistre des chansons à la radio sur une cassette, en pestant contre l’animateur qui parle par-dessus. »
+- **beatles** _(vie quotidienne)_ — 12–20 ans · de 1963 à 1970 · niveau de vie : modeste à grande aisance · Europe et Asie centrale, Amérique du Nord, Océanie
+  - « Écoute les Beatles en boucle sur le tourne-disque familial, jusqu’à rayer le vinyle. »
+- **disques-os** _(culture et fêtes)_ — 14–25 ans · de 1950 à 1970 · ex-URSS
+  - « Écoute du rock’n’roll gravé sur de vieilles radiographies, les « disques sur os », vendus sous le manteau. »
+- **kpop** _(culture et fêtes)_ — 10–22 ans · à partir de 2010 · niveau de vie : modeste à grande aisance · Asie de l’Est et du Sud-Est, Amérique latine et Caraïbes, Asie du Sud
+  - « Apprend par cœur les chorégraphies d’un groupe de K-pop, et quelques mots de coréen. »
+- **afrobeats** _(culture et fêtes)_ — 12–25 ans · à partir de 2010 · Nigeria, Ghana, Kenya, Côte d’Ivoire, Cameroun, Afrique du Sud
+  - « Danse sur les derniers tubes d’afrobeats, ceux que le monde entier finira par écouter. »
+- **fela** _(culture et fêtes)_ — 14–30 ans · de 1970 à 1997 · Nigeria
+  - « Écoute Fela en boucle ; sa musique dit tout haut ce que le pays pense tout bas. »
+- **rai** _(culture et fêtes)_ — 14–25 ans · à partir de 1985 · Algérie, Maroc, Tunisie
+  - « Écoute du raï sur des cassettes qui passent de main en main, le volume au minimum quand le père est là. »
+- **reggaeton** _(culture et fêtes)_ — 12–25 ans · à partir de 2004 · Amérique hispanique
+  - « Danse sur du reggaeton à toutes les fêtes ; les parents trouvent les paroles scandaleuses. »
+- **bollywood-chansons** _(culture et fêtes)_ — 10–25 ans · à partir de 1950 · Inde, Pakistan, Bangladesh, Népal
+  - « Connaît par cœur toutes les chansons du dernier film de Bollywood. »
+- **dispute-porte** _(vie quotidienne)_ — 13–17 ans · niveau de vie : modeste à grande aisance · un parent vivant
+  - « Claque la porte de sa chambre ; les parents ne comprennent rien, évidemment. »
+- **atelier-oncle** _(travail)_ — 13–17 ans · niveau de vie : survie à précarité · pas en études
+  - « Apprend un métier à l’atelier d’un oncle, en regardant faire plus qu’en écoutant. »
+- **quinceanera** _(culture et fêtes)_ — à 15 ans · niveau de vie : précarité à grande aisance · Amérique hispanique (pays d’origine) · femmes · une fois dans la vie · raconté dès que possible
+  - « Fête ses quinze ans : la quinceañera, la robe, la valse avec son père, et tout le quartier invité. »
+- **quince-simple** _(culture et fêtes)_ — à 15 ans · niveau de vie : survie · Amérique hispanique (pays d’origine) · femmes · une fois dans la vie · raconté dès que possible
+  - « Pas d’argent pour une grande quinceañera ; sa mère lui coud une robe, et les voisins apportent le gâteau. »
+- **bar-mitsva** _(culture et fêtes)_ — à 13 ans · Israël (pays d’origine) · hommes · une fois dans la vie · raconté dès que possible
+  - « Fait sa bar-mitsva : lit la Torah devant toute la famille, la voix qui tremble. »
+- **bat-mitsva** _(culture et fêtes)_ — à 12 ans · Israël (pays d’origine) · femmes · une fois dans la vie · raconté dès que possible
+  - « Fait sa bat-mitsva entourée de toute la famille ; la fête dure jusqu’à minuit. »
+- **seijin** _(culture et fêtes)_ — à 20 ans · à partir de 1948 · Japon (pays d’origine) · une fois dans la vie · raconté dès que possible
+  - « Fête le Jour de la majorité en costume/en kimono, avec toute sa promotion, devant la mairie. »
+- **novice** _(culture et fêtes)_ — 10–20 ans · Thaïlande, Myanmar, Laos, Cambodge (pays d’origine) · hommes · une fois dans la vie
+  - « Passe trois mois au monastère comme novice, crâne rasé, robe safran ; sa mère en est fière. »
+  - Effets : bonheur +1
+- **permis** _(vie quotidienne)_ — 17–24 ans · à partir de 1950 · niveau de vie : classe moyenne à grande aisance · pays au revenu moyen au-dessus de 20 000 $ · une fois dans la vie
+  - « Passe son permis de conduire du premier coup. »
+  - « Rate son permis de conduire une première fois, à cause d’un créneau ; l’obtient la seconde. »
+- **job-ete** _(travail)_ — 15–18 ans · à partir de 1960 · niveau de vie : modeste à aisance · États-Unis, Canada, Australie, Nouvelle-Zélande, Royaume-Uni
+  - « Travaille l’été dans un fast-food pour s’acheter une voiture d’occasion. »
+  - Effets : rentrée 0,02 × revenu médian
+- **bal-promo** _(vie quotidienne)_ — à 17 ans · à partir de 1950 · États-Unis, Canada · au collège ou au lycée · une fois dans la vie
+  - « Va au bal de fin d’année du lycée ; les photos, plus tard, feront beaucoup rire. »
+- **premier-salaire** _(travail)_ — 14–35 ans · premier emploi, salarié·e · une fois dans la vie
+  - « Touche son premier salaire et invite toute la famille à manger. »
+- **premier-salaire-mere** _(travail)_ — 14–35 ans · premier emploi, salarié·e, sa mère vivante · une fois dans la vie
+  - « Avec son premier salaire, achète un cadeau à sa mère ; elle le garde des années sans oser s’en servir. »
+- **service-militaire** _(vie quotidienne)_ — 18–21 ans · France 1905–1996, Allemagne 1956–2010, Italie 1900–2004, Espagne 1900–2001, Portugal 1911–2004, Belgique 1909–1993, Pays-Bas 1900–1996, Royaume-Uni 1947–1960, Russie dès 1925, Ukraine dès 1992, Biélorussie dès 1992, Turquie dès 1900, Grèce dès 1900, Chypre dès 1964, Autriche dès 1955, Suisse dès 1900, Finlande dès 1919, Norvège dès 1900, Suède 1901–2010, Danemark dès 1900, Égypte dès 1950, Iran dès 1925, Vietnam dès 1960, Taïwan dès 1950, Singapour dès 1967, Arménie dès 1992, Azerbaïdjan dès 1992, Géorgie dès 1992, Algérie dès 1969, Tunisie dès 1959, Maroc 1966–2006, Pologne 1918–2008, Tchéquie 1918–2004, Hongrie 1900–2004, Roumanie 1900–2006, Bulgarie 1900–2007, Serbie 1945–2010, Ouzbékistan dès 1992, Kazakhstan dès 1992 · hommes · une fois dans la vie
+  - « Fait son service militaire : des mois loin de chez soi, les cheveux ras, et des amitiés pour la vie. »
+  - Effets : liens +1
+- **service-kr** _(vie quotidienne)_ — 19–23 ans · de 1950 à 2009 · Corée du Sud · hommes · une fois dans la vie
+  - « Fait près de deux ans de service militaire, comme tous les hommes du pays ; on en reparlera toute sa vie. »
+- **service-kr-kpop** _(vie quotidienne)_ — 19–23 ans · à partir de 2010 · Corée du Sud · hommes · une fois dans la vie
+  - « Fait son service militaire, dix-huit mois comme tous les hommes du pays ; même les stars de la K-pop y passent. »
+- **service-il** _(vie quotidienne)_ — à 18 ans · à partir de 1949 · Israël · une fois dans la vie · raconté dès que possible
+  - « Part pour le service militaire, comme presque tous les jeunes du pays, garçons et filles. »
+- **service-kp** _(vie quotidienne)_ — à 17 ans · Corée du Nord · hommes · une fois dans la vie · raconté dès que possible
+  - « Part pour un service militaire qui durera près de dix ans. »
+- **service-mx** _(vie quotidienne)_ — à 18 ans · à partir de 1942 · Mexique · hommes · une fois dans la vie
+  - « Fait son service militaire national le samedi matin, pour obtenir la précieuse « cartilla ». »
+- **service-br** _(vie quotidienne)_ — à 18 ans · à partir de 1940 · Brésil · hommes · une fois dans la vie
+  - « S’inscrit pour le service militaire à dix-huit ans ; comme la plupart des jeunes, il en est dispensé. »
+
+### Études supérieures
+
+- **bu** _(école)_ — 18–26 ans · à l’université
+  - « Découvre la bibliothèque universitaire et y passe ses soirées. »
+  - Effets : savoir +2
+- **job-etudiant** _(travail)_ — 18–26 ans · niveau de vie : survie à modeste · à l’université
+  - « Travaille la nuit pour payer ses études ; s’endort parfois en cours. »
+- **pret-etudiant** _(argent)_ — 18–22 ans · à partir de 1980 · États-Unis · à l’université · une fois dans la vie
+  - « Signe un prêt étudiant ; la dette le/la suivra pendant vingt ans. »
+  - Effets : dette 0,5 × revenu médian
+- **dortoir-cn** _(école)_ — 18–22 ans · Chine · à l’université · une fois dans la vie
+  - « Partage une chambre à six lits superposés sur le campus ; les amitiés se nouent tard dans la nuit. »
+- **resto-u** _(école)_ — 18–24 ans · à partir de 1955 · France · à l’université
+  - « Mange au restaurant universitaire pour quelques pièces ; le plat du jour est un sujet de conversation. »
+- **amphi-bonde** _(école)_ — 18–24 ans · pays au revenu moyen sous 25 000 $ · à l’université
+  - « Suit les cours dans un amphithéâtre bondé, assis(e) sur les marches, faute de place. »
+- **greve-profs** _(école)_ — 18–25 ans · à partir de 1960 · pays au revenu moyen sous 25 000 $ · Afrique subsaharienne, Amérique latine et Caraïbes, Moyen-Orient et Afrique du Nord · à l’université
+  - « Les professeurs sont en grève ; l’année universitaire s’allonge de six mois. »
+- **bourse-etranger** _(école)_ — 19–25 ans · niveau de vie : survie à modeste · pays au revenu moyen sous 20 000 $ · à l’université · une fois dans la vie
+  - « Décroche une bourse pour étudier un semestre à l’étranger ; c’est son premier voyage en avion. »
+  - Effets : savoir +3, bonheur +4
+- **erasmus** _(école)_ — 19–24 ans · à partir de 1988 · Europe de l’Ouest (UE) · à l’université · une fois dans la vie
+  - « Part un an en Erasmus ; revient avec des amis dans six pays et un autre regard sur le sien. »
+  - Effets : savoir +2, bonheur +3
+- **erasmus-est** _(école)_ — 19–24 ans · à partir de 1998 · Europe centrale et orientale (UE) · à l’université · une fois dans la vie
+  - « Part un an en Erasmus, à l’Ouest ; découvre que les étudiants s’y plaignent des mêmes choses. »
+  - Effets : savoir +2, bonheur +3
+- **diplome-chomage** _(école)_ — 22–30 ans · Moyen-Orient et Afrique du Nord, Afrique subsaharienne, Asie du Sud · diplômé·e de l’université, sans emploi
+  - « Diplômé(e), sans emploi, passe ses journées au café avec d’autres diplômés ; on attend un concours de la fonction publique. »
+  - Effets : bonheur −3
+- **hittiste** _(école)_ — 20–35 ans · à partir de 1988 · Algérie · hommes · sans emploi
+  - « Rejoint les « hittistes », ceux qui tiennent les murs du quartier faute de travail. »
+  - Effets : bonheur −2
+- **these** _(école)_ — 23–30 ans · niveau de vie : modeste à grande aisance · diplômé·e de l’université, secteur : technique et sciences ou secteur public ou services · une fois dans la vie
+  - « Commence une thèse ; personne dans la famille ne comprend vraiment le sujet. »
+  - Effets : savoir +4
+
+### Aux champs
+
+- **aube-champs** _(travail)_ — 12–80 ans · métier : agriculteur, ouvrier agricole
+  - « Se lève avant l’aube pour aller aux champs ; le travail s’arrête quand la lumière tombe. »
+- **pluie-semis** _(travail)_ — 12–80 ans · pays au revenu moyen sous 12 000 $ · métier : agriculteur, ouvrier agricole
+  - « Guette le ciel avec tout le village ; quand la pluie arrive enfin, on sème le jour même. »
+- **bonne-recolte** _(travail)_ — 16–80 ans · métier : agriculteur, ouvrier agricole
+  - « Une récolte exceptionnelle : on rembourse les dettes de l’année et on achète des tôles neuves. »
+  - Effets : bonheur +3, rentrée 0,08 × revenu médian
+- **maigre-recolte** _(travail)_ — 16–80 ans · pays au revenu moyen sous 20 000 $ · métier : agriculteur, ouvrier agricole
+  - « La récolte est maigre ; il faudra serrer la ceinture jusqu’à la prochaine. »
+  - Effets : bonheur −3, dépense 0,04 × revenu médian
+- **mousson-retard** _(travail)_ — 12–80 ans · pays de la mousson · métier : agriculteur, ouvrier agricole
+  - « La mousson est en retard ; les semis attendent, et les prêteurs se frottent les mains. »
+  - Effets : bonheur −2
+- **riz-repique** _(travail)_ — 12–70 ans · pays au revenu moyen sous 20 000 $ · pays du riz · métier : agriculteur, ouvrier agricole
+  - « Repique le riz à la main, les pieds dans l’eau, le dos courbé du matin au soir. »
+- **tracteur** _(travail)_ — 25–70 ans · à partir de 1950 · niveau de vie : modeste à aisance · métier : agriculteur · une fois dans la vie
+  - « Achète un tracteur d’occasion en commun avec trois voisins ; on se dispute déjà le calendrier. »
+  - Effets : dépense 0,1 × revenu médian, bonheur +2
+- **dossiers-pac** _(travail)_ — 25–75 ans · à partir de 1965 · Europe de l’Ouest (UE), Europe centrale et orientale (UE) · secteur : agriculture, à son compte
+  - « Remplit des dossiers de subventions agricoles plus épais que l’annuaire. »
+- **prix-lait** _(travail)_ — 25–75 ans · à partir de 1985 · France, Allemagne, Irlande, Pays-Bas, Belgique, Danemark, Pologne, Autriche · secteur : agriculture
+  - « Le prix du lait baisse encore ; l’exploitation tient grâce aux subventions et aux heures que personne ne compte. »
+  - Effets : bonheur −2
+- **moissonneuse-gps** _(travail)_ — 25–75 ans · à partir de 2005 · États-Unis, Canada, Australie, Nouvelle-Zélande, Argentine · métier : agriculteur
+  - « Une moissonneuse guidée par satellite fait le travail de cent personnes ; la ferme compte trois salariés. »
+- **cafe-haut** _(travail)_ — 18–75 ans · Éthiopie, Colombie, Brésil, Vietnam, Ouganda, Honduras, Guatemala, Pérou, Kenya, Rwanda, Burundi, Nicaragua, Costa Rica, Salvador, Mexique, Indonésie, Tanzanie · métier : agriculteur, ouvrier agricole
+  - « Le prix du café remonte : on rachète une vache et on répare le toit. »
+  - Effets : rentrée 0,05 × revenu médian, bonheur +2
+- **cafe-bas** _(travail)_ — 18–75 ans · Éthiopie, Colombie, Brésil, Vietnam, Ouganda, Honduras, Guatemala, Pérou, Kenya, Rwanda, Burundi, Nicaragua, Costa Rica, Salvador, Mexique, Indonésie, Tanzanie · métier : agriculteur, ouvrier agricole
+  - « Le prix du café s’effondre sur les marchés mondiaux ; la récolte de l’année vaut moins que les engrais. »
+  - Effets : dépense 0,03 × revenu médian, bonheur −3
+- **cacao-bas** _(travail)_ — 18–75 ans · de 1960 à 2023 · Côte d’Ivoire, Ghana, Cameroun, Nigeria · métier : agriculteur, ouvrier agricole
+  - « Le prix du cacao payé aux planteurs baisse encore ; le travail d’une année ne paie presque rien. »
+  - Effets : bonheur −2
+- **cacao-haut** _(travail)_ — 18–75 ans · en 2024, 2025 · Côte d’Ivoire, Ghana, Cameroun, Nigeria · métier : agriculteur, ouvrier agricole · une fois dans la vie
+  - « Le prix du cacao s’envole sur les marchés mondiaux ; pour une fois, une part arrive jusqu’aux planteurs. »
+  - Effets : rentrée 0,05 × revenu médian, bonheur +2
+- **elephants** _(travail)_ — 12–80 ans · Kenya, Tanzanie, Zambie, Zimbabwe, Botswana, Namibie, Mozambique, Sri Lanka, Inde · à la campagne · métier : agriculteur, ouvrier agricole
+  - « Des éléphants ravagent le champ de maïs en une nuit ; on veillera désormais avec des tambours et des clôtures au piment. »
+  - Effets : bonheur −2, dépense 0,03 × revenu médian
+- **criquets** _(travail)_ — 10–80 ans · Sahel, Corne de l’Afrique, Soudan, Yémen, Pakistan · secteur : agriculture
+  - « Un nuage de criquets s’abat sur les champs ; en une après-midi, il ne reste plus rien. »
+  - Effets : bonheur −4, dépense 0,05 × revenu médian
+- **secheresse-champs** _(travail)_ — 10–80 ans · pays au revenu moyen sous 20 000 $ · pays exposés à la sécheresse · métier : agriculteur, ouvrier agricole
+  - « La sécheresse grille les champs ; le maïs ne dépasse pas les genoux. »
+  - Effets : bonheur −3, dépense 0,04 × revenu médian
+- **terres-promoteur** _(travail)_ — 30–80 ans · à partir de 1985 · pays au revenu moyen entre 5 000 et 35 000 $ · à la campagne · métier : agriculteur
+  - « Le voisin vend ses terres à un promoteur ; la ville avance vers le village, une rangée d’immeubles à la fois. »
+- **saisonnier** _(travail)_ — 18–50 ans · Maroc dès 1990, Roumanie dès 2000, Bulgarie dès 2007, Pologne dès 1990, Mexique dès 1974, Guatemala dès 2003, Jamaïque dès 1966, Ukraine dès 2000, Moldavie dès 2000 · secteur : agriculture, pas à son compte
+  - « Part chaque été faire les récoltes à l’étranger, sous contrat saisonnier ; rentre avec de quoi tenir l’hiver. »
+  - Effets : rentrée 0,08 × revenu médian, liens −1
+- **transhumance** _(travail)_ — 10–70 ans · Sahel, Corne de l’Afrique, Mongolie, Afghanistan, Kirghizstan, Tanzanie, Soudan · métier : éleveur
+  - « Suit le troupeau vers les pâturages de saison sèche : des semaines de marche, et des nuits sous les étoiles. »
+- **betes-banque** _(travail)_ — 16–80 ans · Afrique subsaharienne, Asie du Sud, Moyen-Orient et Afrique du Nord · à la campagne · métier : éleveur, agriculteur
+  - « Compte ses bêtes chaque soir : c’est sa banque, son assurance et sa fierté. »
+- **dzud** _(travail)_ — 10–80 ans · en 2000, 2001, 2002, 2010, 2016, 2023, 2024 · Mongolie · à la campagne · une fois dans la vie
+  - « Un dzud, un hiver extrême après un été sec : une grande partie du troupeau meurt de froid et de faim. »
+  - Effets : bonheur −6, troupeau -50 %
+- **chalutiers** _(travail)_ — 16–70 ans · à partir de 1980 · Sénégal, Mauritanie, Gambie, Guinée, Sierra Leone, Ghana, Somalie, Madagascar, Mozambique, Liberia · métier : pêcheur
+  - « Rentre de mer avec les filets presque vides : au large, les chalutiers industriels ont tout raclé. »
+  - Effets : bonheur −2
+- **tempete-port** _(travail)_ — 16–70 ans · métier : pêcheur
+  - « Une tempête cloue les bateaux au port pendant deux semaines ; on répare les filets en attendant. »
+- **peche-miraculeuse** _(travail)_ — 16–70 ans · métier : pêcheur
+  - « Une pêche miraculeuse : le bateau rentre si chargé qu’il frôle l’eau, et tout le village aide à décharger. »
+  - Effets : rentrée 0,04 × revenu médian, bonheur +2
+
+### Économie informelle
+
+- **marche-4h** _(travail)_ — 12–75 ans · métier : vendeur au marché
+  - « Arrive au marché à quatre heures du matin pour avoir une bonne place ; repart quand les lampes s’allument. »
+- **saisie-mairie** _(travail)_ — 16–75 ans · en ville · métier : vendeur au marché
+  - « Les agents de la mairie saisissent la marchandise des vendeurs de rue ; il faudra tout racheter à crédit. »
+  - Effets : bonheur −3, dépense 0,03 × revenu médian
+- **chef-marche** _(travail)_ — 16–75 ans · métier : vendeur au marché
+  - « Paie chaque jour quelques pièces au « chef » du marché pour garder son emplacement. »
+- **cliente-fidele** _(travail)_ — 20–75 ans · métier : vendeur au marché, vendeur, couturier, coiffeur
+  - « Une cliente fidèle depuis dix ans vient avec sa fille ; on se connaît, on se fait crédit. »
+  - Effets : liens +1
+- **beignets-ecole** _(travail)_ — 16–75 ans · Afrique subsaharienne · femmes · métier : vendeur au marché
+  - « Vend des beignets et de la bouillie devant l’école ; les enfants l’appellent « tantie ». »
+  - Effets : liens +1
+- **domestique-chambre** _(travail)_ — 14–70 ans · métier : employé de maison
+  - « Travaille six jours sur sept chez une famille aisée et dort dans une petite chambre au fond de la cour. »
+- **domestique-enfants** _(travail)_ — 20–60 ans · métier : employé de maison, un enfant mineur
+  - « Élève les enfants des autres pendant que les siens grandissent chez leur grand-mère. »
+  - Effets : liens −2
+- **porteur-charge** _(travail)_ — 14–60 ans · métier : porteur
+  - « Porte des sacs de quatre-vingts kilos sur le dos, du marché aux camions ; le soir, les épaules brûlent. »
+  - Effets : santé −1
+- **porteur-himalaya** _(travail)_ — 16–55 ans · Népal · métier : porteur
+  - « Porte les sacs des randonneurs sur les sentiers de l’Himalaya ; les pourboires valent plus que le salaire. »
+- **couture-fetes** _(travail)_ — 16–75 ans · métier : couturier
+  - « Avant les fêtes, coud des tenues de cérémonie jusqu’à tard dans la nuit, sous une ampoule nue. »
+- **moto-frayeur** _(travail)_ — 16–65 ans · métier : conducteur de taxi-moto
+  - « Évite de justesse un camion à l’heure de pointe ; reprend la route, les mains qui tremblent. »
+- **moto-police** _(travail)_ — 16–65 ans · métier : conducteur de taxi-moto
+  - « Un policier arrête sa moto ; sans « petit billet », elle part à la fourrière. »
+  - Effets : dépense 0,01 × revenu médian, bonheur −1
+- **boda** _(travail)_ — 16–65 ans · Ouganda, Kenya, Tanzanie, Rwanda · métier : conducteur de taxi-moto
+  - « Attend les clients au carrefour avec les autres boda-boda ; chacun a son surnom, ses habitués, et son autocollant sur le garde-boue. »
+- **okada** _(travail)_ — 16–65 ans · Nigeria · métier : conducteur de taxi-moto
+  - « Faufile son okada entre les voitures arrêtées ; les clients pressés paient double. »
+- **zemidjan** _(travail)_ — 16–65 ans · Bénin, Togo · métier : conducteur de taxi-moto
+  - « Conduit un zémidjan en chemise jaune ; on le/la hèle d’un sifflement au bord de la route. »
+- **reparateur** _(travail)_ — 16–65 ans · métier : réparateur de téléphones
+  - « Répare des téléphones dans une échoppe grande comme une armoire ; tout le quartier lui confie ses écrans fêlés. »
+- **journalier** _(travail)_ — 16–60 ans · pays au revenu moyen sous 25 000 $ · Amérique latine et Caraïbes, Asie du Sud, Moyen-Orient et Afrique du Nord, Afrique subsaharienne · en ville · sans emploi
+  - « Attend chaque matin au carrefour des journaliers, en espérant qu’une camionnette s’arrête pour lui/elle. »
+- **petits-boulots** _(travail)_ — 18–60 ans · pays au revenu moyen sous 20 000 $ · sans emploi
+  - « Sans emploi, enchaîne les petits boulots à la journée : décharger des sacs, porter des briques, aider aux récoltes. »
+
+### Usines et chantiers
+
+- **confection** _(travail)_ — 14–50 ans · à partir de 1980 · Bangladesh, Cambodge, Vietnam, Myanmar, Pakistan, Sri Lanka, Inde, Éthiopie · métier : ouvrier du textile, ouvrier d’usine
+  - « Coud à la chaîne, douze heures par jour, des vêtements pour des marques qu’il/elle ne pourra jamais s’offrir. »
+- **dortoir-usine** _(travail)_ — 16–40 ans · de 1990 à 2025 · Chine · métier : ouvrier d’usine, ouvrier du textile
+  - « Travaille dans une usine d’électronique de la côte et dort au dortoir de l’entreprise, à huit par chambre. »
+- **maquiladora** _(travail)_ — 16–50 ans · à partir de 1970 · Mexique · métier : ouvrier d’usine, ouvrier du textile
+  - « Travaille dans une maquiladora près de la frontière, à assembler des pièces qui partiront aux États-Unis. »
+- **sirene** _(travail)_ — 16–65 ans · jusqu’en 1990 · secteur : industrie
+  - « La sirène de l’usine rythme les journées de toute la ville ; on règle sa montre sur elle. »
+- **greve-usine** _(travail)_ — 18–65 ans · à partir de 1905 · secteur : industrie, salarié·e
+  - « Grève à l’usine : trois semaines sans salaire, des soupes collectives, puis une petite augmentation. »
+  - Effets : liens +2, bonheur −1
+- **robots** _(travail)_ — 25–65 ans · à partir de 1985 · pays au revenu moyen au-dessus de 20 000 $ · secteur : industrie
+  - « Les robots arrivent sur la chaîne ; à la cantine, on se demande qui restera. »
+- **delocalisation** _(travail)_ — 30–64 ans · de 1975 à 2015 · pays au revenu moyen au-dessus de 20 000 $ · Europe et Asie centrale, Amérique du Nord · secteur : industrie
+  - « Des rumeurs de délocalisation courent dans les ateliers ; certaines machines sont déjà parties en Asie. »
+  - Effets : bonheur −2
+- **echafaudage** _(travail)_ — 16–60 ans · pays au revenu moyen sous 25 000 $ · métier : ouvrier du bâtiment
+  - « Monte sur des échafaudages en bambou, sans harnais, à trente mètres du sol. »
+- **chantier-tours** _(travail)_ — 18–60 ans · en ville · métier : ouvrier du bâtiment
+  - « Construit des immeubles où il/elle ne pourra jamais habiter. »
+- **mine-poumons** _(travail)_ — 16–60 ans · métier : mineur
+  - « Descend chaque jour au fond de la mine ; la poussière s’installe dans les poumons. »
+  - Effets : santé −1
+- **foyer-mineurs** _(travail)_ — 18–55 ans · de 1910 à 2010 · Afrique du Sud, Lesotho, Mozambique, Eswatini, Botswana · métier : mineur
+  - « Vit dans un foyer de mineurs, loin de sa famille, onze mois par an ; on rentre au pays à Noël. »
+- **mecanicien-debrouille** _(travail)_ — 18–70 ans · pays au revenu moyen sous 15 000 $ · métier : mécanicien
+  - « Fait rouler des voitures que leurs constructeurs ont oubliées depuis longtemps ; ici, rien ne se jette. »
+- **electricien-orage** _(travail)_ — 18–65 ans · pays au revenu moyen sous 12 000 $ · métier : électricien
+  - « Rebranche les fils du quartier après chaque orage ; tout le monde a son numéro. »
+- **soudeur** _(travail)_ — 18–65 ans · métier : soudeur, technicien de maintenance
+  - « Finit ses journées les yeux rouges et les mains noires ; le travail est bien fait, et ça se voit. »
+
+### Bureaux et services
+
+- **pourboires** _(travail)_ — 16–65 ans · États-Unis, Canada · métier : serveur
+  - « Vit des pourboires plus que du salaire ; un mauvais soir, on rentre presque les mains vides. »
+- **coup-de-feu** _(travail)_ — 16–65 ans · métier : cuisinier
+  - « Passe ses soirées dans une cuisine à 40 °C, en plein coup de feu ; le service fini, on mange debout. »
+- **gardien-nuit** _(travail)_ — 18–70 ans · pays au revenu moyen sous 25 000 $ · métier : agent de sécurité
+  - « Veille toute la nuit devant une villa, sur une chaise en plastique, une lampe torche à la main. »
+- **routier** _(travail)_ — 20–65 ans · métier : chauffeur routier
+  - « Avale des milliers de kilomètres ; sa cabine est sa deuxième maison, avec la photo des siens scotchée au pare-soleil. »
+- **frontiere-camions** _(travail)_ — 20–65 ans · à partir de 1980 · Afrique subsaharienne · métier : chauffeur routier
+  - « Attend trois jours à la frontière avec sa cargaison, dans une file de camions qui s’étire sur des kilomètres. »
+- **caisse** _(travail)_ — 16–65 ans · métier : caissier
+  - « Passe des milliers d’articles par jour devant le scanner ; le dos proteste dès le jeudi. »
+- **salon-coiffure** _(travail)_ — 18–70 ans · métier : coiffeur
+  - « Tient un petit salon où l’on vient autant pour parler que pour se faire coiffer ; on y sait tout du quartier. »
+- **tampons** _(travail)_ — 20–65 ans · métier : employé de bureau, fonctionnaire
+  - « Passe ses journées entre tampons et formulaires, au troisième étage d’un bâtiment administratif. »
+- **centre-appels-us** _(travail)_ — 18–45 ans · à partir de 1998 · Philippines, Inde · métier : téléconseiller
+  - « Travaille de nuit au centre d’appels, aux heures des clients américains ; dort le jour, rideaux fermés. »
+- **centre-appels-fr** _(travail)_ — 18–45 ans · à partir de 2000 · Maroc, Tunisie, Sénégal, Côte d’Ivoire, Maurice, Madagascar · métier : téléconseiller
+  - « Répond à des clients français depuis un centre d’appels ; on lui a attribué un prénom de là-bas. »
+- **objectifs** _(travail)_ — 22–60 ans · métier : commercial, agent immobilier
+  - « Court après les objectifs du trimestre ; le téléphone ne s’éteint jamais vraiment. »
+- **livreur-pluie** _(travail)_ — 17–50 ans · métier : livreur à vélo
+  - « Pédale sous la pluie pour livrer des repas ; l’application décide de tout, même des pauses. »
+- **note-chauffeur** _(travail)_ — 20–60 ans · métier : chauffeur VTC
+  - « Surveille sa note de chauffeur : en dessous de 4,6, l’application risque de le/la désactiver. »
+- **tour-verre** _(travail)_ — 24–60 ans · métier : cadre de banque
+  - « Travaille tard dans une tour de verre ; le bonus de fin d’année fait oublier les week-ends perdus. »
+  - Effets : liens −1
+- **premiere-plaidoirie** _(travail)_ — 24–40 ans · métier : avocat · une fois dans la vie
+  - « Plaide sa première affaire ; ses mains tremblent sous la robe, sa voix non. »
+- **enquete-sensible** _(travail)_ — 24–65 ans · pays au revenu moyen sous 40 000 $ · métier : journaliste
+  - « Enquête sur un sujet sensible ; on lui conseille amicalement de laisser tomber. »
+  - Effets : bonheur −1
+- **decalage** _(travail)_ — 25–60 ans · métier : pilote de ligne
+  - « Fait trois fois le tour du monde en un mois ; le décalage horaire devient un mode de vie. »
+- **viral** _(travail)_ — 16–45 ans · métier : créateur de contenu
+  - « Une de ses vidéos devient virale ; le lendemain, il faut tout recommencer. »
+  - Effets : bonheur +2
+- **expo-cafe** _(travail)_ — 18–80 ans · métier : artiste
+  - « Expose ses œuvres dans un café du quartier ; on en vend une, c’est une fête. »
+  - Effets : bonheur +3
+- **nomikai** _(travail)_ — 22–60 ans · à partir de 1960 · Japon, Corée du Sud · salarié·e
+  - « Boit avec ses collègues après le travail, chaque vendredi ; refuser serait mal vu. »
+  - Effets : santé −1, liens +1
+- **dernier-train** _(travail)_ — 22–60 ans · à partir de 1995 · Japon · en ville · salarié·e
+  - « Rate le dernier train et dort dans un café manga, entre deux étagères de bandes dessinées. »
+- **neuf-neuf-six** _(travail)_ — 22–45 ans · à partir de 2012 · Chine · secteur : technique et sciences ou services, salarié·e
+  - « Travaille « 996 » : de 9 heures à 21 heures, six jours sur sept. »
+  - Effets : santé −1, liens −1
+- **teletravail** _(travail)_ — 22–64 ans · à partir de 2020 · niveau de vie : classe moyenne à grande aisance · secteur : technique et sciences ou services, salarié·e
+  - « Travaille depuis la cuisine plusieurs jours par semaine ; le chat assiste à toutes les réunions. »
+- **collegues-famille** _(travail)_ — 20–64 ans · salarié·e · une fois dans la vie
+  - « Ses collègues deviennent une seconde famille ; on fête les naissances et on pleure les départs ensemble. »
+  - Effets : liens +2
+- **chef-toxique** _(travail)_ — 20–64 ans · salarié·e
+  - « Un nouveau chef rend chaque journée plus longue ; le dimanche soir a un goût amer. »
+  - Effets : bonheur −3
+- **conges-1936** _(travail)_ — 18–64 ans · en 1936, 1937, 1938 · France · salarié·e · une fois dans la vie
+  - « Prend ses premiers congés payés : deux semaines, un train, et la mer pour la première fois. »
+- **cinq-semaines** _(travail)_ — 20–64 ans · à partir de 1982 · France, Suède, Danemark, Norvège, Finlande, Allemagne, Autriche, Espagne · salarié·e
+  - « Part cinq semaines en congé, comme chaque année ; ailleurs, beaucoup n’en reviendraient pas. »
+- **manif-retraites** _(travail)_ — 20–64 ans · en 1995, 2003, 2010, 2019, 2023 · France · au travail
+  - « Manifeste contre la réforme des retraites, dans un cortège qui s’étire sur des kilomètres. »
+- **assurance-emploi** _(santé)_ — 25–64 ans · à partir de 1960 · États-Unis · salarié·e
+  - « Garde un emploi qui ne lui plaît plus, pour ne pas perdre l’assurance santé de la famille. »
+  - Effets : bonheur −2
+- **deux-emplois** _(travail)_ — 22–60 ans · les 25 % les plus modestes du pays · États-Unis · au travail, un enfant mineur
+  - « Cumule deux emplois ; ne voit plus les enfants qu’endormis. »
+  - Effets : liens −2, santé −1
+- **salaire-retard** _(travail)_ — 22–64 ans · pays au revenu moyen sous 12 000 $ · secteur : secteur public
+  - « Le salaire des fonctionnaires arrive avec trois mois de retard ; on vit à crédit en attendant. »
+  - Effets : bonheur −2
+
+### Service public
+
+- **classe-70** _(travail)_ — 20–65 ans · pays au revenu moyen sous 6 000 $ · métier : instituteur
+  - « Enseigne à soixante-dix élèves avec une craie et un tableau fendu ; certains marchent deux heures pour venir. »
+- **copies** _(travail)_ — 22–65 ans · métier : instituteur, enseignant-chercheur
+  - « Corrige des copies jusqu’à minuit, un stylo rouge dans chaque main. »
+- **ancien-eleve** _(travail)_ — 35–80 ans · métier : instituteur · une fois dans la vie
+  - « Un ancien élève revient lui dire merci ; il est devenu médecin. »
+  - Effets : bonheur +3
+- **hopital-manque** _(travail)_ — 22–65 ans · pays au revenu moyen sous 15 000 $ · métier : infirmier, médecin, aide-soignant
+  - « À l’hôpital, il manque des gants, des médicaments, et les collègues partis travailler à l’étranger. »
+- **offre-hopital** _(travail)_ — 22–45 ans · à partir de 1990 · Philippines, Inde, Nigeria, Ghana, Zimbabwe, Kenya · métier : infirmier · une fois dans la vie
+  - « Reçoit une offre d’un hôpital britannique ; la moitié de sa promotion est déjà partie. »
+- **garde-nuit** _(travail)_ — 22–65 ans · métier : infirmier, médecin
+  - « Enchaîne les gardes de nuit ; le café de 4 heures du matin a un goût de victoire. »
+  - Effets : santé −1
+- **urgences-couloir** _(travail)_ — 22–65 ans · à partir de 2000 · pays au revenu moyen au-dessus de 30 000 $ · métier : infirmier, médecin, aide-soignant
+  - « Les urgences débordent ; on soigne des patients sur des brancards, dans les couloirs. »
+- **dispensaire-brousse** _(travail)_ — 26–65 ans · pays au revenu moyen sous 10 000 $ · métier : médecin
+  - « Une semaine par mois, consulte dans un dispensaire de brousse ; on fait la queue depuis l’aube. »
+- **toilettes-matin** _(travail)_ — 20–64 ans · pays au revenu moyen au-dessus de 20 000 $ · métier : aide-soignant
+  - « Fait la toilette de douze personnes âgées chaque matin, en courant d’une chambre à l’autre ; certaines ne reçoivent pas d’autre visite. »
+  - Effets : liens +1
+- **carrefour-sifflet** _(travail)_ — 20–60 ans · pays au revenu moyen sous 15 000 $ · métier : policier
+  - « Règle la circulation à un carrefour sans feux, sous le soleil, en sifflant à s’en faire mal. »
+- **mission-soldat** _(travail)_ — 18–50 ans · métier : soldat
+  - « Part en mission loin de chez soi pendant six mois ; les appels du dimanche sont courts. »
+  - Effets : liens −1
+- **poste-fonctionnaire** _(travail)_ — 22–40 ans · pays au revenu moyen sous 25 000 $ · métier : fonctionnaire · une fois dans la vie
+  - « Obtient un poste de fonctionnaire : un salaire modeste, mais sûr jusqu’à la retraite ; on le/la félicite comme pour un mariage. »
+  - Effets : bonheur +3
+
+### Sciences et technique
+
+- **paye-dollars** _(travail)_ — 22–55 ans · à partir de 2012 · pays au revenu moyen sous 30 000 $ · secteur : technique et sciences
+  - « Travaille à distance pour une entreprise à l’autre bout du monde, payé(e) en dollars ; les réunions sont à minuit. »
+  - Effets : rentrée 0,05 × revenu médian
+- **nuits-courtes** _(travail)_ — 22–60 ans · secteur : technique et sciences
+  - « Livre un projet après des semaines de nuits courtes ; personne ne remarque, sauf quand ça casse. »
+- **premier-article** _(travail)_ — 25–40 ans · métier : chercheur, enseignant-chercheur · une fois dans la vie
+  - « Publie son premier article scientifique ; ses parents l’encadrent sans le comprendre. »
+  - Effets : bonheur +3, savoir +2
+- **pont-natal** _(travail)_ — 30–60 ans · métier : ingénieur · une fois dans la vie
+  - « Conçoit un pont dans sa région natale ; y passe en voiture, chaque fois, un peu plus lentement. »
+- **ia-rapports** _(travail)_ — 22–65 ans · à partir de 2026 · niveau de vie : classe moyenne à grande aisance · secteur : technique et sciences ou services, au travail
+  - « Travaille avec une intelligence artificielle qui écrit la moitié de ses rapports ; reste à savoir quelle moitié. »
+
+### À son compte
+
+- **horaires-patron** _(travail)_ — 18–75 ans · à la tête d’une entreprise
+  - « Ouvre la boutique à 6 heures, la ferme à 22 heures : c’est ça, être son propre patron. »
+- **client-mauvais-payeur** _(travail)_ — 18–75 ans · à la tête d’une entreprise
+  - « Un gros client ne paie pas ; la trésorerie vacille tout l’hiver. »
+  - Effets : bonheur −3
+- **premier-salarie** _(travail)_ — 20–75 ans · à la tête d’une entreprise · une fois dans la vie
+  - « Embauche son premier salarié ; découvre ce que c’est que de payer quelqu’un avant soi. »
+  - Effets : bonheur +2
+- **enveloppes** _(travail)_ — 20–75 ans · pays au revenu moyen sous 20 000 $ · à la tête d’une entreprise
+  - « Chaque inspecteur qui passe repart avec une enveloppe ; c’est compté dans les frais. »
+  - Effets : dépense 0,02 × revenu médian
+- **renta** _(travail)_ — 18–75 ans · à partir de 1995 · Salvador, Honduras, Guatemala · à la tête d’une entreprise · passage difficile
+  - « Les maras exigent la « renta » chaque semaine pour laisser la boutique ouverte. »
+  - Effets : bonheur −4, dépense 0,03 × revenu médian
+
+### Au foyer
+
+- **foyer-tourner** _(famille)_ — 18–70 ans · au foyer
+  - « Fait tourner la maison : les courses, les repas, les enfants, les comptes ; personne n’appelle ça un travail. »
+- **carnet-comptes** _(argent)_ — 18–70 ans · niveau de vie : survie à modeste · au foyer
+  - « Tient les comptes du foyer dans un carnet, au centime près. »
+- **reprendre-travail** _(famille)_ — 30–55 ans · à partir de 1965 · pays au revenu moyen au-dessus de 15 000 $ · au foyer
+  - « Pense à reprendre un travail, maintenant que les enfants ont grandi. »
+
+### Trajets
+
+- **embouteillages** _(vie quotidienne)_ — 18–65 ans · à partir de 1980 · pays aux mégapoles embouteillées · en ville · au travail, pas secteur : agriculture
+  - « Passe deux heures par jour dans les embouteillages ; on apprend à dormir assis, à manger debout, à attendre. »
+- **metro-bonde** _(vie quotidienne)_ — 16–65 ans · à partir de 1950 · Japon, Chine, Corée du Sud, France, Royaume-Uni, États-Unis, Russie, Inde, Brésil, Mexique, Allemagne, Espagne, Italie, Égypte, Turquie, Singapour, Hong Kong, Taïwan · en ville · au travail, pas secteur : agriculture
+  - « Prend le métro bondé chaque matin, collé(e) contre des inconnus qui lisent par-dessus son épaule. »
+- **danfo** _(vie quotidienne)_ — 14–70 ans · Nigeria · en ville
+  - « Monte chaque matin dans un danfo jaune bondé ; le receveur crie les arrêts par la portière ouverte. »
+- **matatu** _(vie quotidienne)_ — 14–70 ans · à partir de 1960 · Kenya · en ville
+  - « Prend un matatu peint de toutes les couleurs, musique à fond ; le chauffeur conduit comme s’il était en retard. »
+- **jeepney** _(vie quotidienne)_ — 10–70 ans · à partir de 1950 · Philippines
+  - « Prend le jeepney ; on fait passer sa pièce de main en main jusqu’au chauffeur. »
+- **rickshaw** _(vie quotidienne)_ — 10–70 ans · à partir de 1960 · Inde, Bangladesh, Pakistan, Sri Lanka, Thaïlande, Cambodge, Laos, Népal · en ville
+  - « Négocie le prix du rickshaw avant de monter, comme chaque fois ; c’est presque un sport. »
+- **trotro** _(vie quotidienne)_ — 10–70 ans · Ghana
+  - « Monte dans un tro-tro bondé, entre un sac de riz et une cage à poules. »
+- **car-rapide** _(vie quotidienne)_ — 10–70 ans · Sénégal · en ville
+  - « Prend un car rapide bleu et jaune, couvert d’inscriptions protectrices ; l’apprenti tape sur la carrosserie à chaque arrêt. »
+- **taxi-brousse** _(vie quotidienne)_ — 10–80 ans · Madagascar, Mali, Niger, Burkina Faso, Tchad, Cameroun, Côte d’Ivoire, Guinée, Bénin, Togo, République centrafricaine, Congo
+  - « Voyage en taxi-brousse, quatorze dans une voiture prévue pour sept ; on part quand c’est plein. »
+- **marchroutka** _(vie quotidienne)_ — 10–80 ans · à partir de 1990 · Russie, Ukraine, Biélorussie, Kazakhstan, Kirghizstan, Ouzbékistan, Géorgie, Arménie, Azerbaïdjan, Moldavie
+  - « Prend la marchroutka ; on fait passer l’argent du trajet de main en main jusqu’au chauffeur. »
+- **combi** _(vie quotidienne)_ — 10–80 ans · Pérou, Bolivie, Équateur, Colombie, Argentine, Venezuela, Guatemala, Mexique · en ville
+  - « Saute dans un combi qui ralentit à peine ; le rabatteur crie la destination par la fenêtre. »
+- **dolmus** _(vie quotidienne)_ — 10–80 ans · Turquie · en ville
+  - « Prend le dolmuş, qui part quand il est plein et s’arrête où l’on veut. »
+- **velo-partout** _(vie quotidienne)_ — 6–85 ans · à partir de 1930 · Pays-Bas, Danemark
+  - « Fait tout à vélo, par tous les temps ; la pluie n’est pas une excuse. »
+- **shinkansen** _(vie quotidienne)_ — 8–80 ans · à partir de 1965 · niveau de vie : modeste à grande aisance · Japon · une fois dans la vie
+  - « Prend le Shinkansen pour la première fois ; le paysage défile, le café ne tremble pas. »
+- **train-nouvel-an** _(migrations)_ — 16–50 ans · de 1985 à 2030 · Chine · métier : ouvrier d’usine, ouvrier du bâtiment, ouvrier du textile, employé de maison, livreur à vélo, cuisinier, serveur
+  - « Prend le train du Nouvel An : trente heures debout pour rentrer au village, des sacs de cadeaux entre les jambes. »
+- **chuseok** _(culture et fêtes)_ — 10–80 ans · à partir de 1970 · Corée du Sud
+  - « Rentre au village pour Chuseok, dans des bouchons de dix heures ; on salue les ancêtres et on mange des songpyeon. »
+- **moto-famille** _(vie quotidienne)_ — 20–50 ans · à partir de 1990 · niveau de vie : modeste à classe moyenne · Vietnam, Indonésie, Thaïlande, Cambodge, Inde, Malaisie, Laos, Taïwan · une fois dans la vie
+  - « Achète une moto à crédit : désormais, toute la famille tient dessus, à quatre, avec les courses. »
+- **premiere-voiture** _(vie quotidienne)_ — 20–60 ans · à partir de 1950 · niveau de vie : classe moyenne à aisance · pays au revenu moyen sous 35 000 $ · une fois dans la vie
+  - « La famille s’offre sa première voiture, d’occasion ; on part le dimanche, juste pour rouler. »
+  - Effets : bonheur +3
+- **voiture-electrique** _(vie quotidienne)_ — 25–75 ans · à partir de 2030 · niveau de vie : aisance à grande aisance · une fois dans la vie
+  - « Achète une voiture électrique ; on la branche le soir, comme un téléphone. »
+- **premier-train** _(vie quotidienne)_ — 5–40 ans · niveau de vie : survie à modeste · sauf pays sans train de voyageurs, Océanie · une fois dans la vie
+  - « Prend le train pour la première fois ; colle son front à la vitre pendant tout le trajet. »
+- **premier-avion** _(vie quotidienne)_ — 5–60 ans · à partir de 1960 · niveau de vie : classe moyenne à grande aisance · une fois dans la vie
+  - « Prend l’avion pour la première fois ; serre l’accoudoir au décollage, puis ne quitte plus le hublot des yeux. »
+
+### Argent au quotidien
+
+- **compter-pieces** _(argent)_ — 18–85 ans · niveau de vie : survie
+  - « Compte chaque pièce avant d’aller au marché ; tout se calcule, même le sel. »
+  - « Noue ses quelques billets dans un coin de son pagne ou de sa poche intérieure ; ils doivent tenir jusqu’à la fin de la semaine. »
+- **journee-malade** _(argent)_ — 18–70 ans · niveau de vie : survie à précarité · au travail
+  - « Une journée de maladie, c’est une journée sans revenu ; on va travailler avec la fièvre. »
+  - Effets : santé −1
+- **chaussures-mois** _(argent)_ — 10–70 ans · niveau de vie : précarité
+  - « Économise des mois pour une paire de chaussures neuves, qu’on cire chaque dimanche. »
+- **bipe** _(argent)_ — 12–70 ans · de 2002 à 2016 · niveau de vie : survie à modeste · pays au revenu moyen sous 15 000 $
+  - « Fait durer le crédit du téléphone : on « bipe » pour que l’autre rappelle. »
+- **recharge-voisin** _(argent)_ — 12–70 ans · à partir de 2008 · niveau de vie : survie à précarité · Afrique subsaharienne · à la campagne
+  - « Recharge son téléphone chez le voisin qui a un panneau solaire, contre quelques pièces. »
+- **second-bus** _(argent)_ — 18–65 ans · niveau de vie : précarité à modeste · en ville · au travail
+  - « Marche une heure plutôt que de prendre le second bus : c’est autant de gagné pour le dîner. »
+- **boite-fer** _(argent)_ — 20–75 ans · niveau de vie : modeste
+  - « Met de côté chaque mois un peu d’argent dans une boîte en fer, pour les jours difficiles. »
+- **frigo-credit** _(argent)_ — 20–60 ans · à partir de 1960 · niveau de vie : modeste à classe moyenne · une fois dans la vie
+  - « Achète un réfrigérateur à crédit, en vingt-quatre mensualités ; l’eau fraîche en plein été, quel luxe. »
+  - Effets : bonheur +2
+- **meubles-credit** _(argent)_ — 22–50 ans · niveau de vie : modeste à classe moyenne · une fois dans la vie
+  - « Achète un canapé et une armoire à crédit ; on fait le tour de la maison pour les montrer aux voisins. »
+- **peser-depenses** _(argent)_ — 25–65 ans · niveau de vie : classe moyenne · un enfant mineur
+  - « Pèse chaque grande dépense : les études des enfants d’abord, le reste ensuite. »
+- **vacances-hotel** _(argent)_ — 20–75 ans · à partir de 1965 · niveau de vie : classe moyenne à aisance
+  - « Passe une semaine de vacances à l’hôtel, avec piscine ; on en parle toute l’année. »
+  - Effets : bonheur +3
+- **vacances-etranger** _(argent)_ — 20–80 ans · à partir de 1965 · niveau de vie : aisance à grande aisance · pas à la retraite
+  - « Part en vacances à l’étranger ; le retour au travail est rude. »
+  - Effets : bonheur +3
+- **voyage-retraite** _(argent)_ — 60–90 ans · à partir de 1975 · niveau de vie : aisance à grande aisance · à la retraite
+  - « Voyage à l’étranger avec des amis retraités ; envoie à la famille la photo de chaque repas. »
+  - Effets : bonheur +3
+- **change-voiture** _(argent)_ — 30–75 ans · à partir de 1960 · niveau de vie : aisance à grande aisance
+  - « Change de voiture ; l’ancienne n’avait que six ans. »
+- **renovation** _(argent)_ — 30–75 ans · niveau de vie : aisance à grande aisance · propriétaire
+  - « Rénove la maison de fond en comble ; six mois de poussière, puis la fierté. »
+- **classe-affaires** _(argent)_ — 30–85 ans · à partir de 1975 · niveau de vie : grande aisance · les 5 % les plus aisés du pays
+  - « Voyage en classe affaires ; l’avion n’a plus rien d’une aventure. »
+- **club-prive** _(argent)_ — 35–85 ans · à partir de 1950 · niveau de vie : grande aisance · les 3 % les plus aisés du pays
+  - « Fréquente un club privé où l’on parle affaires entre deux parties de golf. »
+- **oeuvres-art** _(argent)_ — 40–90 ans · niveau de vie : grande aisance · les 2 % les plus aisés du pays
+  - « Achète des œuvres d’art, d’abord pour le plaisir, ensuite pour le placement. »
+- **conseiller** _(argent)_ — 40–90 ans · niveau de vie : grande aisance · les 5 % les plus aisés du pays · pays au revenu moyen au-dessus de 25 000 $
+  - « Un conseiller en gestion de patrimoine l’appelle par son prénom. »
+- **don-ecole** _(argent)_ — 50–95 ans · niveau de vie : grande aisance · les 2 % les plus aisés du pays · une fois dans la vie
+  - « Fait un don important à son ancienne école ; une salle porte désormais son nom. »
+  - Effets : bonheur +2, dépense 0,5 × revenu médian
+- **fin-mois** _(argent)_ — 20–75 ans · les 20 % les plus modestes du pays · pays au revenu moyen au-dessus de 20 000 $
+  - « Les fins de mois commencent le 15 ; on surveille le compte comme le lait sur le feu. »
+  - Effets : bonheur −2
+- **dentiste-cher** _(santé)_ — 25–85 ans · les 30 % les plus modestes du pays · pays au revenu moyen au-dessus de 20 000 $
+  - « Renonce au dentiste, trop cher ; on mâche de l’autre côté. »
+  - Effets : santé −1
+- **pas-vacances** _(argent)_ — 25–60 ans · les 20 % les plus modestes du pays · pays au revenu moyen au-dessus de 20 000 $ · un enfant mineur
+  - « Pas de vacances cette année encore ; les enfants racontent celles des autres à la rentrée. »
+  - Effets : bonheur −1
+- **usurier** _(argent)_ — 20–70 ans · niveau de vie : survie à précarité · à la campagne · sans compte en banque
+  - « Emprunte à l’usurier du village pour acheter des semences, à un taux qui fait peur. »
+  - Effets : dette 0,08 × revenu médian
+- **tontine-femmes** _(argent)_ — 20–70 ans · niveau de vie : survie à classe moyenne · Afrique subsaharienne · femmes
+  - « Cotise à la tontine des femmes du quartier : chaque mois, l’une d’elles reçoit la cagnotte, et c’est une fête. »
+  - Effets : liens +2
+- **committee** _(argent)_ — 20–70 ans · niveau de vie : précarité à classe moyenne · Pakistan, Inde, Bangladesh
+  - « Participe à un « committee » entre voisines : chaque mois, une famille reçoit le pot commun. »
+  - Effets : liens +1
+- **microcredit** _(argent)_ — 20–60 ans · à partir de 1983 · niveau de vie : survie à modeste · Bangladesh, Inde, Bolivie, Pérou, Kenya, Ouganda, Philippines, Cambodge, Mexique, Nicaragua · femmes · une fois dans la vie
+  - « Obtient un microcrédit pour acheter une machine à coudre ; le remboursement se fait chaque semaine, devant tout le groupe. »
+  - Effets : dette 0,05 × revenu médian, bonheur +2
+- **argent-telephone** _(argent)_ — 16–85 ans · à partir de 2009 · Kenya, Tanzanie, Ouganda, Rwanda, Ghana, Zambie, Zimbabwe, Mozambique, Sénégal, Côte d’Ivoire · une fois dans la vie
+  - « Reçoit de l’argent sur son téléphone pour la première fois : plus besoin de cacher les billets sous le matelas. »
+- **qr-cn** _(argent)_ — 10–95 ans · à partir de 2015 · Chine · une fois dans la vie
+  - « Paie le marchand de légumes en scannant un QR code ; même les musiciens de rue en ont un. »
+- **upi** _(argent)_ — 14–95 ans · à partir de 2018 · Inde · une fois dans la vie
+  - « Paie son thé au coin de la rue d’un scan de téléphone ; le vendeur a son QR code collé sur la marmite. »
+- **pix** _(argent)_ — 14–95 ans · à partir de 2021 · Brésil · une fois dans la vie
+  - « Tout se paie par Pix, même le vendeur de noix de coco sur la plage. »
+- **euro** _(argent)_ — 8–105 ans · en 2002 · zone euro de 2002 · une fois dans la vie · raconté dès que possible
+  - « Les premiers euros dans le porte-monnaie ; pendant des années, on reconvertira les prix de tête. »
+- **euro-tard** _(argent)_ — 8–105 ans · Slovénie 2007, Chypre 2008, Malte 2008, Slovaquie 2009, Estonie 2011, Lettonie 2014, Lituanie 2015, Croatie 2023 · une fois dans la vie · raconté dès que possible
+  - « Le pays passe à l’euro ; on reconvertit les prix de tête pendant des mois. »
+- **decimal-gb** _(argent)_ — 10–105 ans · Royaume-Uni 1971 · une fois dans la vie · raconté dès que possible
+  - « La livre passe au système décimal ; les anciens comptent encore en shillings. »
+- **dollars-ar** _(argent)_ — 20–85 ans · à partir de 1975 · niveau de vie : modeste à grande aisance · Argentine
+  - « Dès que le salaire tombe, l’échange contre des dollars ; les prix, eux, changent chaque semaine. »
+- **liasses-ve** _(argent)_ — 12–95 ans · de 2016 à 2020 · Venezuela
+  - « On paie le pain avec une liasse de billets ; au marché, certains pèsent l’argent au lieu de le compter. »
+- **billet-zw** _(argent)_ — 10–95 ans · en 2008 · Zimbabwe · une fois dans la vie
+  - « Un billet de cent mille milliards de dollars zimbabwéens ne suffit plus pour acheter le pain. »
+- **banques-lb** _(argent)_ — 20–95 ans · de 2019 à 2025 · Liban · avec de l’épargne · une fois dans la vie
+  - « Les banques bloquent les dépôts ; l’épargne de toute une vie est là, sur l’écran, et inaccessible. »
+  - Effets : bonheur −5
+- **prix-tr** _(argent)_ — 18–95 ans · de 2018 à 2024 · Turquie
+  - « Le prix du pain double en un an ; on fait ses courses dès le jour de paie, avant que tout augmente. »
+- **rial** _(argent)_ — 18–95 ans · à partir de 2012 · Iran
+  - « Le rial perd encore de sa valeur ; on parle des prix en dollars et des voyages au conditionnel. »
+- **loterie** _(argent)_ — 18–90 ans · rare (30 % des années) · une fois dans la vie
+  - « Gagne une petite somme à la loterie ; invite tout le monde, et il ne reste presque rien. »
+  - Effets : bonheur +3, rentrée 0,03 × revenu médian
+- **vol-telephone** _(argent)_ — 14–75 ans · à partir de 2005 · niveau de vie : précarité à grande aisance · en ville · une fois dans la vie
+  - « Se fait voler son téléphone dans le bus ; c’est tout un carnet d’adresses qui part avec. »
+  - Effets : bonheur −2, dépense 0,01 × revenu médian
+
+### Migrations
+
+- **mandat-oncle** _(migrations)_ — 8–85 ans · niveau de vie : survie à modeste · pays au revenu moyen sous 20 000 $ · pays qui vivent en partie de l’argent des émigrés · dans son pays natal
+  - « Un oncle parti travailler à l’étranger envoie de l’argent : de quoi payer l’école des petits cette année. »
+  - Effets : rentrée 0,03 × revenu médian, liens +1
+- **mandat-usa** _(migrations)_ — 8–85 ans · à partir de 1980 · niveau de vie : survie à modeste · pays d’émigration vers les États-Unis · dans son pays natal
+  - « Le mandat d’un cousin installé aux États-Unis arrive à l’agence du village ; on fait la queue pour le retirer. »
+  - Effets : rentrée 0,03 × revenu médian
+- **balikbayan** _(migrations)_ — 5–85 ans · à partir de 1980 · Philippines · dans son pays natal
+  - « La caisse « balikbayan » d’une tante partie à l’étranger arrive enfin : du chocolat, des savons, des vêtements trop grands. »
+  - Effets : bonheur +2
+- **camp-travailleurs** _(migrations)_ — 18–60 ans · pays du Golfe · émigré·e venu·e de : pays d’où l’on part travailler dans le Golfe, Égypte, Éthiopie, Kenya, Ouganda, Soudan · émigré·e
+  - « Dort dans un camp de travailleurs aux portes de la ville, à douze par chambre ; le bus de l’aube part à 5 heures. »
+  - Effets : santé −1
+- **passeport-garde** _(migrations)_ — 18–60 ans · pays du Golfe · émigré·e venu·e de : pays d’où l’on part travailler dans le Golfe, Égypte, Éthiopie, Kenya, Ouganda, Soudan · émigré·e · une fois dans la vie
+  - « L’employeur garde son passeport ; changer de travail sans son accord est impossible. »
+  - Effets : bonheur −3
+- **chantier-45** _(migrations)_ — 18–60 ans · pays du Golfe · émigré·e venu·e de : pays d’où l’on part travailler dans le Golfe, Égypte, Soudan · émigré·e
+  - « Travaille sur un chantier sous 45 °C ; à midi, la pause obligatoire semble toujours trop courte. »
+  - Effets : santé −1
+- **envoie-tout** _(migrations)_ — 18–65 ans · pays au revenu moyen au-dessus de 15 000 $ · émigré·e venu·e de : Afrique subsaharienne, Asie du Sud, Amérique latine et Caraïbes, pays d’où l’on part travailler dans le Golfe · émigré·e
+  - « Envoie presque tout son salaire à la famille restée au pays ; garde de quoi manger et téléphoner. »
+  - Effets : liens +2
+- **titre-sejour** _(migrations)_ — 18–75 ans · pays au revenu moyen au-dessus de 25 000 $ · émigré·e
+  - « Fait la queue des heures pour renouveler son titre de séjour ; il manque toujours un papier. »
+  - Effets : bonheur −2
+- **diplome-ignore** _(migrations)_ — 22–60 ans · pays au revenu moyen au-dessus de 25 000 $ · émigré·e, diplômé·e de l’université · une fois dans la vie
+  - « Son diplôme n’est pas reconnu ici ; en attendant, travaille la nuit dans un entrepôt. »
+  - Effets : bonheur −3
+- **epicerie-pays** _(migrations)_ — 18–95 ans · émigré·e
+  - « Retrouve, dans une épicerie du quartier, les épices et les sons de son enfance ; reste longtemps entre les rayons. »
+  - Effets : bonheur +2
+- **nom-repete** _(migrations)_ — 18–65 ans · pays au revenu moyen au-dessus de 25 000 $ · émigré·e
+  - « On lui fait répéter son nom trois fois à chaque entretien d’embauche ; certains le changent sur leur CV. »
+  - Effets : bonheur −2
+- **vacances-au-pays** _(migrations)_ — 20–75 ans · émigré·e venu·e de : Afrique subsaharienne, Asie du Sud, Amérique latine et Caraïbes, Moyen-Orient et Afrique du Nord, Asie de l’Est et du Sud-Est · émigré·e
+  - « Rentre au pays pour les vacances, les valises pleines de cadeaux ; là-bas, on le/la croit riche. »
+  - Effets : liens +3, dépense 0,05 × revenu médian
+- **enfants-traduisent** _(migrations)_ — 30–75 ans · émigré·e, un enfant mineur
+  - « Les enfants parlent la langue du pays mieux que lui/elle ; parfois, ce sont eux qui traduisent chez le médecin. »
+- **video-mere** _(migrations)_ — 18–70 ans · à partir de 2010 · émigré·e, sa mère vivante
+  - « Appelle sa mère en vidéo chaque dimanche, malgré le décalage horaire ; elle montre la cuisine, le jardin, les voisins. »
+  - Effets : liens +2
+- **enterrement-loin** _(migrations)_ — 25–85 ans · émigré·e · une fois dans la vie
+  - « Ne peut pas rentrer pour l’enterrement d’un proche ; les papiers ne le permettent pas. »
+  - Effets : bonheur −4
+- **entre-deux** _(migrations)_ — 40–95 ans · émigré·e · une fois dans la vie
+  - « Se sent étranger(ère) ici comme là-bas ; chez soi, désormais, c’est un peu entre les deux. »
+- **village-natal** _(migrations)_ — 65–95 ans · émigré·e · une fois dans la vie
+  - « Retourne voir son village natal ; ne reconnaît presque rien, sauf l’odeur. »
+- **mere-part** _(famille)_ — 2–12 ans · niveau de vie : survie à modeste · Philippines dès 1975, Indonésie dès 1980, Sri Lanka dès 1980, Moldavie dès 1995, Ukraine dès 1995, Roumanie dès 1995 · sa mère vivante, dans son pays natal · ouvre le fil « parentAbroad » · une fois dans la vie
+  - « Sa mère, ‹mere›, part travailler à l’étranger comme aide à domicile ; on se parle au téléphone le dimanche. »
+  - Effets : liens −2, bonheur −3
+- **pere-part** _(famille)_ — 2–14 ans · niveau de vie : survie à modeste · Inde dès 1975, Népal dès 1990, Bangladesh dès 1976, Pakistan dès 1975, Sri Lanka dès 1976, Philippines dès 1975, Égypte dès 1975 · son père vivant, dans son pays natal · ouvre le fil « parentAbroad » · une fois dans la vie
+  - « Son père, ‹pere›, part travailler sur les chantiers du Golfe ; il ne rentrera que tous les deux ans. »
+  - Effets : liens −2, bonheur −2
+- **parent-colis** _(famille)_ — 3–17 ans · suite du fil « parentAbroad »
+  - « Un colis arrive de l’étranger, envoyé par ‹parent› : des vêtements neufs, du chocolat, et une lettre qu’on relit dix fois. »
+  - Effets : bonheur +2
+- **parent-retour** _(famille)_ — 6–25 ans · suite du fil « parentAbroad » (au moins 4 ans après)
+  - « ‹parent› rentre pour de bon, après des années à l’étranger ; il faut réapprendre à vivre ensemble. »
+  - Effets : liens +2
+- **enfant-part** _(migrations)_ — 40–75 ans · pays au revenu moyen sous 20 000 $ · un enfant adulte, dans son pays natal · ouvre le fil « kidAbroad » · une fois dans la vie
+  - « ‹enfant› part travailler à l’étranger ; la maison est plus silencieuse. »
+  - Effets : bonheur −2, liens −1
+- **enfant-envoie** _(argent)_ — 41–95 ans · suite du fil « kidAbroad »
+  - « ‹enfant› envoie de l’argent chaque mois depuis l’étranger ; on refait le toit et on paie les médicaments. »
+  - Effets : rentrée 0,06 × revenu médian, bonheur +1
+- **enfant-visite** _(famille)_ — 42–100 ans · suite du fil « kidAbroad » (au moins 2 ans après)
+  - « ‹enfant› rentre pour quelques semaines, avec des cadeaux et un accent nouveau ; les voisins défilent. »
+  - Effets : bonheur +3, liens +2
+- **enfant-video** _(famille)_ — 45–100 ans · à partir de 2012 · suite du fil « kidAbroad »
+  - « Voit grandir ses petits-enfants à l’écran, à l’autre bout du monde ; c’est ‹enfant› qui tient le téléphone. »
+  - Effets : liens +1
+
+### Santé et soins
+
+- **dispensaire-loin** _(santé)_ — 3–85 ans · pays au revenu moyen sous 6 000 $ · à la campagne
+  - « Le dispensaire le plus proche est à trois heures de marche ; on n’y va que quand c’est grave. »
+- **guerisseur** _(santé)_ — 3–85 ans · niveau de vie : survie à précarité · Afrique subsaharienne, Amérique latine et Caraïbes, Asie du Sud · à la campagne
+  - « Consulte un guérisseur, faute de médecin : des herbes, des prières, et beaucoup d’attention. »
+  - Effets : bonheur +1
+- **medicaments-unite** _(santé)_ — 15–85 ans · niveau de vie : survie à précarité · Afrique subsaharienne
+  - « Achète ses médicaments à l’unité, au marché, sans ordonnance ni notice. »
+- **paludisme** _(santé)_ — 5–85 ans · pays au revenu moyen sous 12 000 $ · Afrique subsaharienne
+  - « Fait une crise de paludisme ; une semaine de fièvre, de frissons et de rêves étranges. »
+  - Effets : santé −2
+- **dengue** _(santé)_ — 5–85 ans · à partir de 1980 · Brésil, Mexique, Colombie, Pérou, Philippines, Indonésie, Vietnam, Thaïlande, Malaisie, Inde, Bangladesh, Sri Lanka, Pakistan, Nicaragua, Honduras, République dominicaine, Porto Rico, Singapour · une fois dans la vie
+  - « Attrape la dengue ; quinze jours cloué(e) au lit, les os en miettes. »
+  - Effets : santé −2
+- **pollution** _(santé)_ — 3–90 ans · Inde dès 1990, Pakistan dès 1995, Bangladesh dès 1995, Népal dès 2000, Chine 1995–2020, Égypte dès 1990, Nigeria dès 2000, Iran dès 2000 · en ville
+  - « Les jours de pollution, on ne voit plus le bout de la rue ; les enfants toussent tout l’hiver. »
+  - Effets : santé −1
+- **chaleur-48** _(santé)_ — 3–95 ans · à partir de 1990 · niveau de vie : survie à modeste · Inde, Pakistan, Irak, Koweït, Arabie saoudite, Émirats arabes unis, Oman, Qatar, Bahreïn, Iran, Égypte, Soudan, Mali, Niger, Tchad
+  - « Une vague de chaleur à 48 °C : on dort sur le toit, on mouille les draps, on attend la nuit. »
+  - « La chaleur ne retombe plus la nuit ; on dort par terre, sur le carrelage, la porte ouverte. »
+  - « Le thermomètre dépasse 45 °C une semaine entière ; les chantiers s’arrêtent à midi, les marchés ouvrent à l’aube. »
+  - Effets : santé −1
+- **canicule-2003** _(santé)_ — 10–105 ans · France 2003 · une fois dans la vie
+  - « La canicule de l’été 2003 : on ferme les volets, on rend visite aux voisins âgés, on écoute le décompte à la radio. »
+- **cataracte** _(santé)_ — 60–100 ans · à partir de 1985 · niveau de vie : modeste à grande aisance · une fois dans la vie
+  - « Se fait opérer de la cataracte : le monde redevient net et lumineux, comme repeint. »
+  - Effets : bonheur +3
+- **cataracte-non** _(santé)_ — 60–100 ans · niveau de vie : survie à précarité · pays au revenu moyen sous 10 000 $ · une fois dans la vie
+  - « Perd peu à peu la vue ; l’opération de la cataracte existe, mais en ville, et trop chère. »
+  - Effets : bonheur −3, santé −1
+- **camp-yeux** _(santé)_ — 55–95 ans · à partir de 1990 · niveau de vie : survie à modeste · Inde, Népal · une fois dans la vie
+  - « Se fait opérer de la cataracte gratuitement lors d’un camp médical ; le lendemain, découvre les rides de ses enfants. »
+  - Effets : bonheur +4
+- **facture-urgences** _(santé)_ — 20–85 ans · à partir de 1970 · les 50 % les plus modestes du pays · États-Unis · une fois dans la vie
+  - « Un passage aux urgences, et une facture qui arrive trois semaines plus tard, de quoi s’asseoir. »
+  - Effets : dépense 0,15 × revenu médian, bonheur −3
+- **prise-en-charge** _(santé)_ — 40–95 ans · à partir de 1950 · France, Allemagne, Belgique, Autriche, Pays-Bas, Luxembourg, Suède, Norvège, Danemark, Finlande, Japon, Corée du Sud, Taïwan, Canada, Royaume-Uni, Espagne, Italie · une fois dans la vie
+  - « Une opération lourde, presque entièrement prise en charge ; il/elle pense à ceux qui, ailleurs, n’ont pas cette chance. »
+- **liste-attente** _(santé)_ — 55–95 ans · à partir de 1990 · Royaume-Uni, Canada, Irlande, Nouvelle-Zélande · une fois dans la vie
+  - « Attend huit mois une opération de la hanche ; marche avec une canne en attendant. »
+  - Effets : santé −1, bonheur −1
+- **genoux** _(santé)_ — 60–100 ans
+  - « Ses genoux lui rappellent chaque escalier ; on rit, on soupire, on monte quand même. »
+  - « Le dos se rappelle à lui/elle chaque matin ; il faut cinq minutes pour se mettre en route. »
+- **arracheur** _(santé)_ — 25–85 ans · niveau de vie : survie à précarité · pays au revenu moyen sous 10 000 $
+  - « Se fait arracher une dent par un arracheur ambulant, au marché ; c’est moins cher que le dentiste. »
+  - Effets : santé −1
+- **periode-sombre** _(santé)_ — 18–90 ans · malheureux·se · passage difficile
+  - « Traverse une période sombre ; il faut des mois pour retrouver le goût des choses. »
+  - Effets : bonheur −2
+- **parler-quelqu-un** _(santé)_ — 18–85 ans · à partir de 1980 · niveau de vie : classe moyenne à grande aisance · pays au revenu moyen au-dessus de 25 000 $ · malheureux·se
+  - « Commence à voir quelqu’un pour parler ; ce n’est pas magique, mais ça aide. »
+  - Effets : bonheur +3
+- **tai-chi** _(santé)_ — 55–100 ans · Chine, Taïwan, Hong Kong, Singapour
+  - « Fait du tai-chi au parc chaque matin, au milieu d’autres retraités, dans un silence de cathédrale. »
+  - Effets : santé +1
+- **gym-radio** _(santé)_ — 6–100 ans · à partir de 1930 · Japon
+  - « Fait la gymnastique radio du matin, sur la même musique depuis l’enfance. »
+  - Effets : santé +1
+- **yoga** _(santé)_ — 25–85 ans · à partir de 1980 · niveau de vie : classe moyenne à grande aisance · une fois dans la vie
+  - « S’initie au yoga ; les articulations protestent, le sommeil s’améliore. »
+  - Effets : santé +1
+
+### Couple et mariage
+
+- **bon-parti** _(famille)_ — 19–28 ans · Inde, Pakistan, Bangladesh, Népal, Afghanistan, Sri Lanka (pays d’origine) · jamais marié·e
+  - « Ses parents cherchent un bon parti ; les photos et les horoscopes circulent entre les familles. »
+- **site-matrimonial** _(famille)_ — 22–32 ans · à partir de 2005 · niveau de vie : modeste à grande aisance · Inde (pays d’origine) · jamais marié·e
+  - « Ses parents publient son profil sur un site de mariages arrangés : diplômes, taille, famille, horoscope. »
+- **marche-mariages** _(famille)_ — 27–36 ans · à partir de 2005 · Chine · en ville · jamais marié·e
+  - « Ses parents affichent sa fiche au « marché aux mariages » du parc, le dimanche : âge, salaire, signe astral. »
+- **appartement-fiancee** _(famille)_ — 25–35 ans · à partir de 2005 · Chine · hommes · jamais marié·e
+  - « La famille de sa fiancée attend un appartement ; ses parents vident leur épargne pour l’apport. »
+- **applis** _(famille)_ — 20–45 ans · à partir de 2013 · pays au revenu moyen au-dessus de 15 000 $ · pas en couple
+  - « Tente les applications de rencontre : beaucoup de discussions, peu de rendez-vous, un fou rire ou deux. »
+- **bal-village** _(famille)_ — 17–25 ans · jusqu’en 1970 · Europe et Asie centrale, Amérique du Nord, Amérique latine et Caraïbes · à la campagne · jamais marié·e
+  - « Va au bal du village le samedi ; les mères surveillent depuis les chaises alignées le long du mur. »
+- **noce-in** _(famille)_ — 16–50 ans · niveau de vie : modeste à grande aisance · Inde, Népal (pays d’origine) · au mariage · raconté dès que possible
+  - « Le mariage a duré trois jours : huit cents invités, des danses, des larmes, et des dettes pour des années. »
+  - Effets : dépense 0,1 × revenu médian
+- **noce-in-simple** _(famille)_ — 14–50 ans · niveau de vie : survie à précarité · Inde, Népal, Bangladesh (pays d’origine) · au mariage · raconté dès que possible
+  - « Un mariage simple au village ; la famille a emprunté pour nourrir les invités. »
+  - Effets : dette 0,05 × revenu médian
+- **noce-pk** _(famille)_ — 16–50 ans · niveau de vie : modeste à grande aisance · Pakistan, Bangladesh, Afghanistan (pays d’origine) · au mariage · raconté dès que possible
+  - « Le mehndi, le baraat, le walima : trois jours de fête, de henné et de cuisine. »
+- **noce-ng** _(famille)_ — 18–50 ans · niveau de vie : précarité à grande aisance · Nigeria, Ghana, Cameroun (pays d’origine) · au mariage · raconté dès que possible
+  - « Le mariage traditionnel, puis le mariage à l’église : deux fêtes, deux tenues assorties, deux fois plus d’invités. »
+- **lobola** _(famille)_ — 18–50 ans · Afrique du Sud, Lesotho, Eswatini, Zimbabwe, Botswana, Namibie (pays d’origine) · au mariage · raconté dès que possible
+  - « Les deux familles ont négocié la lobola pendant des heures, avant de faire la fête toute la nuit. »
+- **dot-vaches** _(famille)_ — 16–50 ans · Kenya, Tanzanie, Ouganda, Soudan du Sud, Rwanda, Burundi, Éthiopie (pays d’origine) · au mariage · raconté dès que possible
+  - « Les familles se sont accordées sur la dot : tant de vaches, ou leur équivalent ; les oncles ont mené la négociation. »
+- **noce-mairie** _(famille)_ — 18–60 ans · France, Belgique, Luxembourg, Suisse (pays d’origine) · au mariage · raconté dès que possible
+  - « Mariage à la mairie, puis repas et danse jusqu’à l’aube ; l’oncle a fait le même discours qu’à chaque mariage. »
+- **noce-us** _(famille)_ — 20–60 ans · niveau de vie : classe moyenne à grande aisance · États-Unis · au mariage · raconté dès que possible
+  - « Un grand mariage, avec photographe et traiteur ; il faudra des années pour en rembourser le prix. »
+  - Effets : dépense 0,15 × revenu médian
+- **noce-jp** _(famille)_ — 20–60 ans · à partir de 1960 · Japon · au mariage · raconté dès que possible
+  - « Cérémonie shintoïste le matin, robe blanche l’après-midi, discours millimétrés le soir. »
+- **noce-kr** _(famille)_ — 20–60 ans · à partir de 1985 · Corée du Sud · au mariage · raconté dès que possible
+  - « Le mariage a duré une heure dans une salle louée ; le couple suivant attendait déjà dans le couloir. »
+- **noce-urss** _(famille)_ — 18–60 ans · à partir de 1950 · ex-URSS · au mariage · raconté dès que possible
+  - « Mariage au bureau d’état civil, photos devant le monument aux morts, et toasts jusqu’à l’aube. »
+- **noce-henne** _(famille)_ — 17–60 ans · Maroc, Algérie, Tunisie, Libye, Égypte, Jordanie, Liban, Syrie, Irak, Palestine (pays d’origine) · au mariage · raconté dès que possible
+  - « La soirée du henné la veille, puis la grande fête : trois robes, des youyous, et tout le quartier. »
+- **noce-hisp** _(famille)_ — 18–60 ans · Amérique hispanique (pays d’origine) · au mariage · raconté dès que possible
+  - « Un mariage avec orchestre et cousins venus de partout ; on a dansé jusqu’à ce que les chaussures lâchent. »
+- **noce-br** _(famille)_ — 18–60 ans · Brésil (pays d’origine) · au mariage · raconté dès que possible
+  - « Mariage à l’église, puis la fête : samba, brigadeiros, et des cousins qui dansent jusqu’au matin. »
+- **noce-modeste** _(famille)_ — 16–60 ans · niveau de vie : survie à précarité · au mariage
+  - « Une noce simple : un repas partagé dans la cour, les voisins qui chantent, et des bancs empruntés à l’école. »
+- **noce-grande** _(famille)_ — 18–60 ans · niveau de vie : modeste à grande aisance · au mariage
+  - « La noce réunit les deux familles ; on danse jusqu’au matin, et les tantes comparent déjà les menus. »
+- **noce-rouge** _(famille)_ — 20–60 ans · Chine, Taïwan, Hong Kong, Singapour, Vietnam (pays d’origine) · au mariage · raconté dès que possible
+  - « Le mariage en rouge, les enveloppes d’argent des invités, et le banquet de dix plats. »
+- **noce-simple** _(famille)_ — 22–60 ans · niveau de vie : modeste à aisance · pays au revenu moyen au-dessus de 25 000 $ · au mariage
+  - « Un mariage simple, à la mairie, avec vingt amis ; l’argent ira plutôt dans le logement. »
+- **noce-people** _(famille)_ — 20–60 ans · niveau de vie : grande aisance · les 3 % les plus aisés du pays · au mariage · raconté dès que possible
+  - « Le mariage a rassemblé mille invités et fait la une d’un magazine people. »
+- **disputes-argent** _(famille)_ — 20–70 ans · les 30 % les plus modestes du pays · en couple
+  - « Les disputes d’argent reviennent à chaque fin de mois, avec toujours les mêmes mots. »
+  - Effets : liens −1
+- **dimanche-a-deux** _(famille)_ — 20–90 ans · en couple
+  - « Un dimanche sans rien faire, à deux ; le bonheur tient parfois à ça. »
+  - « Une dispute sur un détail, puis un fou rire au milieu ; c’est aussi ça, vivre à deux. »
+  - Effets : bonheur +1, liens +1
+- **noces-10** _(famille)_ — 25–80 ans · en couple, 10 ans de mariage · une fois dans la vie · raconté dès que possible
+  - « Dix ans de mariage avec ‹conjoint› ; on ressort les photos, on rit des coupes de cheveux. »
+- **noces-25** _(famille)_ — 40–95 ans · en couple, 25 ans de mariage · une fois dans la vie · raconté dès que possible
+  - « Noces d’argent : vingt-cinq ans avec ‹conjoint›, et un dîner où l’on se dit des choses qu’on ne dit jamais. »
+  - Effets : bonheur +2
+- **noces-50** _(famille)_ — 65–110 ans · en couple, 50 ans de mariage · une fois dans la vie · raconté dès que possible
+  - « Noces d’or : cinquante ans avec ‹conjoint›, toute la famille réunie autour d’eux. »
+  - Effets : bonheur +4, liens +3
+- **apres-divorce** _(famille)_ — 20–85 ans · après un divorce · une fois dans la vie
+  - « Apprend à vivre seul(e) après le divorce ; les dimanches sont longs, puis un peu moins. »
+  - Effets : bonheur −1
+- **garde-alternee** _(famille)_ — 25–60 ans · à partir de 1990 · pays au revenu moyen au-dessus de 20 000 $ · après un divorce, un enfant mineur · une fois dans la vie
+  - « Les enfants vivent une semaine chez chacun ; le sac de voyage ne se défait plus. »
+- **deux-assiettes** _(famille)_ — 40–110 ans · après un veuvage · une fois dans la vie
+  - « Met encore deux assiettes sur la table, par habitude ; range la seconde sans rien dire. »
+  - Effets : bonheur −1
+- **voisins-marmite** _(famille)_ — 40–110 ans · Moyen-Orient et Afrique du Nord, Afrique subsaharienne, Asie du Sud, Amérique latine et Caraïbes · après un veuvage · une fois dans la vie
+  - « Les voisins passent chaque soir, une marmite à la main ; personne ne le/la laisse seul(e). »
+  - Effets : liens +2
+- **groupe-veufs** _(famille)_ — 50–110 ans · à partir de 1980 · pays au revenu moyen au-dessus de 25 000 $ · après un veuvage · une fois dans la vie
+  - « Rejoint un groupe de parole de veufs et de veuves ; on y rit plus qu’on ne l’aurait cru. »
+  - Effets : bonheur +2, liens +2
+
+### Être parent
+
+- **nuits-blanches** _(famille)_ — 16–50 ans · un bébé
+  - « Les nuits blanches des premiers mois : on apprend à dormir par tranches de deux heures. »
+  - Effets : santé −1
+- **bebe-pagne** _(famille)_ — 15–45 ans · Afrique subsaharienne · à la campagne · femmes · un bébé
+  - « Porte ‹enfant› sur le dos, noué(e) dans un pagne, pendant les travaux des champs. »
+- **conge-pere** _(famille)_ — 20–55 ans · à partir de 1995 · pays nordiques · hommes · un bébé, salarié·e
+  - « Prend plusieurs mois de congé parental payé, comme la plupart des pères du pays. »
+  - Effets : liens +3, bonheur +2
+- **conge-us** _(famille)_ — 18–45 ans · à partir de 1950 · États-Unis · femmes · un bébé, salarié·e
+  - « Retourne au travail trois semaines après l’accouchement : le congé maternité n’est pas payé. »
+  - Effets : santé −1, bonheur −2
+- **creche-attente** _(famille)_ — 20–45 ans · à partir de 1980 · France, Allemagne, Japon · en ville · un bébé
+  - « Inscrit ‹enfant› en crèche dès la grossesse ; on attend toujours une place. »
+- **nounou** _(famille)_ — 25–50 ans · niveau de vie : aisance à grande aisance · pays au revenu moyen sous 30 000 $ · un bébé
+  - « Engage une nounou pour s’occuper de ‹enfant› ; elle chante des berceuses de son village. »
+- **premier-jour-ecole** _(famille)_ — 20–60 ans · niveau de vie : précarité à grande aisance · un enfant de 6 ans · une fois dans la vie · raconté dès que possible
+  - « Premier jour d’école pour ‹enfant› : un cartable trop grand, quelques larmes, puis un sourire. »
+- **histoire-soir** _(famille)_ — 20–60 ans · un enfant de 3 à 5 ans
+  - « Raconte une histoire à ‹enfant› chaque soir ; c’est le meilleur moment de la journée. »
+  - Effets : liens +2
+- **apprendre-velo** _(famille)_ — 22–60 ans · niveau de vie : précarité à grande aisance · un enfant de 6 à 12 ans · une fois dans la vie
+  - « Apprend à ‹enfant› à faire du vélo, en courant derrière, la main sur la selle, puis sans la main. »
+  - Effets : bonheur +2
+- **fievre-nuit** _(famille)_ — 18–55 ans · un enfant de 3 à 5 ans
+  - « ‹enfant› a de la fièvre toute la nuit ; on se relaie au bord du lit jusqu’au matin. »
+- **prix-ecole** _(famille)_ — 25–65 ans · un enfant de 6 à 12 ans
+  - « ‹enfant› remporte un prix à l’école ; la photo trône désormais sur le buffet. »
+  - Effets : bonheur +2
+- **monosyllabes** _(famille)_ — 28–70 ans · un adolescent
+  - « ‹enfant› ne parle plus que par monosyllabes : l’adolescence est arrivée. »
+  - Effets : bonheur −1
+- **ado-telephone** _(famille)_ — 28–70 ans · à partir de 2012 · niveau de vie : modeste à grande aisance · un adolescent
+  - « ‹enfant› passe ses nuits sur son téléphone ; les négociations sur l’heure du coucher reprennent. »
+- **ado-travailler** _(famille)_ — 28–70 ans · niveau de vie : survie à précarité · pays au revenu moyen sous 15 000 $ · un adolescent
+  - « ‹enfant› veut arrêter l’école pour travailler et aider la famille ; longue discussion, tard le soir. »
+  - Effets : bonheur −1
+- **ecole-recolte** _(argent)_ — 25–70 ans · niveau de vie : survie à modeste · pays au revenu moyen sous 12 000 $ · un enfant de 6 à 12 ans, métier : agriculteur, ouvrier agricole
+  - « Vend une partie de la récolte pour payer l’école de ‹enfant›. »
+  - Effets : dépense 0,03 × revenu médian, études des enfants 0,03 × revenu médian
+- **ecole-privee** _(argent)_ — 25–65 ans · niveau de vie : aisance à grande aisance · un enfant de 6 à 12 ans
+  - « Inscrit ‹enfant› dans une école privée ; les frais coûtent presque un salaire. »
+  - Effets : dépense 0,1 × revenu médian, études des enfants 0,1 × revenu médian
+- **cours-du-soir** _(argent)_ — 30–65 ans · niveau de vie : modeste à grande aisance · Corée du Sud, Chine, Japon, Inde, Égypte, Grèce, Turquie, Vietnam, Hong Kong, Taïwan, Singapour · un adolescent
+  - « Paie des cours particuliers à ‹enfant› presque tous les soirs ; c’est le premier poste de dépense de la famille. »
+  - Effets : dépense 0,06 × revenu médian, études des enfants 0,06 × revenu médian
+- **enfant-diplome** _(famille)_ — 38–85 ans · niveau de vie : modeste à grande aisance · un enfant adulte · une fois dans la vie
+  - « ‹enfant› obtient son diplôme ; dans la salle, c’est lui/elle qui pleure le plus. »
+  - Effets : bonheur +4
+- **enfant-mariage** _(famille)_ — 38–90 ans · un enfant adulte · une fois dans la vie
+  - « ‹enfant› se marie ; on danse jusqu’au matin, et on se trouve soudain vieux. »
+  - Effets : bonheur +3, liens +2
+- **enfant-ville** _(famille)_ — 38–90 ans · à la campagne · un enfant adulte · une fois dans la vie
+  - « ‹enfant› part vivre en ville ; les appels du dimanche deviennent sacrés. »
+  - Effets : liens −1
+- **enfant-emploi** _(famille)_ — 36–85 ans · un enfant adulte · une fois dans la vie
+  - « ‹enfant› trouve son premier emploi et invite la famille au restaurant ; les rôles commencent à s’inverser. »
+- **enfant-unique** _(famille)_ — 22–40 ans · de 1980 à 2015 · Chine · en ville · en couple, sans enfant · une fois dans la vie
+  - « Comme tous les couples de la ville, n’aura droit qu’à un enfant : c’est la loi. »
+- **mercredis** _(famille)_ — 50–90 ans · pays au revenu moyen au-dessus de 20 000 $ · grand-parent
+  - « Garde ses petits-enfants le mercredi ; la maison redevient bruyante, puis silencieuse le soir. »
+  - Effets : bonheur +2, liens +2
+- **eleve-petits** _(famille)_ — 45–90 ans · pays au revenu moyen sous 20 000 $ · à la campagne · grand-parent
+  - « Élève ses petits-enfants pendant que leurs parents travaillent en ville ; c’est une seconde vie de parent. »
+  - Effets : liens +2, santé −1
+
+### Parents qui vieillissent
+
+- **parent-sous-toit** _(famille)_ — 30–75 ans · Asie du Sud, Asie de l’Est et du Sud-Est, Moyen-Orient et Afrique du Nord, Afrique subsaharienne, Amérique latine et Caraïbes · un parent de 75 ans ou plus
+  - « Accueille ‹parent› sous son toit : ici, on ne laisse pas ses parents vieillir seuls. »
+  - Effets : liens +2
+- **appel-parent** _(famille)_ — 22–65 ans · pays au revenu moyen au-dessus de 15 000 $ · un parent vivant
+  - « Appelle ‹parent› chaque dimanche ; on parle de la météo, et c’est très bien comme ça. »
+  - Effets : liens +1
+- **parent-hopital** _(famille)_ — 35–80 ans · un parent de 75 ans ou plus
+  - « Rend visite à ‹parent› à l’hôpital ; pour la première fois, les rôles s’inversent. »
+- **parent-smartphone** _(famille)_ — 20–55 ans · à partir de 2012 · niveau de vie : modeste à grande aisance · un parent vivant
+  - « Apprend à ‹parent› à se servir d’un smartphone ; la même question revient chaque semaine. »
+- **parent-histoire** _(famille)_ — 30–75 ans · un parent de 75 ans ou plus
+  - « ‹parent› raconte pour la centième fois la même histoire ; cette fois, il/elle l’enregistre. »
+
+### Croyances et fêtes
+
+- **aid** _(culture et fêtes)_ — 3–95 ans · pays à majorité musulmane (pays d’origine)
+  - « L’Aïd : des vêtements neufs, les visites chez les oncles, et quelques pièces glissées dans la main des enfants. »
+  - « Les soirées du ramadan : on rompt le jeûne en famille, puis on sort tard dans les rues illuminées. »
+- **premier-ramadan** _(culture et fêtes)_ — 10–14 ans · pays à majorité musulmane (pays d’origine) · une fois dans la vie
+  - « Jeûne pour la première fois tout le mois du ramadan ; la fierté l’emporte sur la faim. »
+- **tabaski** _(culture et fêtes)_ — 20–85 ans · niveau de vie : précarité à aisance · Sénégal, Mali, Niger, Burkina Faso, Guinée, Mauritanie, Gambie, Côte d’Ivoire, Cameroun, Tchad (pays d’origine)
+  - « Pour la Tabaski, la famille achète un mouton ; son prix fait la conversation de tout le quartier. »
+  - Effets : dépense 0,03 × revenu médian
+- **hajj** _(culture et fêtes)_ — 40–85 ans · à partir de 1950 · niveau de vie : modeste à grande aisance · pays à majorité musulmane (pays d’origine) · une fois dans la vie
+  - « Fait le pèlerinage à La Mecque, l’argent de toute une vie ; au retour, on l’appelle avec respect. »
+  - Effets : dépense 0,4 × revenu médian, bonheur +6
+- **noel-modeste** _(culture et fêtes)_ — 3–12 ans · niveau de vie : survie à précarité · pays de tradition chrétienne (pays d’origine)
+  - « À Noël, une orange, des bonbons et un vêtement neuf : c’est la fête des grands jours. »
+- **noel-cadeaux** _(culture et fêtes)_ — 3–12 ans · à partir de 1950 · niveau de vie : classe moyenne à grande aisance · pays de tradition chrétienne (pays d’origine)
+  - « À Noël, le sapin croule sous les cadeaux ; le plus beau jouet reste le carton d’emballage. »
+- **reveillon-24** _(culture et fêtes)_ — 5–95 ans · Amérique hispanique, Brésil, Philippines (pays d’origine)
+  - « Le réveillon de Noël dure toute la nuit du 24 ; les enfants s’endorment sous la table. »
+- **noel-septembre** _(culture et fêtes)_ — 5–95 ans · Philippines (pays d’origine)
+  - « Les chants de Noël commencent dès septembre ; ici, les fêtes durent quatre mois. »
+- **messe-minuit** _(culture et fêtes)_ — 6–95 ans · Pologne, Italie, Irlande, Espagne, Portugal, Mexique, Philippines, Croatie, Slovaquie, Lituanie, Malte (pays d’origine)
+  - « Va à la messe de minuit avec toute la famille, en luttant contre le sommeil. »
+- **noel-7-janvier** _(culture et fêtes)_ — 5–95 ans · Russie, Ukraine, Biélorussie, Serbie, Géorgie, Éthiopie, Macédoine du Nord, Monténégro, Moldavie, Érythrée (pays d’origine)
+  - « Fête Noël le 7 janvier, après le jeûne ; la table se couvre de plats qu’on n’a pas vus depuis un an. »
+- **nouvel-an-urss** _(culture et fêtes)_ — 4–95 ans · à partir de 1950 · ex-URSS (pays d’origine)
+  - « Le Nouvel An, la plus grande fête de l’année : le sapin, les mandarines, la salade Olivier, et le discours de minuit à la télévision. »
+- **paques-bougie** _(culture et fêtes)_ — 5–95 ans · Grèce, Chypre, Roumanie, Bulgarie, Serbie (pays d’origine)
+  - « À Pâques, les cloches sonnent à minuit ; on rentre de l’église en protégeant sa bougie du vent. »
+- **nouvel-an-lunaire** _(culture et fêtes)_ — 3–95 ans · pays du Nouvel An lunaire (pays d’origine)
+  - « Le Nouvel An lunaire : les enveloppes rouges, les pétards, et la famille au complet. »
+  - « Pour le Nouvel An, on nettoie la maison de fond en comble pour chasser la malchance. »
+- **tet** _(culture et fêtes)_ — 3–95 ans · Vietnam (pays d’origine)
+  - « Pour le Têt, on achète un pêcher en fleur et on prépare les gâteaux de riz gluant dans des feuilles de bananier. »
+- **tsagaan-sar** _(culture et fêtes)_ — 3–95 ans · Mongolie (pays d’origine)
+  - « Pour Tsagaan Sar, on salue les aînés les bras tendus, puis on mange jusqu’à ne plus pouvoir bouger. »
+- **qingming** _(culture et fêtes)_ — 8–95 ans · Chine, Taïwan, Hong Kong, Singapour, Macao (pays d’origine)
+  - « Au Qingming, balaie la tombe des ancêtres et brûle pour eux des billets de papier. »
+- **diwali** _(culture et fêtes)_ — 3–95 ans · pays de tradition hindoue (pays d’origine)
+  - « Diwali : des lampes à huile sur chaque marche, des pétards jusqu’à minuit, et des douceurs échangées entre voisins. »
+  - « Holi : tout le quartier se couvre de poudres de couleur ; même les grands-parents s’y mettent. »
+- **kumbh** _(culture et fêtes)_ — 30–85 ans · Inde (pays d’origine) · une fois dans la vie
+  - « Se baigne dans le Gange lors de la Kumbh Mela, au milieu de dizaines de millions de pèlerins. »
+  - Effets : bonheur +3
+- **norouz** _(culture et fêtes)_ — 3–95 ans · Iran, Afghanistan, Tadjikistan, Ouzbékistan, Kazakhstan, Kirghizstan, Azerbaïdjan, Turkménistan (pays d’origine)
+  - « Pour Norouz, on dresse la table des sept symboles et on saute par-dessus les feux, la veille du printemps. »
+- **nouvel-an-eau** _(culture et fêtes)_ — 4–85 ans · Thaïlande, Laos, Cambodge, Myanmar (pays d’origine)
+  - « Pour le Nouvel An d’avril, toute la ville s’arrose dans les rues, en riant, pendant trois jours. »
+- **muertos** _(culture et fêtes)_ — 4–95 ans · Mexique (pays d’origine)
+  - « Prépare l’autel des morts : des œillets d’Inde orange, les photos des disparus, le pain des morts et leur plat préféré. »
+- **carnaval-br** _(culture et fêtes)_ — 8–80 ans · Brésil
+  - « Défile au carnaval avec son école de samba ; des mois de répétitions pour une seule nuit. »
+- **carnaval-tt** _(culture et fêtes)_ — 10–70 ans · Trinité-et-Tobago
+  - « Passe la nuit du carnaval à danser derrière les steelbands, couvert(e) de peinture et de boue. »
+- **guadalupe** _(culture et fêtes)_ — 10–85 ans · Mexique · une fois dans la vie
+  - « Marche jusqu’à la basilique de Guadalupe, le 12 décembre, au milieu de millions de pèlerins. »
+- **compostelle** _(culture et fêtes)_ — 30–75 ans · à partir de 1985 · niveau de vie : classe moyenne à grande aisance · Europe de l’Ouest (UE) · une fois dans la vie
+  - « Marche jusqu’à Saint-Jacques-de-Compostelle ; ne sait plus très bien si c’est pour Dieu, pour soi ou pour les ampoules. »
+- **magal** _(culture et fêtes)_ — 10–85 ans · Sénégal (pays d’origine) · une fois dans la vie
+  - « Part au Grand Magal de Touba avec des millions de pèlerins ; la ville sainte déborde jusque dans les champs. »
+- **timkat** _(culture et fêtes)_ — 5–90 ans · Éthiopie, Érythrée (pays d’origine)
+  - « Pour Timkat, suit la procession des prêtres en tenues brodées, sous des parasols de toutes les couleurs. »
+- **hatsumode** _(culture et fêtes)_ — 5–95 ans · Japon (pays d’origine)
+  - « Au Nouvel An, va prier au sanctuaire et tire un papier de bonne aventure ; s’il est mauvais, on le noue à une branche. »
+- **obon** _(culture et fêtes)_ — 5–95 ans · Japon (pays d’origine)
+  - « Pour l’O-Bon, la famille rentre au pays des grands-parents accueillir l’esprit des ancêtres et danser le bon-odori. »
+- **shabbat** _(culture et fêtes)_ — 5–95 ans · Israël (pays d’origine)
+  - « Le vendredi soir, le shabbat : les bougies, la hallah, et le téléphone qu’on éteint. »
+- **famadihana** _(culture et fêtes)_ — 10–90 ans · Madagascar (pays d’origine)
+  - « Participe au famadihana : on sort les ancêtres de leur tombeau pour les envelopper d’un linceul neuf, en dansant. »
+- **funerailles-gh** _(culture et fêtes)_ — 18–90 ans · Ghana (pays d’origine)
+  - « Les funérailles d’un oncle durent tout un week-end, avec tenues assorties et orchestre ; la famille s’endette pour bien faire. »
+  - Effets : dépense 0,03 × revenu médian, liens +2
+- **umuganda** _(culture et fêtes)_ — 18–70 ans · à partir de 2009 · Rwanda
+  - « Participe à l’umuganda, le dernier samedi du mois : tout le pays nettoie, plante et répare ensemble. »
+- **harambee** _(culture et fêtes)_ — 18–85 ans · à partir de 1963 · Kenya
+  - « Donne au harambee du village : chacun met ce qu’il peut pour envoyer un enfant à l’université. »
+  - Effets : liens +2, dépense 0,01 × revenu médian
+- **thanksgiving** _(culture et fêtes)_ — 5–95 ans · États-Unis (pays d’origine)
+  - « Le dîner de Thanksgiving : la dinde, la tarte à la citrouille, et l’oncle qui parle politique. »
+- **lieu-culte** _(culture et fêtes)_ — 8–95 ans · sauf pays très sécularisés
+  - « Va chaque semaine au lieu de culte ; on y prie, on y chante, on y prend des nouvelles de tout le monde. »
+  - « Le jour de prière, la rue entière se met en habits de fête ; on y va autant pour les voisins que pour le ciel. »
+  - Effets : liens +1
+
+### Loisirs et sport
+
+- **cricket-ruelle** _(culture et fêtes)_ — 6–16 ans · pays du cricket
+  - « Joue au cricket dans la ruelle, un bidon en guise de guichet ; les fenêtres des voisins en font les frais. »
+- **baseball** _(culture et fêtes)_ — 6–16 ans · pays du base-ball
+  - « Joue au base-ball avec un gant trop grand, en rêvant des ligues majeures. »
+- **koshien** _(culture et fêtes)_ — 15–17 ans · Japon · au collège ou au lycée · une fois dans la vie
+  - « L’équipe de base-ball du lycée se qualifie pour le tournoi de Kōshien ; tout le quartier suit les matchs à la télévision. »
+- **basket-poteau** _(culture et fêtes)_ — 8–30 ans · Philippines
+  - « Joue au basket pieds nus, sur un panneau cloué à un poteau électrique, comme tout le quartier. »
+- **patinoire-cour** _(culture et fêtes)_ — 6–14 ans · à partir de 1920 · Canada
+  - « Joue au hockey sur la patinoire que son père arrose chaque soir dans la cour. »
+- **course-collines** _(culture et fêtes)_ — 10–25 ans · Kenya, Éthiopie · à la campagne
+  - « Court chaque matin dans les collines, à deux mille mètres d’altitude ; au village, plusieurs champions sont partis de là. »
+- **rugby** _(culture et fêtes)_ — 8–25 ans · Nouvelle-Zélande, Fidji, Samoa, Tonga, Afrique du Sud · hommes
+  - « Joue au rugby dès qu’il tient debout ; le dimanche, tout le village vient voir le match. »
+- **lutte** _(culture et fêtes)_ — 10–30 ans · Mongolie, Iran, Turquie, Géorgie, Azerbaïdjan, Sénégal · hommes
+  - « S’entraîne à la lutte avec les garçons du quartier ; les anciens commentent chaque prise. »
+- **match-quartier** _(culture et fêtes)_ — 8–95 ans · à partir de 1960 · niveau de vie : précarité à grande aisance
+  - « Regarde le match de l’équipe nationale avec tout le quartier ; on crie, on pleure, on refait le match jusqu’à minuit. »
+  - « Une finale perdue aux tirs au but ; tout le monde rentre en silence, sauf l’oncle qui sait comment il aurait fallu tirer. »
+  - Effets : liens +1
+- **match-cafe** _(culture et fêtes)_ — 10–95 ans · à partir de 1960 · niveau de vie : survie à précarité
+  - « Regarde le match sur la télévision du café, qui fait payer l’entrée quelques pièces. »
+  - Effets : liens +1
+- **bollywood-salle** _(culture et fêtes)_ — 10–85 ans · à partir de 1950 · Inde, Népal
+  - « Pleure devant un film de Bollywood au cinéma du quartier, avec toute la salle ; on chante pendant les chansons. »
+- **nollywood** _(culture et fêtes)_ — 10–85 ans · à partir de 1995 · Nigeria, Ghana, Cameroun, Kenya
+  - « Regarde des films de Nollywood en boucle ; les intrigues sont folles, et on adore ça. »
+- **telenovela** _(culture et fêtes)_ — 8–95 ans · à partir de 1965 · Amérique hispanique, Brésil
+  - « Toute la famille suit la telenovela du soir ; personne ne parle pendant l’épisode. »
+- **series-coreennes** _(culture et fêtes)_ — 12–85 ans · à partir de 2003 · Corée du Sud, Japon, Chine, Philippines, Vietnam, Thaïlande, Indonésie, Malaisie, Taïwan
+  - « Regarde des séries coréennes jusqu’à deux heures du matin, « juste un dernier épisode ». »
+- **karaoke** _(culture et fêtes)_ — 16–85 ans · à partir de 1980 · Japon, Corée du Sud, Philippines, Vietnam, Chine, Taïwan, Thaïlande, Hong Kong, Singapour
+  - « Chante au karaoké jusqu’à l’aube ; personne ne se souvient de qui a choisi la dernière chanson. »
+- **milonga** _(culture et fêtes)_ — 25–90 ans · Argentine, Uruguay · en ville
+  - « Danse le tango dans une milonga le jeudi soir ; on ne s’y parle pas, on s’y comprend. »
+- **sauna** _(culture et fêtes)_ — 6–100 ans · Finlande, Estonie
+  - « Le sauna du samedi, puis un plongeon dans le lac glacé ; on en ressort neuf. »
+- **cafe-the** _(culture et fêtes)_ — 18–95 ans · Turquie, Iran, Afghanistan, Pakistan, Maroc, Égypte, Irak · hommes
+  - « Passe ses soirées au café, entre le thé et les parties de jacquet. »
+- **guitare** _(culture et fêtes)_ — 12–60 ans · rare (30 % des années) · une fois dans la vie
+  - « Passe des mois à apprendre la guitare ; ne connaît que trois accords, mais les joue avec cœur. »
+  - Effets : bonheur +2
+- **chien** _(culture et fêtes)_ — 8–80 ans · niveau de vie : modeste à grande aisance · pays au revenu moyen au-dessus de 10 000 $ · rare (50 % des années) · une fois dans la vie
+  - « Adopte un chien, qui devient en une semaine le roi de la maison. »
+  - Effets : bonheur +3
+- **mer-premiere-fois** _(culture et fêtes)_ — 5–45 ans · niveau de vie : survie à modeste · sauf après : premier-avion, vacances-etranger, vacances-hotel, colo, roadtrip, maison-vacances, grands-parents-ete, voyage-scolaire, plat-au · une fois dans la vie
+  - « Voit la mer pour la première fois ; reste longtemps sans rien dire, les pieds dans l’eau. »
+  - Effets : bonheur +3
+- **neige-premiere-fois** _(culture et fêtes)_ — 10–60 ans · niveau de vie : classe moyenne à grande aisance · pays tropicaux · une fois dans la vie
+  - « Voit la neige pour la première fois, en voyage ; en ramasse une poignée pour vérifier qu’elle est froide. »
+- **nuit-cousins** _(culture et fêtes)_ — 8–25 ans
+  - « Une nuit d’été inoubliable avec les cousins, à parler jusqu’à l’aube sous les étoiles. »
+  - Effets : bonheur +2, liens +1
+- **danse-noce** _(culture et fêtes)_ — 16–80 ans
+  - « Danse toute la nuit au mariage d’un cousin ; le lendemain, les jambes s’en souviennent. »
+  - « Retrouve au mariage d’une cousine toute la famille éparpillée ; on se promet de se revoir plus souvent. »
+  - Effets : bonheur +2
+- **roman** _(culture et fêtes)_ — 15–95 ans · à partir de 1920 · niveau de vie : modeste à grande aisance · une fois dans la vie
+  - « Lit un roman qui change sa façon de voir le monde ; le relira trois fois. »
+  - Effets : savoir +1
+- **concert** _(culture et fêtes)_ — 15–50 ans · à partir de 1960 · niveau de vie : classe moyenne à grande aisance · en ville · une fois dans la vie
+  - « Va à son premier grand concert ; garde le billet dans un tiroir pendant des décennies. »
+- **jardinage** _(culture et fêtes)_ — 40–95 ans · niveau de vie : modeste à grande aisance · propriétaire · une fois dans la vie
+  - « Se découvre une passion pour le jardinage ; parle à ses tomates quand personne ne regarde. »
+- **peche-dimanche** _(culture et fêtes)_ — 30–90 ans · à la campagne
+  - « Va pêcher le dimanche matin, plus pour le silence que pour les poissons. »
+
+### L’histoire en direct
+
+- **lune** _(histoire)_ — 5–105 ans · en 1969 · niveau de vie : modeste à grande aisance · une fois dans la vie · raconté dès que possible
+  - « Regarde, sur un écran qui grésille, des hommes marcher sur la Lune. »
+- **lune-radio** _(histoire)_ — 8–105 ans · en 1969 · niveau de vie : survie à précarité · une fois dans la vie · raconté dès que possible
+  - « Entend à la radio que des hommes ont marché sur la Lune ; certains, autour de lui/elle, n’y croient pas. »
+- **gagarine** _(histoire)_ — 6–105 ans · en 1961 · ex-URSS · une fois dans la vie · raconté dès que possible
+  - « Gagarine est le premier homme dans l’espace ; on s’embrasse dans les rues, on est fiers. »
+- **mur-berlin** _(histoire)_ — 6–105 ans · en 1989 · Allemagne · une fois dans la vie · raconté dès que possible
+  - « Le Mur de Berlin tombe : des inconnus s’embrassent sur les gravats, et l’on pleure devant la télévision. »
+- **fin-regime** _(histoire)_ — 10–105 ans · en 1989, 1990 · Pologne, Hongrie, Roumanie, Bulgarie, Albanie · une fois dans la vie · raconté dès que possible
+  - « Le régime tombe ; on découvre la liberté de parler, les magasins pleins, et bientôt le chômage. »
+- **velours** _(histoire)_ — 10–105 ans · en 1989 · Tchéquie, Slovaquie · une fois dans la vie · raconté dès que possible
+  - « La révolution de Velours : sur les places, des centaines de milliers de gens agitent leurs clés. »
+- **cz-sk** _(histoire)_ — 8–105 ans · en 1993 · Tchéquie, Slovaquie · une fois dans la vie · raconté dès que possible
+  - « La Tchécoslovaquie se sépare en deux pays, sans un coup de feu ; il faudra passer une frontière pour voir ses cousins. »
+- **fin-urss** _(histoire)_ — 10–105 ans · en 1991 · Russie · une fois dans la vie · raconté dès que possible
+  - « L’URSS disparaît ; en quelques mois, l’épargne, les certitudes et le pays d’hier s’évaporent. »
+- **independance-91** _(histoire)_ — 8–105 ans · Ukraine 1991, Biélorussie 1991, Kazakhstan 1991, Ouzbékistan 1991, Turkménistan 1991, Kirghizstan 1991, Tadjikistan 1991, Azerbaïdjan 1991, Arménie 1991, Géorgie 1991, Moldavie 1991, Lituanie 1990, Lettonie 1991, Estonie 1991, Slovénie 1991, Croatie 1991, Macédoine du Nord 1991, Bosnie-Herzégovine 1992, Monténégro 2006, Kosovo 2008 · une fois dans la vie · raconté dès que possible
+  - « Le pays proclame son indépendance ; on chante un nouvel hymne, et l’on ne sait pas encore ce que demain coûtera. »
+- **solidarnosc** _(histoire)_ — 16–105 ans · en 1980 · Pologne · une fois dans la vie · raconté dès que possible
+  - « Les grèves des chantiers navals de Gdańsk : Solidarność est née, et tout le pays parle de l’avenir à voix basse. »
+- **oeillets** _(histoire)_ — 10–105 ans · en 1974 · Portugal · une fois dans la vie · raconté dès que possible
+  - « La révolution des Œillets : les soldats ont des fleurs au bout du fusil, et la dictature tombe sans bataille. »
+- **franco** _(histoire)_ — 10–105 ans · en 1975 · Espagne · une fois dans la vie · raconté dès que possible
+  - « Franco est mort ; le pays retient son souffle, puis apprend la démocratie. »
+- **mandela-libre** _(histoire)_ — 8–105 ans · en 1990 · Afrique du Sud · une fois dans la vie · raconté dès que possible
+  - « Nelson Mandela sort de prison, le poing levé ; la télévision passe les images en boucle. »
+- **vote-1994** _(histoire)_ — 18–110 ans · en 1994 · Afrique du Sud · une fois dans la vie · raconté dès que possible
+  - « Vote à la première élection libre du pays, dans une file qui serpente sur des kilomètres ; personne ne s’en plaint. »
+- **vote-inde** _(histoire)_ — 21–25 ans · à partir de 1952 · Inde · une fois dans la vie
+  - « Vote pour la première fois, dans la plus grande élection du monde ; montre fièrement son doigt marqué à l’encre. »
+- **vote-femmes** _(histoire)_ — 21–110 ans · États-Unis 1920, Royaume-Uni 1918, Allemagne 1919, Espagne 1933, Brésil 1933, France 1945, Italie 1946, Japon 1946, Argentine 1951, Mexique 1955, Suisse 1971, Koweït 2006, Arabie saoudite 2015 · femmes · une fois dans la vie · raconté dès que possible
+  - « Vote pour la première fois : les femmes du pays viennent d’obtenir le droit de vote. »
+- **independance** _(histoire)_ — 5–110 ans · Inde 1947, Pakistan 1947, Sri Lanka 1948, Myanmar 1948, Indonésie 1949, Libye 1951, Maroc 1956, Tunisie 1956, Soudan 1956, Ghana 1957, Malaisie 1957, Guinée 1958, Sénégal 1960, Mali 1960, Niger 1960, Burkina Faso 1960, Côte d’Ivoire 1960, Togo 1960, Bénin 1960, Cameroun 1960, Tchad 1960, République centrafricaine 1960, Congo 1960, Gabon 1960, Madagascar 1960, Mauritanie 1960, RD Congo 1960, Nigeria 1960, Somalie 1960, Chypre 1960, Tanzanie 1961, Sierra Leone 1961, Algérie 1962, Ouganda 1962, Rwanda 1962, Burundi 1962, Jamaïque 1962, Trinité-et-Tobago 1962, Kenya 1963, Malawi 1964, Zambie 1964, Malte 1964, Gambie 1965, Singapour 1965, Botswana 1966, Lesotho 1966, Guyana 1966, Barbade 1966, Maurice 1968, Eswatini 1968, Guinée équatoriale 1968, Fidji 1970, Bangladesh 1971, Bahamas 1973, Guinée-Bissau 1974, Mozambique 1975, Angola 1975, Cap-Vert 1975, Sao Tomé-et-Principe 1975, Comores 1975, Papouasie-Nouvelle-Guinée 1975, Suriname 1975, Djibouti 1977, Îles Salomon 1978, Zimbabwe 1980, Vanuatu 1980, Namibie 1990, Érythrée 1993, Timor oriental 2002, Soudan du Sud 2011, Vietnam 1945, Philippines 1946, Jordanie 1946, Syrie 1946, Liban 1943, Israël 1948, Corée du Sud 1945 · une fois dans la vie · raconté dès que possible
+  - « L’indépendance est proclamée : on danse dans les rues, on apprend un nouvel hymne, on hisse un nouveau drapeau. »
+- **onze-septembre** _(histoire)_ — 6–105 ans · en 2001 · États-Unis · une fois dans la vie · raconté dès que possible
+  - « Le 11 septembre : toute sa vie, il/elle se souviendra de l’endroit où il/elle se trouvait en voyant les tours tomber. »
+- **fukushima** _(histoire)_ — 5–105 ans · en 2011 · Japon · une fois dans la vie · raconté dès que possible
+  - « Le 11 mars, la terre tremble, la mer monte, et la centrale de Fukushima s’emballe ; le pays entier retient son souffle. »
+- **brexit** _(histoire)_ — 18–105 ans · en 2016 · Royaume-Uni · une fois dans la vie · raconté dès que possible
+  - « Le référendum sur le Brexit coupe le pays, et parfois les familles, en deux. »
+- **revolution-tn** _(histoire)_ — 10–105 ans · en 2011 · Tunisie · une fois dans la vie · raconté dès que possible
+  - « La révolution : le président s’enfuit, et le pays découvre en même temps la liberté et l’incertitude. »
+- **tahrir** _(histoire)_ — 12–105 ans · en 2011 · Égypte · une fois dans la vie · raconté dès que possible
+  - « Dix-huit jours place Tahrir : le pays entier regarde, chante, espère. »
+- **iran-1979** _(histoire)_ — 10–105 ans · en 1979 · Iran · une fois dans la vie · raconté dès que possible
+  - « La révolution renverse le chah ; la vie quotidienne, les tenues, la musique, tout change en quelques mois. »
+- **chili-1988** _(histoire)_ — 18–105 ans · en 1988 · Chili · une fois dans la vie · raconté dès que possible
+  - « Vote au référendum qui met fin à la dictature ; quand le « non » l’emporte, des inconnus s’embrassent dans les rues. »
+- **reformes-cn** _(histoire)_ — 16–105 ans · en 1979, 1980, 1981, 1982 · Chine · à la campagne · une fois dans la vie
+  - « Les réformes arrivent au village : on peut de nouveau vendre au marché ce qu’on a cultivé en plus. »
+- **doi-moi** _(histoire)_ — 16–105 ans · en 1986, 1987, 1988 · Vietnam · une fois dans la vie
+  - « Le Đổi Mới, le « renouveau » : les petits commerces rouvrent, la moto remplace le vélo, tout s’accélère. »
+- **seisme-1985** _(histoire)_ — 5–105 ans · en 1985 · Mexique · une fois dans la vie · raconté dès que possible
+  - « Le grand séisme de Mexico : des voisins fouillent les décombres à mains nues pendant des jours. »
+- **maracanazo** _(histoire)_ — 5–105 ans · Uruguay 1950 · une fois dans la vie · raconté dès que possible
+  - « Le « Maracanazo » : l’Uruguay bat le Brésil chez lui et devient champion du monde ; le pays ne dort pas. »
+- **berne-1954** _(histoire)_ — 5–105 ans · Allemagne 1954 · une fois dans la vie · raconté dès que possible
+  - « Le « miracle de Berne » : l’Allemagne de l’Ouest est championne du monde de football, neuf ans après la guerre. »
+- **pele-1958** _(histoire)_ — 5–105 ans · Brésil 1958 · une fois dans la vie · raconté dès que possible
+  - « Pelé a dix-sept ans et le Brésil devient champion du monde ; on écoute la finale collé(e) au poste de radio. »
+- **wembley-1966** _(histoire)_ — 5–105 ans · Royaume-Uni 1966 · une fois dans la vie · raconté dès que possible
+  - « Wembley : l’Angleterre est championne du monde de football ; on en parlera pendant des décennies. »
+- **bresil-1970** _(histoire)_ — 5–105 ans · Brésil 1970 · une fois dans la vie · raconté dès que possible
+  - « Pelé, Jairzinho, Rivelino : le Brésil champion du monde pour la troisième fois, et les premières images en couleur. »
+- **maradona-1986** _(histoire)_ — 5–105 ans · Argentine 1986 · une fois dans la vie · raconté dès que possible
+  - « Maradona, la « main de Dieu » puis le but du siècle : l’Argentine championne du monde, le pays en transe. »
+- **france-1998** _(histoire)_ — 5–105 ans · France 1998 · une fois dans la vie · raconté dès que possible
+  - « Zidane marque deux fois de la tête : la France est championne du monde, et un million de personnes chantent sur les Champs-Élysées. »
+- **espagne-2010** _(histoire)_ — 5–105 ans · Espagne 2010 · une fois dans la vie · raconté dès que possible
+  - « Iniesta marque en prolongation : l’Espagne est championne du monde, et le pays entier descend dans la rue. »
+- **allemagne-2014** _(histoire)_ — 5–105 ans · Allemagne 2014 · une fois dans la vie · raconté dès que possible
+  - « L’Allemagne championne du monde au Brésil, après une demi-finale gagnée 7 à 1 contre le pays hôte. »
+- **messi-2022** _(histoire)_ — 5–105 ans · Argentine 2022 · une fois dans la vie · raconté dès que possible
+  - « Messi soulève enfin la Coupe du monde ; à Buenos Aires, l’Obélisque disparaît sous la foule. »
+- **champions-monde** _(histoire)_ — 5–105 ans · Uruguay 1930, Italie 1934, 1938, 1982, 2006, Brésil 1962, 1994, 2002, Allemagne 1974, 1990, Argentine 1978, France 2018 · raconté dès que possible
+  - « Le pays est champion du monde de football : on klaxonne, on chante, on dort peu. »
+- **championnes-monde** _(histoire)_ — 5–105 ans · États-Unis 1991, 1999, 2015, 2019, Norvège 1995, Allemagne 2003, 2007, Japon 2011, Espagne 2023 · raconté dès que possible
+  - « L’équipe féminine est championne du monde de football ; des petites filles collent des posters dans leur chambre. »
+- **vuvuzelas** _(histoire)_ — 5–105 ans · Afrique du Sud 2010 · une fois dans la vie · raconté dès que possible
+  - « La Coupe du monde se joue en Afrique pour la première fois ; les vuvuzelas résonnent dans tout le pays. »
+- **jeux-olympiques** _(histoire)_ — 6–105 ans · Royaume-Uni 1948, 2012, Finlande 1952, Australie 1956, 2000, 2032, Italie 1960, Japon 1964, 2021, Mexique 1968, Allemagne 1972, Canada 1976, Russie 1980, États-Unis 1984, 1996, 2028, Corée du Sud 1988, Espagne 1992, Grèce 2004, Chine 2008, Brésil 2016, France 1924, 2024 · raconté dès que possible
+  - « Les Jeux olympiques se tiennent dans le pays ; on suit les épreuves avec une fierté qu’on ne se connaissait pas. »
+
+### Nature et climat
+
+- **inondation-mousson** _(vie quotidienne)_ — 3–95 ans · niveau de vie : survie à modeste · Bangladesh, Inde, Pakistan, Népal, Myanmar
+  - « La mousson inonde la maison ; l’eau monte jusqu’aux genoux, on sauve ce qu’on peut sur les étagères. »
+  - Effets : dépense 0,03 × revenu médian, bonheur −2
+- **typhon** _(vie quotidienne)_ — 3–95 ans · pays des typhons
+  - « Un typhon passe sur la région ; on scotche les fenêtres et on attend dans le noir que le vent se calme. »
+  - Effets : bonheur −1
+- **toit-arrache** _(vie quotidienne)_ — 3–95 ans · niveau de vie : survie à modeste · Philippines, Vietnam, Bangladesh, Myanmar, Madagascar, Mozambique, Haïti, Honduras, Nicaragua, Cuba, République dominicaine, Fidji, Vanuatu, Tonga
+  - « Le cyclone arrache le toit de la maison ; on reconstruit avec les voisins, tôle après tôle. »
+  - Effets : dépense 0,05 × revenu médian, bonheur −3
+- **ouragan-evacuation** _(vie quotidienne)_ — 5–95 ans · niveau de vie : classe moyenne à grande aisance · États-Unis
+  - « Un ouragan force à évacuer ; on revient trouver la maison abîmée, et un long formulaire d’assurance. »
+  - Effets : bonheur −2
+- **seisme-nuit** _(vie quotidienne)_ — 3–100 ans · pays sismiques
+  - « La terre tremble pendant la nuit ; tout le quartier dort dehors pendant une semaine. »
+  - « Une secousse fait tomber la vaisselle des étagères ; pendant des jours, on sursaute au moindre grondement. »
+  - Effets : bonheur −2
+- **puits-sec** _(vie quotidienne)_ — 3–95 ans · pays au revenu moyen sous 15 000 $ · pays exposés à la sécheresse
+  - « La sécheresse s’installe ; le puits s’assèche, et il faut marcher deux fois plus loin pour l’eau. »
+  - Effets : bonheur −2, santé −1
+- **secheresse-troupeau** _(vie quotidienne)_ — 10–85 ans · pays au revenu moyen sous 15 000 $ · Sahel, Corne de l’Afrique, Afrique australe · à la campagne · métier : éleveur, agriculteur
+  - « La sécheresse emporte une partie du troupeau ; on vend les bêtes qui restent avant qu’elles maigrissent. »
+  - Effets : bonheur −3, troupeau -30 %
+- **incendies** _(vie quotidienne)_ — 5–100 ans · à partir de 1990 · pays des grands incendies
+  - « Les incendies approchent ; pendant des jours, la fumée cache le soleil et les cendres tombent sur les voitures. »
+  - Effets : santé −1
+- **grand-froid** _(vie quotidienne)_ — 5–100 ans · pays aux hivers extrêmes
+  - « Un hiver à −35 °C : la voiture ne démarre plus, et l’on dort avec deux bonnets. »
+- **smog-yourtes** _(vie quotidienne)_ — 3–95 ans · à partir de 2000 · Mongolie · en ville
+  - « En hiver, la fumée des poêles des quartiers de yourtes noie la capitale dans un brouillard âcre. »
+  - Effets : santé −1
+- **ecole-neige** _(vie quotidienne)_ — 5–14 ans · jusqu’en 2040 · pays au revenu moyen au-dessus de 20 000 $ · Europe et Asie centrale, Amérique du Nord · à l’école
+  - « L’école ferme pour cause de neige : bataille de boules de neige, puis chocolat chaud. »
+- **volcan** _(vie quotidienne)_ — 5–100 ans · Indonésie, Philippines, Guatemala, Équateur, Islande, Italie
+  - « Le volcan gronde ; une fine cendre grise recouvre les toits pendant une semaine. »
+- **chaleur-records** _(vie quotidienne)_ — 5–105 ans · à partir de 2035
+  - « Une nouvelle vague de chaleur bat les records ; on vit la nuit, on dort le jour. »
+  - « L’été s’étire jusqu’en octobre ; les anciens disent que ce n’était pas comme ça avant. »
+  - « Une alerte canicule de plus ; on garde les volets clos et l’on prend des nouvelles des voisins âgés. »
+  - Effets : santé −1
+- **hivers-autrefois** _(vie quotidienne)_ — 50–105 ans · à partir de 2045 · pays au revenu moyen au-dessus de 15 000 $ · Europe et Asie centrale, Amérique du Nord, Asie de l’Est et du Sud-Est
+  - « Raconte aux enfants les hivers de neige d’autrefois ; ils écoutent comme on écoute un conte. »
+- **mer-monte** _(vie quotidienne)_ — 10–105 ans · à partir de 2040 · Kiribati, Îles Marshall, Maldives, Bangladesh, Micronésie
+  - « La mer gagne du terrain chaque année ; il faut surélever la maison, puis déplacer le village. »
+  - Effets : bonheur −2
+- **moussons-folles** _(vie quotidienne)_ — 10–105 ans · à partir de 2040 · pays de la mousson
+  - « Les moussons sont devenues imprévisibles : un mois de déluge, puis plus rien. »
+
+### Insécurité
+
+- **coups-de-feu** _(vie quotidienne)_ — 8–85 ans · au moins 20 homicides pour 100 000 habitants · en ville · passage difficile
+  - « Entend des coups de feu la nuit ; on ne sort plus après la tombée du jour. »
+  - Effets : bonheur −2
+- **fusillades** _(vie quotidienne)_ — 6–70 ans · à partir de 1985 · les 35 % les plus modestes du pays · Brésil · en ville · passage difficile
+  - « Les fusillades entre police et trafiquants obligent toute la famille à s’allonger dans le couloir, loin des fenêtres. »
+  - Effets : bonheur −3
+- **disparitions** _(vie quotidienne)_ — 12–85 ans · à partir de 2007 · Mexique · passage difficile
+  - « Dans la région, des gens disparaissent ; on évite certaines routes et on prévient quand on est arrivé. »
+  - Effets : bonheur −2
+- **barbeles** _(vie quotidienne)_ — 5–90 ans · niveau de vie : classe moyenne à grande aisance · Afrique du Sud · en ville
+  - « La maison est entourée de barbelés, de barreaux et d’une alarme reliée à une société de sécurité. »
+- **braquage** _(vie quotidienne)_ — 16–75 ans · au moins 10 homicides pour 100 000 habitants · en ville · passage difficile
+  - « Se fait braquer en rentrant du travail ; ce n’était que de l’argent, se répète-t-il/elle. »
+  - Effets : bonheur −4, dépense 0,01 × revenu médian
+- **pere-alcool** _(vie quotidienne)_ — 5–15 ans · son père vivant · passage difficile
+  - « Les soirs où son père a bu, la maison retient son souffle. »
+  - Effets : bonheur −3
+- **barrage-police** _(vie quotidienne)_ — 16–85 ans · pays au revenu moyen sous 20 000 $ · Afrique subsaharienne, Moyen-Orient et Afrique du Nord, Asie du Sud
+  - « Sur la route, un barrage de police ; on tend ses papiers, avec un billet plié dedans. »
+  - Effets : dépense 0,005 × revenu médian
+
+### Technologies
+
+- **poste-radio** _(vie quotidienne)_ — 16–85 ans · de 1925 à 1965 · niveau de vie : modeste à grande aisance · une fois dans la vie
+  - « Achète un poste de radio ; le soir, toute la maisonnée se réunit autour pour écouter les nouvelles et les chansons. »
+- **transistor** _(vie quotidienne)_ — 8–85 ans · de 1960 à 2005 · niveau de vie : survie à modeste · pays au revenu moyen sous 8 000 $ · une fois dans la vie
+  - « Un transistor à piles entre dans la maison : les nouvelles et la musique arrivent jusqu’au village. »
+- **tele-noir-blanc** _(vie quotidienne)_ — 5–85 ans · de 1952 à 1978 · niveau de vie : classe moyenne à grande aisance · pays au revenu moyen entre 3 000 et 25 000 $ · une fois dans la vie
+  - « La première télévision arrive à la maison, en noir et blanc ; les voisins viennent regarder les émissions du soir. »
+- **tele-couleur** _(vie quotidienne)_ — 5–85 ans · de 1970 à 1992 · niveau de vie : classe moyenne à grande aisance · pays au revenu moyen sous 35 000 $ · une fois dans la vie
+  - « La télévision en couleur arrive au salon ; on redécouvre les maillots des équipes de foot. »
+- **tele-batterie** _(vie quotidienne)_ — 5–85 ans · de 1985 à 2015 · niveau de vie : précarité à modeste · pays au revenu moyen sous 10 000 $ · à la campagne · une fois dans la vie
+  - « Une télévision arrive à la maison, branchée sur une batterie de voiture ; tout le voisinage vient voir le feuilleton. »
+- **telephone-fixe** _(vie quotidienne)_ — 10–85 ans · de 1955 à 1995 · niveau de vie : classe moyenne à grande aisance · pays au revenu moyen entre 4 000 et 30 000 $ · une fois dans la vie
+  - « Le téléphone est enfin installé à la maison, après des mois d’attente ; on parle fort, comme si la distance l’exigeait. »
+- **machine-laver** _(vie quotidienne)_ — 20–75 ans · de 1955 à 2005 · niveau de vie : classe moyenne à grande aisance · pays au revenu moyen entre 4 000 et 28 000 $ · une fois dans la vie
+  - « Une machine à laver entre dans la maison ; ce sont des heures gagnées chaque semaine, surtout pour les femmes. »
+- **ordinateur** _(vie quotidienne)_ — 8–75 ans · de 1984 à 2005 · niveau de vie : classe moyenne à grande aisance · une fois dans la vie
+  - « Un ordinateur arrive à la maison ; on se dispute pour y jouer, et personne ne sait vraiment s’en servir. »
+- **modem** _(vie quotidienne)_ — 10–75 ans · de 1995 à 2008 · niveau de vie : classe moyenne à grande aisance · une fois dans la vie
+  - « Se connecte à internet pour la première fois ; le modem grince, une page met une minute à s’afficher, c’est magique. »
+- **cybercafe** _(vie quotidienne)_ — 12–45 ans · de 1998 à 2012 · niveau de vie : précarité à classe moyenne · pays au revenu moyen sous 25 000 $ · une fois dans la vie
+  - « Découvre internet dans un cybercafé, payé à l’heure ; y ouvre sa première adresse électronique. »
+- **portable** _(vie quotidienne)_ — 14–80 ans · de 1996 à 2011 · niveau de vie : modeste à grande aisance · une fois dans la vie
+  - « Achète son premier téléphone portable ; il sert surtout à envoyer des SMS et à jouer au serpent. »
+- **portable-occasion** _(vie quotidienne)_ — 14–80 ans · de 2003 à 2016 · niveau de vie : survie à précarité · une fois dans la vie
+  - « Achète un téléphone portable d’occasion ; c’est le premier de toute la famille, et chacun vient l’emprunter. »
+  - Effets : liens +1
+- **smartphone** _(vie quotidienne)_ — 12–85 ans · à partir de 2010 · niveau de vie : précarité à grande aisance · une fois dans la vie
+  - « Achète son premier smartphone ; le monde entier tient désormais dans sa poche. »
+- **reseau-social** _(vie quotidienne)_ — 14–60 ans · à partir de 2006 · niveau de vie : précarité à grande aisance · une fois dans la vie
+  - « Ouvre un compte sur un réseau social ; retrouve des camarades d’école perdus de vue. »
+- **ia-questions** _(vie quotidienne)_ — 10–75 ans · à partir de 2024 · niveau de vie : modeste à grande aisance · une fois dans la vie
+  - « Pose ses questions à une intelligence artificielle, comme on consultait autrefois l’encyclopédie. »
+- **teleconsultation** _(santé)_ — 30–100 ans · à partir de 2030 · niveau de vie : précarité à aisance · à la campagne · une fois dans la vie
+  - « Consulte un médecin par vidéo, depuis le village ; l’infirmière tient la tablette. »
+
+### Vieillesse
+
+- **dominos** _(vie quotidienne)_ — 60–105 ans · Cuba, République dominicaine, Porto Rico, Venezuela, Panama, Colombie
+  - « Joue aux dominos sur le trottoir avec les anciens du quartier ; les pièces claquent sur la table jusqu’à la nuit. »
+- **mah-jong** _(vie quotidienne)_ — 55–105 ans · Chine, Hong Kong, Taïwan, Singapour, Macao
+  - « Joue au mah-jong tous les après-midi ; le bruit des tuiles est la musique de sa retraite. »
+- **echecs-parc** _(vie quotidienne)_ — 55–105 ans · Russie, Ukraine, Arménie, Géorgie, Biélorussie
+  - « Joue aux échecs dans le parc avec d’autres retraités ; les spectateurs donnent des conseils que personne n’a demandés. »
+- **petanque** _(vie quotidienne)_ — 55–105 ans · France, Monaco
+  - « Joue à la pétanque sur la place du village ; on mesure au mètre ruban et on se dispute pour un centimètre. »
+- **trictrac** _(vie quotidienne)_ — 55–105 ans · Turquie, Grèce, Chypre, Liban, Syrie, Iran
+  - « Joue au trictrac au café, chaque après-midi, contre le même adversaire depuis trente ans. »
+- **palabres** _(vie quotidienne)_ — 60–105 ans · Afrique subsaharienne · à la campagne
+  - « On vient lui demander conseil sous l’arbre à palabres ; ici, l’âge donne la parole. »
+  - Effets : bonheur +2, liens +1
+- **baduk** _(vie quotidienne)_ — 60–105 ans · Corée du Sud · hommes
+  - « Joue au baduk dans le parc avec d’autres grands-pères, en commentant l’actualité. »
+- **danse-place** _(vie quotidienne)_ — 55–90 ans · à partir de 1995 · Chine · en ville
+  - « Danse le soir sur la place du quartier avec d’autres retraités, au son d’une enceinte portable ; les voisins se plaignent, eux s’en moquent. »
+  - Effets : santé +1, bonheur +2, liens +1
+- **pension-reguliere** _(vie quotidienne)_ — 62–105 ans · avec une pension · une fois dans la vie
+  - « La pension tombe chaque mois, modeste mais régulière ; c’est une paix qu’on n’a pas toujours eue. »
+- **sans-pension** _(vie quotidienne)_ — 65–105 ans · niveau de vie : survie à modeste · sans vraie pension
+  - « Sans pension, continue de travailler aussi longtemps que le dos le permet. »
+- **aide-des-enfants** _(vie quotidienne)_ — 65–105 ans · pays au revenu moyen sous 20 000 $ · sans vraie pension, un enfant adulte
+  - « Vit de l’aide de ses enfants ; on n’en parle pas, c’est comme ça que ça marche ici. »
+  - Effets : liens +1
+- **beignets-porte** _(vie quotidienne)_ — 65–95 ans · niveau de vie : survie à précarité · femmes · sans vraie pension
+  - « Vend quelques beignets devant la porte pour avoir de quoi acheter ses médicaments. »
+- **cartons** _(vie quotidienne)_ — 68–95 ans · à partir de 1995 · les 30 % les plus modestes du pays · Corée du Sud
+  - « Ramasse des cartons dans les rues avec une charrette, pour compléter une pension trop maigre. »
+  - Effets : santé −1
+- **petit-boulot-jp** _(vie quotidienne)_ — 66–80 ans · Japon · à la retraite
+  - « Retraité(e), reprend un petit travail : guider les piétons devant un chantier, casque sur la tête et bâton lumineux à la main. »
+- **hiver-au-sud** _(vie quotidienne)_ — 62–90 ans · à partir de 1975 · niveau de vie : classe moyenne à grande aisance · Allemagne, Royaume-Uni, Pays-Bas, Belgique, Suède, Norvège, Danemark, Finlande, Canada, États-Unis, Irlande, Suisse, Autriche · à la retraite
+  - « Passe ses hivers au soleil, dans le sud, avec d’autres retraités du nord ; on y joue aux cartes en short en janvier. »
+- **croisiere** _(vie quotidienne)_ — 62–90 ans · à partir de 1980 · niveau de vie : aisance à grande aisance · à la retraite · une fois dans la vie
+  - « Part en croisière avec d’autres retraités ; garde le menu du dîner du capitaine. »
+- **lecture-benevole** _(vie quotidienne)_ — 62–85 ans · pays au revenu moyen au-dessus de 15 000 $ · à la retraite
+  - « Donne des cours de lecture bénévoles aux enfants du quartier ; c’est le meilleur moment de sa semaine. »
+  - Effets : bonheur +2, liens +2
+- **comment-c-etait** _(vie quotidienne)_ — 60–110 ans · grand-parent
+  - « Raconte à ses petits-enfants comment c’était, avant ; ils ont du mal à le/la croire. »
+  - « Apprend à ses petits-enfants une chanson de sa jeunesse ; ils la chantent de travers, c’est parfait. »
+- **appels-video** _(vie quotidienne)_ — 60–105 ans · à partir de 2012 · niveau de vie : modeste à grande aisance · grand-parent · une fois dans la vie
+  - « Apprend à faire des appels vidéo pour voir ses petits-enfants ; tient la tablette trop près du visage. »
+- **enterrements** _(vie quotidienne)_ — 78–110 ans
+  - « Les enterrements des amis se succèdent ; on raye des noms dans le carnet d’adresses. »
+  - « Fait partie des derniers de sa génération dans le quartier ; on le/la salue avec une sorte de respect étonné. »
+  - Effets : bonheur −1, liens −1
+- **jours-longs** _(vie quotidienne)_ — 75–110 ans · pays au revenu moyen au-dessus de 25 000 $ · isolé·e
+  - « Les journées sont longues ; le téléphone sonne rarement, mais la boulangère connaît son prénom. »
+  - Effets : bonheur −2
+- **aide-domicile** _(vie quotidienne)_ — 80–110 ans · pays au revenu moyen au-dessus de 25 000 $ · une fois dans la vie
+  - « Une aide à domicile passe chaque matin ; c’est la visite qu’il/elle attend le plus. »
+- **enfants-relais** _(vie quotidienne)_ — 80–110 ans · pays au revenu moyen sous 25 000 $ · un enfant adulte
+  - « Ses enfants se relaient pour s’occuper de lui/elle ; la maison ne désemplit pas. »
+  - Effets : liens +2
+- **testament** _(argent)_ — 70–100 ans · niveau de vie : classe moyenne à grande aisance · une fois dans la vie
+  - « Rédige son testament chez le notaire ; en ressort étrangement léger(ère). »
+- **quatre-vingt-dix** _(vie quotidienne)_ — à 90 ans · une fois dans la vie · raconté dès que possible
+  - « Fête ses quatre-vingt-dix ans ; on chante, on pleure un peu, on ressort les vieilles photos. »
+  - Effets : bonheur +2, liens +2
+- **cent-ans** _(vie quotidienne)_ — à 100 ans · une fois dans la vie · raconté dès que possible
+  - « Fête ses cent ans ; le maire vient en personne, et les plus jeunes de la famille soufflent les bougies. »
+- **cent-ans-jp** _(vie quotidienne)_ — à 100 ans · à partir de 1963 · Japon · une fois dans la vie · raconté dès que possible
+  - « Reçoit, pour ses cent ans, une coupe en argent offerte par le gouvernement, comme tous les centenaires du pays. »
+
+### Petites décisions
+
+- **d-pret-cousin** _(argent)_ — 25–65 ans · niveau de vie : modeste à grande aisance · dans son pays natal
+  - Décision : « Un cousin demande ‹0,15 × revenu médian› pour lancer son commerce. Lui prêter ? »
+    - Prêter l’argent → « Prête ‹0,15 × revenu médian› à un cousin pour son commerce. » (dépense 0,15 × revenu médian, liens +2) · ouvre le fil « pretCousin »
+    - Refuser → « Refuse de prêter de l’argent au cousin ; le repas de famille suivant est un peu froid. » (liens −2)
+- **pret-rembourse** _(argent)_ — 27–100 ans · suite du fil « pretCousin » (au moins 2 ans après)
+  - « Le cousin rembourse le prêt, avec un cadeau en plus : le commerce a marché. »
+  - Effets : rentrée 0,17 × revenu médian, bonheur +2, liens +2
+- **pret-perdu** _(argent)_ — 27–100 ans · suite du fil « pretCousin » (au moins 2 ans après)
+  - « L’argent prêté au cousin ne reviendra pas ; on n’en parle plus aux repas de famille. »
+  - Effets : liens −2, bonheur −2
+- **d-recolte** _(argent)_ — 18–75 ans · niveau de vie : survie à précarité · à la campagne · métier : agriculteur, ouvrier agricole, éleveur
+  - Décision : « La récolte est mauvaise. Comment tenir jusqu’à la prochaine ? »
+    - Vendre des bêtes _(si avec du bétail)_ → « Vend une partie des bêtes pour tenir jusqu’à la récolte. » (troupeau -40 %, bonheur −2)
+    - Emprunter à l’usurier → « Emprunte à l’usurier du village, à un taux qui fait peur. » (dette 0,12 × revenu médian, bonheur −1)
+    - Se serrer la ceinture → « Toute la famille se serre la ceinture jusqu’à la récolte : un repas par jour. » (santé −3, bonheur −2)
+- **d-frais-ecole** _(argent)_ — 22–65 ans · niveau de vie : survie à précarité · pays au revenu moyen sous 15 000 $ · un enfant de 6 à 12 ans
+  - Décision : « Les frais de scolarité de ‹enfant› tombent : ‹0,06 × revenu médian›. Payer ? »
+    - Payer, quitte à se priver → « Paie l’école de ‹enfant›, quitte à se priver. » (dépense 0,06 × revenu médian, études des enfants 0,06 × revenu médian, bonheur −1)
+    - Garder ‹enfant› à la maison → « ‹enfant› reste à la maison cette année, pour aider. » (liens −2, bonheur −2)
+- **d-parent-age** _(famille)_ — 30–75 ans · un parent de 75 ans ou plus · une fois dans la vie
+  - Décision : « ‹parent› ne peut plus vivre seul/seule. Que faire ? »
+    - L’accueillir chez soi → « Accueille ‹parent› à la maison ; les journées sont plus pleines, et plus lourdes. » (liens +4, bonheur −1, santé −1, dépense 0,03 × revenu médian)
+    - Une maison de retraite _(si pays riche)_ → « Installe ‹parent› dans une maison de retraite ; s’y rend chaque dimanche. » (dépense 0,3 × revenu médian, liens −1)
+    - Payer une aide à domicile _(si pays riche)_ → « Engage une aide à domicile pour ‹parent›, et appelle chaque soir. » (dépense 0,15 × revenu médian)
+    - Demander aux voisins de passer _(si pas pays riche)_ → « Laisse ‹parent› chez lui/elle ; une voisine passe chaque jour. » (liens −2)
+- **d-pot-de-vin** _(argent)_ — 18–75 ans · pays au revenu moyen sous 25 000 $
+  - Décision : « Au guichet, un fonctionnaire laisse entendre qu’un « petit cadeau » accélérerait le dossier. Payer ? »
+    - Glisser un billet → « Glisse un billet dans le dossier ; le tampon arrive dans l’heure. » (dépense 0,01 × revenu médian, bonheur −1)
+    - Refuser → 50 % : « Refuse de payer ; le dossier dort trois mois de plus dans un tiroir. » (bonheur −2) ; 50 % : « Refuse de payer ; un autre guichetier traite le dossier, sans rien demander. » (bonheur +2)
+- **d-mariage-fratrie** _(famille)_ — 20–60 ans · niveau de vie : survie à classe moyenne · Inde, Pakistan, Bangladesh, Népal (pays d’origine) · un frère ou une sœur · une fois dans la vie
+  - Décision : « La famille marie ‹fratrie› ; on attend sa part de la dépense : ‹0,15 × revenu médian›. Participer ? »
+    - Participer → « Participe aux frais du mariage de ‹fratrie› ; la fête est belle, le compte est vide. » (dépense 0,15 × revenu médian, liens +4, bonheur +1)
+    - Refuser → « Refuse de payer pour le mariage de ‹fratrie› ; la famille ne l’oubliera pas de sitôt. » (liens −5)
+- **d-tontine** _(argent)_ — 20–70 ans · niveau de vie : survie à classe moyenne · Afrique subsaharienne
+  - Décision : « Les voisines proposent d’entrer dans une tontine : ‹0,1 × revenu médian› à verser, et la cagnotte quand viendra son tour. Entrer ? »
+    - Entrer dans la tontine → « Entre dans la tontine du quartier. » (dépense 0,1 × revenu médian, liens +2) · ouvre le fil « tontine »
+    - Garder son argent → « Préfère garder son argent sous la main. »
+- **tontine-tour** _(argent)_ — 21–100 ans · suite du fil « tontine »
+  - « Son tour de tontine arrive : la cagnotte entière, d’un coup ; on rembourse une dette et on achète une chèvre. »
+  - Effets : rentrée 0,11 × revenu médian, bonheur +3
+- **tontine-envolee** _(argent)_ — 21–100 ans · suite du fil « tontine »
+  - « La trésorière de la tontine disparaît avec la caisse ; tout le quartier est en colère. »
+  - Effets : bonheur −4, liens −1
+- **d-golfe** _(migrations)_ — 20–40 ans · niveau de vie : survie à modeste · Inde, Pakistan, Bangladesh, Népal, Sri Lanka, Philippines · hommes · dans son pays natal, pas en études · une fois dans la vie
+  - Décision : « Un recruteur propose un contrat sur un chantier du Golfe, contre ‹0,4 × revenu médian› de frais d’agence. Partir ? »
+    - Signer le contrat → « Signe un contrat pour un chantier du Golfe ; emprunte les frais d’agence à la famille. »
+    - Rester au pays → « Refuse le contrat du Golfe et reste près des siens. »
+- **d-exode** _(migrations)_ — 16–30 ans · pays au revenu moyen sous 25 000 $ · à la campagne · locataire, pas en couple, dans son pays natal, pas en études · une fois dans la vie
+  - Décision : « Un cousin propose de le/la loger en ville le temps de trouver du travail. Partir ? »
+    - Partir en ville → « Quitte le village pour la ville, un sac sur l’épaule, et dort sur le canapé d’un cousin. »
+    - Rester au village → « Reste au village ; la ville attendra. »
+- **d-usine-cote** _(migrations)_ — 16–28 ans · de 1985 à 2025 · Chine · à la campagne · locataire, dans son pays natal, pas en études · une fois dans la vie
+  - Décision : « Une usine de la côte embauche des jeunes du village. Partir y travailler ? »
+    - Partir à l’usine → « Part travailler dans une usine de la côte, avec trois amis du village. »
+    - Rester → « Reste au village, près des parents. »
+- **d-vacances** _(argent)_ — 25–60 ans · niveau de vie : modeste à classe moyenne · un enfant mineur
+  - Décision : « Un peu d’argent est de côté. Partir en vacances avec les enfants, ou garder cette épargne ? »
+    - Partir en vacances → « Part une semaine en vacances avec les enfants ; on en parlera longtemps. » (dépense 0,06 × revenu médian, bonheur +4, liens +3)
+    - Garder l’épargne → « Garde l’argent de côté ; les vacances, ce sera pour plus tard. »
+- **d-chiot** _(famille)_ — 25–60 ans · niveau de vie : précarité à grande aisance · un enfant de 6 à 12 ans · une fois dans la vie
+  - Décision : « Un chiot errant a suivi ‹enfant› jusqu’à la maison. Le garder ? »
+    - Le garder → « Le chiot reste ; ‹enfant› lui trouve un nom ridicule que tout le monde adopte. » (bonheur +3, liens +1, dépense 0,005 × revenu médian)
+    - Refuser → « Le chiot repart ; ‹enfant› boude toute la semaine. » (bonheur −1)
+

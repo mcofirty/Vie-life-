@@ -8,7 +8,7 @@ const ans = n => `${n} an${n > 1 ? "s" : ""}`;
 const PPP_TO_EUR_FR = 0.72; // 1 $ PPA ≈ 0,72 € aux prix français
 const SPEEDS = [1, 2, 4, 8, 12, 16];
 const DURATIONS = { 15: "≈ 15 min", 30: "≈ 30 min", 60: "≈ 1 h", 90: "≈ 1 h 30" };
-const APP_VERSION = "2.0";
+const APP_VERSION = "2.1";
 const euroMonth = ppp => `${nf.format(Math.round(ppp * PPP_TO_EUR_FR / 12 / 10) * 10)} €`;
 const dollars = x => `${nf.format(Math.round(x / 10) * 10)} $`;
 
@@ -123,6 +123,8 @@ function moneyRows(L) {
   const rows = [];
   rows.push(["Revenu", L.income > 0 ? `${dollars(L.income)} par an · ≈ ${euroMonth(L.income)} par mois (prix français)` : "aucun"]);
   if (L.married && L.partnerInfo) rows.push([`Revenu de ${L.partner}`, L.partnerInfo.income > 0 ? `${dollars(L.partnerInfo.income)} par an` : L.partnerInfo.retired ? "à la retraite" : "au foyer"]);
+  const level = L.livingStandard();
+  rows.push(["Niveau de vie", `${capFirst(TIER_LABEL[L.livingTier(level)])} · ≈ ${dollars(level)} par personne et par an`]);
   rows.push(["Épargne et placements", dollars(L.savings)]);
   if (L.house) rows.push(["Logement", `${dollars(L.house.value)}${L.house.loan > 0 ? ` · reste ${dollars(L.house.loan)} à rembourser` : ""}`]);
   else rows.push(["Logement", L.urban ? "locataire, en ville" : "locataire ou chez la famille, à la campagne"]);

@@ -276,6 +276,8 @@ class Life {
     this.emigrationOffered = false;
     this.priority = "equilibre";
     this.events = {};
+    this.seen = {}; // moments de vie déjà racontés (âge)
+    this.flags = {}; // fils narratifs en cours
     this.drafted = {};
     this.log = [];
     this.highlights = [];
@@ -417,6 +419,7 @@ class Life {
     this.pendingDeath = null;
     this.updateStats();
     this.updateMoney();
+    this.lifeMoments();
     this.snapshot();
     if (this.auto) this.autoResolveAll();
   }
@@ -643,6 +646,7 @@ class Life {
     if (this.married && rand() < 0.012 * (1.5 - s.rel / 100) * (c.gdp > 20000 ? 1.6 : 0.8) * (this.calYear < 1970 ? 0.3 : 1)) this.divorce();
     if (this.married && a > 55 && rand() < 0.012 * (a - 50) / 10) {
       this.say(`${this.partner} meurt. ${this.g("Il", "Elle")} reste ${this.g("veuf", "veuve")}.`, "family", true);
+      this.widowedAt = this.age;
       this.married = false; this.partner = null; this.partnerInfo = null; this.homemaker = false; this.bump("happy", -15); this.bump("rel", -8);
     }
 
@@ -691,6 +695,7 @@ class Life {
     const sexP = this.sex === "m" ? "f" : "m";
     this.partner = nm || this.freshName(sexP);
     this.married = true; this.marriedEver = true;
+    this.marriedAt = this.age; this.marriedForced = !!child;
     this.initPartner(child);
     if (child) {
       this.say(`Est mariée à ${this.age} ans à ${this.partner}, un homme bien plus âgé.`, "family", true, true);
@@ -699,6 +704,7 @@ class Life {
     } else {
       this.say(`Épouse ${this.partner}.`, "family", true);
       this.bump("happy", 8); this.bump("rel", 6);
+      this.wedding();
     }
   }
 

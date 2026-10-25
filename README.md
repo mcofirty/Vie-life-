@@ -6,6 +6,20 @@ Simulation de vie en français, inspirée du concept de [1in8b.life](https://1in
 
 Vous naissez au hasard parmi les bébés de l’année (ou parmi les 8 milliards d’humains), puis vous vivez une vie entière, année après année, guidée par les statistiques réelles de tous les pays et territoires du monde (216), de 1900 à 2100.
 
+## Nouveautés (version 4) : récits de vie
+
+- **Près de 750 moments de vie** (`moments.js`) entre les grands événements, soit environ une à deux bulles de récit par an au lieu d’une tous les deux ans. Chacun dépend :
+  - du **niveau de vie**, en six paliers : survie, précarité, modeste, classe moyenne, aisance, grande aisance. C’est le revenu du foyer par personne, en $ PPA ;
+  - de la **place dans le pays** (pauvreté et richesse relatives) ;
+  - du **pays** ou de sa culture (fêtes et plats de famille selon le pays d’origine) ;
+  - de l’**époque**, de la **ville ou la campagne**, de l’**âge** et de la **situation** (école, métier, couple, enfants, retraite, émigration).
+- **Au programme** : eau, électricité et logement, plats de famille de plus de 60 cultures, école et examens (gaokao, suneung, bac, WAEC, ENEM…), service militaire, métiers (champs, marché, usine, centre d’appels, livreur, infirmière…), trajets (danfo, matatu, jeepney, marchroutka…), argent au quotidien (sachets, tontine, M-Pesa, Pix, inflation), migrations et argent envoyé, santé, noces selon les cultures, parents qui vieillissent, fêtes, sport, nature et climat, technologies de la radio à l’IA, vieillesse.
+- **L’histoire vécue en direct** : la Lune en 1969, la chute du Mur, les indépendances, le premier vote des femmes, la fin de l’URSS, les Coupes du monde, les Jeux olympiques, l’euro…
+- **Fils narratifs** sur plusieurs années : un parent parti travailler à l’étranger qui revient, des grands-parents qui élèvent l’enfant, un enfant émigré qui envoie de l’argent, un prêt à un cousin, une tontine.
+- **Petites décisions** : prêter à un cousin, une mauvaise récolte, les frais de scolarité, un parent qui ne peut plus vivre seul, un pot-de-vin, partir en ville, un contrat dans le Golfe, des vacances ou l’épargne…
+- Le **niveau de vie** s’affiche dans l’argent et sur l’acte de naissance. Les passages les plus durs sont repliés avec « pas de scènes effrayantes » et absents en mode classe.
+- La bible des récits et le catalogue complet, avec les conditions de chaque moment, sont dans [`docs/moments-de-vie.md`](docs/moments-de-vie.md).
+
 ## Nouveautés (version 3)
 
 - **Tous les pays du monde** : 216 pays et territoires, avec 33 indicateurs chacun (naissances, espérance de vie par sexe, mortalité infantile et maternelle, PIB, Gini, école, université, emploi agricole et industriel, chômage, femmes au travail, urbanisation, internet, compte bancaire, inflation, taux d’intérêt, impôts, Bourse, VIH, tabac, homicides, bonheur…). Les données sont générées depuis la Banque mondiale et Our World in Data par `tools/` ; les valeurs manquantes sont estimées d’après la région et signalées.
@@ -59,6 +73,13 @@ Les valeurs sont approchées (vers 2023 ; ordres de grandeur pour le passé et l
 ```sh
 sh tools/fetch-sources.sh      # télécharge les sources dans tools/cache/
 node tools/build-countries.mjs # écrit countries.js
+```
+
+Moments de vie :
+
+```sh
+node tools/check-moments.mjs      # vérifie moments.js et simule des vies (densité du récit, moments jamais vus)
+node tools/catalogue-moments.mjs  # écrit docs/moments-de-vie.md
 ```
 
 ## Identité visuelle
