@@ -545,7 +545,7 @@ $("menuBtn").addEventListener("click", () => {
   const sw = (key, label) => `<label class="cell"><span class="cell-main"><b>${label}</b></span><input type="checkbox" class="switch" data-pref="${key}"${prefs[key] ? " checked" : ""}></label>`;
   const btn = (act, label, sub = "") => `<button class="cell link" data-act="${act}"><span class="cell-main"><b>${label}</b>${sub ? `<small>${sub}</small>` : ""}</span><span class="chev"></span></button>`;
   openSheet(`<h2 class="sheet-title">${esc(life.name)}, ${ans(life.age)}</h2>
-    <div class="group menu-list">${btn("family", "Famille et vie")}${btn("money", "Dépenser et investir")}${btn("nextdec", "Aller à la prochaine décision")}</div>
+    <div class="group menu-list">${btn("family", "Famille et vie")}${btn("money", "Dépenser et investir")}${btn("politics", "Politique", life.politics ? "" : "Ouvert à tous, quel que soit le métier")}${btn("nextdec", "Aller à la prochaine décision")}</div>
     <div class="group menu-list">${sw("music", "Musique douce")}${sw("pauses", "Pauses de réflexion")}${sw("gentle", "Pas de scènes effrayantes")}</div>
     <div class="group menu-list">${prefs.classroom ? "" : btn("birthcard", "Carte de naissance", "Une image à partager")}${btn("help", "Besoin d’aide")}${btn("quit", "Quitter", "La vie est gardée : vous pourrez la reprendre")}</div>`, { dismissable: true });
 });
@@ -561,7 +561,7 @@ document.addEventListener("click", e => {
   const b = e.target.closest("[data-act]"); if (!b || !life) return;
   const act = b.dataset.act;
   haptic();
-  if (act === "family" || act === "money") panelSheet(act);
+  if (act === "family" || act === "money" || act === "politics") panelSheet(act);
   if (act === "nextdec") { closeSheet(); setTimeout(() => skip(true), 320); }
   if (act === "birthcard") shareCard("birth", life).then(r => r === "downloaded" && toast("Image enregistrée"));
   if (act === "help") helpSheet();
@@ -647,6 +647,7 @@ function renderSituation() {
     ["Dettes", L.debt > 0 ? dollars(L.debt) : "aucune"],
     ["Patrimoine", dollars(L.netWorth()), `plus riche que ${Math.round(L.wealthPct() * 100)} % du pays`],
   ]);
+  $("polMini").innerHTML = rowsHtml(polMiniRows(L));
   const living = L.children.filter(k => k.alive).length;
   $("familyMini").innerHTML = rowsHtml([
     ["Parents", L.parents.map(p => `${p.name}${p.alive ? "" : " †"}`).join(" et ")],
@@ -660,7 +661,9 @@ function renderSituation() {
 function panelSheet(kind) {
   const L = life;
   const choice = (name, obj, cur) => `<div class="group">${Object.entries(obj).map(([k, o]) => `<button class="cell link choice-cell" data-choice="${name}" data-v="${k}"><span class="tick">${k === cur ? "✓" : ""}</span><span class="cell-main"><b>${typeof o === "string" ? o : o.label}</b>${o.note ? `<small>${o.note}</small>` : ""}</span></button>`).join("")}</div>`;
-  if (kind === "family") {
+  if (kind === "politics") {
+    openSheet(`<h2 class="sheet-title">Politique</h2>${L.alive ? politicsHtml(L, true) : ""}`, { dismissable: true, onClose: renderLife });
+  } else if (kind === "family") {
     openSheet(`<h2 class="sheet-title">Famille et vie</h2>
       <div class="group">${rowsHtml(familyRows(L))}</div>
       <p class="group-header">Des enfants ?</p>${choice("kids", KIDS_PLAN, L.wantKids)}

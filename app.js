@@ -413,7 +413,7 @@ document.addEventListener("click", e => {
   const b = e.target.closest("[data-act]"); if (!b || !life) return;
   const act = b.dataset.act;
   $("menu").hidden = true;
-  if (act === "family" || act === "money") openPanel(act);
+  if (act === "family" || act === "money" || act === "politics") openPanel(act);
   if (act === "birthcard") { if (prefs.classroom) toast("Le partage est désactivé en mode classe"); else shareCard("birth", life).then(r => r === "downloaded" && toast("Image enregistrée")); }
   if (act === "help") openHelp();
   if (act === "quit") quitLife();
@@ -460,6 +460,7 @@ function renderLife() {
     ["Dettes", L.debt > 0 ? dollars(L.debt) : "aucune"],
     ["Patrimoine", `${dollars(L.netWorth())}<br><small class="muted">plus riche que ${Math.round(L.wealthPct() * 100)} % du pays</small>`],
   ].map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("");
+  $("polMini").innerHTML = polMiniRows(L).map(([k, v, s]) => `<dt>${k}</dt><dd>${esc(v)}${s ? `<br><small class="muted">${esc(s)}</small>` : ""}</dd>`).join("");
   const living = L.children.filter(k => k.alive).length;
   $("familyMini").innerHTML = [
     ["Parents", L.parents.map(p => `${esc(p.name)}${p.alive ? "" : " †"}`).join(" et ")],
@@ -635,6 +636,9 @@ function openPanel(kind) {
         <button class="btn small" data-do="repay" ${(L.debt > 0 || (L.house && L.house.loan > 0)) && L.savings > 0 ? "" : "disabled"}>Rembourser les dettes</button>
       </div>
       <p class="tiny muted">Dollars PPA à prix constants. Les rendements sont réels (après inflation) ; krachs, crises immobilières et hyperinflations suivent l’histoire. Les dettes pèsent sur le bonheur et la santé ; l’épargne rassure.</p>`;
+  } else if (kind === "politics") {
+    $("panelTitle").textContent = "Politique";
+    $("panelBody").innerHTML = L.alive ? politicsHtml(L, true) : "";
   } else if (kind.startsWith("choices:")) {
     const id = kind.slice(8), act = L.availableActions().find(a => a.id === id), list = L.actionChoices(id);
     $("panelTitle").textContent = act.label;

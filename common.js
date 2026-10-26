@@ -154,6 +154,7 @@ function dashboardData(L) {
     { icon: "couple", label: "Couple", value: L.married ? `${L.g("Marié", "Mariée")} à ${L.partner}` : L.age < 16 ? "—" : L.marriedEver ? L.g("Seul (séparé ou veuf)", "Seule (séparée ou veuve)") : L.g("Célibataire", "Célibataire") },
     { icon: "child", label: "Enfants", value: kids.length ? `${kids.length} · ${kids.map(k => `${k.name} ${L.age - k.born}`).join(", ")}` : "Aucun" },
     ...(L.passion ? [{ icon: "leisure", label: "Passion", value: L.passionLabel() }] : []),
+    ...(L.politics ? [{ icon: "work", label: "Politique", value: `${capFirst(L.politics.rank > 0 ? L.polTitle() : L.politics.party)} · popularité ${Math.round(L.politics.pop)}/100` }] : []),
     { icon: "home", label: "Logement", value: `${L.house ? "Propriétaire" : L.age < 23 && !L.married && L.parents.some(p => p.alive) ? "Chez les parents" : "Locataire"} · ${L.urban ? "en ville" : "à la campagne"}` },
   ];
   const todo = [];

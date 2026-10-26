@@ -54,6 +54,9 @@ const REGIME_NOTE = {
 };
 // Droit de vote et d'éligibilité des femmes (années approximatives).
 const WOMEN_VOTE = { NZ: 1919, AU: 1902, FI: 1906, NO: 1913, DK: 1915, IS: 1915, RU: 1917, NL: 1917, DE: 1918, GB: 1918, AT: 1918, PL: 1918, IE: 1918, SE: 1919, US: 1920, CA: 1920, ES: 1931, BR: 1932, TR: 1934, PH: 1937, FR: 1945, IT: 1946, JP: 1946, IN: 1947, AR: 1947, KR: 1948, BE: 1948, CL: 1949, CN: 1949, GR: 1952, MX: 1953, CO: 1954, EG: 1956, IR: 1963, CH: 1971, PT: 1974, QA: 1999, KW: 2005, AE: 2006, SA: 2015 };
+// On peut militer dès 16 ans, quel que soit son métier ; se présenter, à partir de 18 ans.
+const POL_MIN_AGE = 16;
+const polJoinWhy = L => L.politics ? "vous faites déjà de la politique" : L.age < POL_MIN_AGE ? `à partir de ${POL_MIN_AGE} ans` : "";
 const womenCanRun = L => L.sex !== "f" || L.calYear >= (WOMEN_VOTE[L.code] ?? 1950);
 
 // --- Postes ------------------------------------------------------------------------------
@@ -593,7 +596,7 @@ function polOptions(L) {
     const ch = electionChance(L, race.rank), cost = campaignCost(L, race.rank), title = L.polTitle(race.rank);
     const banned = P.banUntil != null && a < P.banUntil;
     add("run", race.rank === 5 && officeTitles(L)[5][0] === "Premier ministre" ? `Mener le parti aux élections pour devenir ${title}` : `Se présenter : ${title}`, `Chances ≈ ${Math.round(ch * 100)} % · campagne ≈ ${eur(cost)}${P.funds > 0 ? ` (trésor : ${eur(P.funds)})` : ""}${OFFICE[race.rank].full && !OFFICE[P.rank].full && L.job ? " · à plein temps : vous quittez votre emploi" : ""}`,
-      !race.why && !banned && P.funds + Math.max(0, L.savings) >= cost && womenCanRun(L), banned ? `inéligible jusqu’à ${P.banUntil} ans` : !womenCanRun(L) ? "les femmes ne peuvent pas encore être élues ici" : race.why || "pas assez d’argent pour la campagne");
+      !race.why && !banned && L.age >= 18 && P.funds + Math.max(0, L.savings) >= cost && womenCanRun(L), banned ? `inéligible jusqu’à ${P.banUntil} ans` : L.age < 18 ? "candidat à partir de 18 ans".replace("candidat", L.g("candidat", "candidate")) : !womenCanRun(L) ? "les femmes ne peuvent pas encore être élues ici : militer, c’est aussi réclamer ce droit" : race.why || "pas assez d’argent pour la campagne");
   }
   if (elected(R)) {
     add("field", "Aller sur le terrain", "Marchés, porte-à-porte, réunions publiques · popularité +3 à +7 · fatigue");
@@ -616,6 +619,7 @@ function polAction(L, id, arg) {
   const P = L.politics;
   if (!L.alive) return null;
   if (id === "bizlobby") return bizLobby(L, +arg || 0);
+  if (id === "enter") { const why = polJoinWhy(L); return why ? `Impossible : ${why}.` : L.joinPolitics(arg); }
   if (!P) return null;
   if (id === "meet" || id === "snub" || id === "join") return lobbyAction(L, id, arg);
   const o = polOptions(L).find(x => x.id === id);
@@ -701,11 +705,18 @@ function bizLobby(L, i) {
 }
 
 // La page « Votre carrière politique », et l'influence de vos entreprises.
-function politicsHtml(L) {
-  const P = L.politics, bigBiz = (L.businesses || []).map((b, i) => [b, i]).filter(([b]) => (b.size || 0) >= 1);
-  if (!P && !bigBiz.length) return "";
+// full : le panneau « Politique » (s'engager, ou mener sa carrière) ; sinon, seulement l'influence des entreprises.
+function politicsHtml(L, full = false) {
+  const P = full ? L.politics : null, bigBiz = (L.businesses || []).map((b, i) => [b, i]).filter(([b]) => (b.size || 0) >= 1);
+  if (!full && !bigBiz.length) return "";
   const bar = v => `<span class="sp-bar"><i style="width:${clamp(v, 0, 100)}%"></i></span>`;
   let html = `<div class="sp">`;
+  if (full && !P) {
+    const R = polRegime(L), why = polJoinWhy(L);
+    html += `<p class="sp-head">S’engager en politique</p>
+    <p class="sp-note" style="margin-top:0">${esc(REGIME_NOTE[R])} Ouvert à tous, quel que soit votre métier : on milite à côté de son travail, de ses études ou de sa retraite. Seuls les mandats à plein temps (maire, député, ministre…) remplacent l’emploi, et c’est vous qui décidez de vous présenter, dès 18 ans.${elected(R) && !womenCanRun(L) ? " Les femmes ne peuvent pas encore être élues ici : on peut militer quand même, et réclamer ce droit." : ""} Ne compte pas parmi les trois actions de l’année.</p>
+    <div class="sp-pills">${partiesFor(L, R).map(p => `<button class="sp-pill" data-pol="enter" data-arg="${p.id}"${why ? " disabled" : ""}>Rejoindre : ${esc(p.label.charAt(0).toLowerCase() + p.label.slice(1))} <span>${esc(why || p.sub)}</span></button>`).join("")}</div>`;
+  }
   if (P) {
     const R = polRegime(L), inf = L.polInfluence(), opts = polOptions(L), titles = officeTitles(L, R);
     const gov = R === "dem" ? ` · majorité : ${SIDE_LABEL[P.govSide]}${lean(P.side, P.govSide) === 1 && P.side !== "ind" ? " (votre camp)" : ""}` : "";
@@ -752,6 +763,27 @@ function politicsHtml(L) {
   raise.when = L => L.jobInfo && L.jobInfo.politics ? "Votre indemnité est fixée par la loi." : when(L);
 }
 ACTIONS.push({ id: "politics", cat: "pro", label: "S’engager en politique",
-  desc: L => `${REGIME_NOTE[polRegime(L)]} Ensuite, tout se joue dans « Dépenser et investir » › « Votre carrière politique ».`,
-  when: L => L.politics ? "Vous faites déjà de la politique." : L.age < 18 ? "À partir de 18 ans." : elected(polRegime(L)) && !womenCanRun(L) ? "Les femmes n’ont pas encore le droit de vote ni d’être élues ici." : true,
+  desc: L => `Quel que soit votre métier, sans compter parmi les actions de l’année. ${REGIME_NOTE[polRegime(L)]} Ensuite, tout se joue dans le panneau « Politique ».`,
+  when: L => { const why = polJoinWhy(L); return why ? capFirst(why) + "." : true; },
   choices: L => partiesFor(L), run: (L, id) => L.joinPolitics(id) });
+// S'engager ne coûte pas d'action de l'année : c'est un choix de vie, ouvert à tous.
+{
+  const avail = Life.prototype.availableActions, doA = Life.prototype.doAction;
+  Life.prototype.availableActions = function () {
+    return avail.call(this).map(a => a.id === "politics" && !a.ok && this.actionsLeft <= 0 && !polJoinWhy(this) ? { ...a, ok: true, why: "" } : a);
+  };
+  Life.prototype.doAction = function (id, arg) {
+    if (id !== "politics") return doA.call(this, id, arg);
+    const left = this.actionsLeft;
+    this.actionsLeft = Math.max(1, left);
+    const r = doA.call(this, id, arg);
+    this.actionsLeft = left;
+    return r;
+  };
+}
+// Le résumé du panneau « Situation » : [libellé, valeur, précision].
+function polMiniRows(L) {
+  const P = L.politics;
+  if (!P) return [["Engagement", "aucun", L.age >= POL_MIN_AGE ? "Ouvert à tous, quel que soit le métier" : `Possible dès ${POL_MIN_AGE} ans`]];
+  return [["Poste", capFirst(P.rank > 0 ? L.polTitle() : L.g(officeTitles(L)[0][0], officeTitles(L)[0][1])), P.party], ["Popularité", `${Math.round(P.pop)}/100`, `influence ${L.polInfluence()}/100`]];
+}
