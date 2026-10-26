@@ -535,6 +535,8 @@ Object.assign(Life.prototype, {
     const c = this.here, y = this.calYear;
     // Rendements des placements, dettes et emprunt immobilier.
     const r = assetReturns(this), before = this.savings;
+    // Acheter et vendre souvent des titres : des frais, et un peu plus de hauts et de bas.
+    if (this.lifestyle && this.lifestyle.invest === "trade") for (const k of ["stocks", "world", "crypto"]) r[k] += -0.015 + 0.05 * randn();
     let gain = 0;
     for (const k in this.assets) { const d = this.assets[k] * Math.max(-0.95, r[k] ?? 0); this.assets[k] += d; gain += d; }
     if (before > median(c) * 0.5) {

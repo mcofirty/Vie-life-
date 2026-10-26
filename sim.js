@@ -419,6 +419,7 @@ class Life {
     this.pendingDeath = null;
     this.updateStats();
     this.updateMoney();
+    this.lifestyleYear();
     this.lifeMoments();
     this.snapshot();
     if (this.auto) this.autoResolveAll();
@@ -633,7 +634,9 @@ class Life {
 
     // Amour et mariage
     if (!this.married && a >= 18) {
-      const p = a <= 35 ? 0.13 : a <= 50 ? 0.04 : 0.01;
+      let p = a <= 35 ? 0.13 : a <= 50 ? 0.04 : 0.01;
+      // « Faire des rencontres » (spending.js) : plus de chances l'année suivante.
+      if (this.dating && this.dating.age === a) p = Math.max(p * 2.5, this.dating.wide ? 0.2 : 0.08);
       if (rand() < p) {
         const sexP = this.sex === "m" ? "f" : "m";
         const nm = this.freshName(sexP);
@@ -672,7 +675,7 @@ class Life {
     }
 
     // Santé à l'âge adulte : une maladie grave, et la question des soins.
-    if (a >= 30 && rand() < (0.02 + a / 3000) * (this.checkupAt === a ? 0.6 : 1)) {
+    if (a >= 30 && rand() < (0.02 + a / 3000) * (this.checkupAt === a ? 0.6 : 1) * this.illnessMult()) {
       this.say(pick(["Une grave maladie la cloue au lit plusieurs mois.", "Un accident l’oblige à s’arrêter de longues semaines.", "Les médecins découvrent un problème de cœur."]).replace("la cloue", this.g("le cloue", "la cloue")), "health", true);
       this.bump("health", -8);
       const cost = this.careCost();
