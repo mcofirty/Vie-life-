@@ -4,7 +4,7 @@
 // et ce qui se fait « sans demander » chaque année. Montants en dollars PPA, affichés
 // aussi en euros aux prix français.
 
-const eur = x => `${Math.round(x * 0.72).toLocaleString("fr-FR")} €`;
+const eur = x => Math.abs(x * 0.72) >= 1e6 ? compactMoney(x * 0.72, "€") : `${Math.round(x * 0.72).toLocaleString("fr-FR")} €`;
 const LIFESTYLE = {
   invest: { label: "Placement", note: "Acheter et garder coûte peu de frais. Acheter et vendre souvent des titres coûte des frais et, en moyenne, rapporte un peu moins, avec plus de hauts et de bas.",
     opts: { hold: ["Acheter et garder", "acheter et garder"], trade: ["Acheter et vendre des titres", "achat et vente de titres"] } },

@@ -123,6 +123,14 @@ function activeEvents(code, year) {
   }
   return out;
 }
+// Montants : en entier jusqu'au million, puis abrégés (« 19,9 M$ », « 1,2 Md€ ») pour rester lisibles.
+const SIG3 = new Intl.NumberFormat("fr-FR", { maximumSignificantDigits: 3 });
+const compactMoney = (x, unit) => {
+  const a = Math.abs(x);
+  if (a >= 1e9) return `${SIG3.format(x / 1e9)} Md${unit}`;
+  if (a >= 1e6) return `${SIG3.format(x / 1e6)} M${unit}`;
+  return `${(Math.round(x / 10) * 10).toLocaleString("fr-FR")} ${unit}`;
+};
 const capFirst = s => s.charAt(0).toUpperCase() + s.slice(1);
 
 // --- Mortalité -------------------------------------------------------------

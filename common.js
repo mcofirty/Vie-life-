@@ -9,8 +9,8 @@ const PPP_TO_EUR_FR = 0.72; // 1 $ PPA ≈ 0,72 € aux prix français
 const SPEEDS = [1, 2, 4, 8, 12, 16];
 const DURATIONS = { 15: "≈ 15 min", 30: "≈ 30 min", 60: "≈ 1 h", 90: "≈ 1 h 30" };
 const APP_VERSION = "2.1";
-const euroMonth = ppp => `${nf.format(Math.round(ppp * PPP_TO_EUR_FR / 12 / 10) * 10)} €`;
-const dollars = x => `${nf.format(Math.round(x / 10) * 10)} $`;
+const euroMonth = ppp => compactMoney(ppp * PPP_TO_EUR_FR / 12, "€");
+const dollars = x => compactMoney(x, "$");
 
 const store = {
   get(key, fallback) { try { const v = localStorage.getItem(key); return v == null ? fallback : JSON.parse(v); } catch { return fallback; } },
@@ -143,7 +143,7 @@ function dashboardData(L) {
   const invested = Math.max(0, L.savings - liquid), net = L.netWorth();
   const pi = L.married && L.partnerInfo ? L.partnerInfo.income || 0 : 0;
   const money = [
-    { id: "salary", label: L.retired ? "Pension" : L.business ? "Revenu de l’entreprise" : "Salaire", value: L.income > 0 ? `${dollars(L.income)}/an` : "aucun", sub: L.income > 0 ? `≈ ${euroMonth(L.income)} par mois${pi ? ` · foyer ${dollars(L.income + pi)}` : ""}` : pi ? `foyer ${dollars(pi)}/an` : "" },
+    { id: "salary", label: L.retired ? "Pension" : L.business ? "Revenus" : "Salaire", value: L.income > 0 ? `${dollars(L.income)}/an` : "aucun", sub: L.income > 0 ? `≈ ${euroMonth(L.income)} par mois${pi ? ` · foyer ${dollars(L.income + pi)}` : ""}` : pi ? `foyer ${dollars(pi)}/an` : "" },
     { id: "net", label: "Patrimoine", value: dollars(net), sub: `plus riche que ${Math.round(L.wealthPct() * 100)} % du pays`, tone: net < 0 ? "bad" : "" },
     { id: "cash", label: "Disponible", value: dollars(liquid), sub: invested > 0 ? `+ ${dollars(invested)} placés` : L.debt > 0 ? `dettes ${dollars(L.debt)}` : "" , tone: liquid < 1 && L.debt > 0 ? "bad" : "" },
   ];

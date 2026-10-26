@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="app.css?v=21">
+<link rel="stylesheet" href="app.css?v=22">
 </head>
 <body>
 
@@ -269,9 +269,10 @@
 <section class="fullscreen life" id="lifeView" hidden>
   <header class="life-top">
     <button class="circle-btn" id="quitBtn" aria-label="Fermer"><svg viewBox="0 0 24 24"><path d="M6.4 5L12 10.6 17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4-5.6-5.6L6.4 19 5 17.6l5.6-5.6L5 6.4z"/></svg></button>
-    <div class="life-who"><b id="lfName"></b><small id="lfCountry"></small></div>
+    <div class="life-who"><b id="lfName"></b><small id="lfCountry"></small><small class="who-mini" id="lfMini" aria-hidden="true"></small></div>
     <button class="chip" id="autoChip" aria-pressed="false">Auto</button>
     <button class="circle-btn" id="menuBtn" aria-label="Menu"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
+    <div class="top-year" role="progressbar" aria-label="Avancement de l’année" aria-valuemin="0" aria-valuemax="100"><i id="topYear"></i></div>
   </header>
 
   <div class="life-scroll" id="lifeScroll">
@@ -355,17 +356,17 @@
 
 <div class="toast" id="toast" hidden></div>
 
-<script src="../countries.js?v=21"></script>
-<script src="../data.js?v=21"></script>
-<script src="../sim.js?v=21"></script>
-<script src="../economy.js?v=21"></script>
-<script src="../moments.js?v=21"></script>
-<script src="../careers.js?v=21"></script>
-<script src="../company.js?v=21"></script>
-<script src="../stardom.js?v=21"></script>
-<script src="../spending.js?v=21"></script>
-<script src="../politics.js?v=21"></script>
-<script src="../common.js?v=21"></script>
-<script src="app.js?v=21"></script>
+<script src="../countries.js?v=22"></script>
+<script src="../data.js?v=22"></script>
+<script src="../sim.js?v=22"></script>
+<script src="../economy.js?v=22"></script>
+<script src="../moments.js?v=22"></script>
+<script src="../careers.js?v=22"></script>
+<script src="../company.js?v=22"></script>
+<script src="../stardom.js?v=22"></script>
+<script src="../spending.js?v=22"></script>
+<script src="../politics.js?v=22"></script>
+<script src="../common.js?v=22"></script>
+<script src="app.js?v=22"></script>
 </body>
 </html>

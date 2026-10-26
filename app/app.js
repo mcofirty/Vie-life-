@@ -442,6 +442,9 @@ function beginLife(resumed = false) {
   if (resumed && life.queue.length) decisionSheet();
 }
 
+// Quand l'anneau de l'âge sort de l'écran, l'en-tête se resserre : âge, année et barre de l'année y restent.
+new IntersectionObserver(([e]) => $("lifeView").querySelector(".life-top").classList.toggle("compact", !e.isIntersecting), { root: $("lifeScroll"), threshold: 0.15 }).observe($("lifeHero"));
+
 function setRunning(on) {
   running = on;
   $("playIcon").innerHTML = on ? '<path d="M7 5h3.5v14H7zm6.5 0H17v14h-3.5z"/>' : '<path d="M8 5v14l11-7z"/>';
@@ -458,6 +461,7 @@ function loop(t) {
     if (progress >= 1) { progress = 0; life.step(); renderLife(); afterStep(); }
   }
   $("yearRing").style.strokeDashoffset = (326.7 * (1 - progress)).toFixed(1);
+  $("topYear").style.transform = `scaleX(${progress.toFixed(4)})`;
   requestAnimationFrame(loop);
 }
 
@@ -573,6 +577,7 @@ function renderLife() {
   const L = life, c = L.here;
   $("lfAge").textContent = L.age;
   $("lfAgeUnit").textContent = `${L.age > 1 ? "ans" : "an"} · ${L.calYear}`;
+  $("lfMini").textContent = `${L.age} ${L.age > 1 ? "ans" : "an"} · ${L.calYear}`;
   $("lfCountry").textContent = L.emigrated ? `vit ${inCountry(c)} · ${L.g("né", "née")} ${inCountry(BY_CODE[L.home])}` : `${inCountry(c).replace(/^./, m => m.toUpperCase())}`;
   $("pendingBtn").hidden = !(L.alive && L.queue.length && !sheetOpen());
   $("autoChip").setAttribute("aria-pressed", String(L.auto));
