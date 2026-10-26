@@ -424,10 +424,10 @@ document.addEventListener("keydown", e => {
 });
 
 const STAT_META = [
-  ["health", "Santé", "#3f8f6b"],
-  ["happy", "Bonheur", "#e6a532"],
-  ["know", "Savoir", "#5b6fd6"],
-  ["rel", "Relations", "#c8553d"],
+  ["health", "Santé", "#3CC9A0"],
+  ["happy", "Bonheur", "#FFB23F"],
+  ["know", "Savoir", "#7C9BFF"],
+  ["rel", "Relations", "#FF5A36"],
 ];
 
 function renderLife() {
@@ -561,10 +561,8 @@ function renderPeers() {
   }).join("");
 }
 
-function happyColor(v) {
-  const hue = 8 + (v / 100) * 140;
-  return `hsl(${hue.toFixed(0)} 55% 52%)`;
-}
+// Comme dans l'app : plus l'année est heureuse, plus la case est corail.
+function happyColor(v) { return `color-mix(in srgb, #FF5A36 ${Math.round(25 + v * 0.75)}%, #B9B4C9)`; }
 function renderGrid(node, history, nowAge, ended) {
   const last = history.length - 1;
   const cells = Math.max(100, Math.ceil((last + 1) / 10) * 10);
