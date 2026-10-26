@@ -433,9 +433,10 @@ function renderLife() {
 
   const facts = [
     ["Famille d’origine", L.familyLabel()],
-    ["Études", L.schooling ? `en cours : ${EDU_LABEL[L.schooling]}` : EDU_LABEL[L.edu]],
+    ["Études", L.schooling ? `en cours : ${eduText(L)}` : eduText(L)],
     ["Travail", L.retired ? "à la retraite" : L.job || (L.homemaker ? "au foyer" : L.age < 6 ? "—" : "sans emploi")],
   ];
+  if (L.passion) facts.push(["Passion", L.passionLabel()]);
   if (L.smoker) facts.push(["Tabac", L.g("fumeur", "fumeuse")]);
   if (L.hivPos) facts.push(["VIH", L.hivTreated() ? "sous traitement" : "sans traitement"]);
   facts.push(["Lieu de vie", L.urban ? "en ville" : "à la campagne"]);
@@ -716,8 +717,9 @@ function showDeath(rec, mode) {
   $("dcLine").textContent = `${lifeLine(s)} ${c.flag} ${vsLifeExpectancy(s)}`;
   const facts = [
     ["Cause du décès", hideCause ? null : s.cause],
-    ["Études", EDU_LABEL[s.edu]],
+    ["Études", s.eduText || EDU_LABEL[s.edu]],
     ["Travail", s.job || "aucun"],
+    ...(s.passion ? [["Passion", s.passion]] : []),
   ];
   if (s.income > 0) facts.push(["Dernier revenu", `${dollars(s.income)} PPA/an`]);
   if (s.wealth != null) facts.push(["Patrimoine", s.wealth >= 0 ? `${dollars(s.wealth)}${s.house ? " et un logement" : ""}` : `des dettes de ${dollars(-s.wealth)}`]);

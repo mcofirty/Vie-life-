@@ -6,6 +6,14 @@ Simulation de vie en français, inspirée du concept de [1in8b.life](https://1in
 
 Vous naissez au hasard parmi les bébés de l’année (ou parmi les 8 milliards d’humains), puis vous vivez une vie entière, année après année, guidée par les statistiques réelles de tous les pays et territoires du monde (216), de 1900 à 2100.
 
+## Nouveautés (version 5) : études, spécialités et passions
+
+- **Filières du lycée** selon le pays et l’époque : séries A/B/C puis bac S/ES/L puis spécialités en France, streams Science/Commerce/Arts en Inde, lǐkē/wénkē en Chine, A-levels, Abitur, liceo…
+- **Voie professionnelle** avec spécialité (électricité, mécanique, cuisine, coiffure, soins, numérique…) : lycée professionnel, Ausbildung, CFC, MBO, PTU soviétique, ITI indien, SENAI… et, dans les pays pauvres, **apprentissage chez un artisan**. Le métier appris ouvre les emplois correspondants.
+- **Université** : une quinzaine de spécialités (médecine, droit, économie, ingénieur, informatique, lettres, arts, STAPS, pilotage…) selon ce qui existe dans le pays, avec des chances d’admission affichées ; **licence (ou bachelor), master, doctorat** ; **études courtes** (BTS, community college…) ; **grandes écoles et universités d’élite** (prépa, Ivy League, Oxbridge, Tsinghua, SKY, IIT…) ; prêts étudiants là où l’université est chère ; universités fermées (Révolution culturelle, Khmers rouges, talibans pour les femmes). La spécialité oriente vers les métiers et le salaire.
+- **Centres de formation sportifs** : centres des clubs pros, académies de football en Afrique de l’Ouest, écoles sportives d’État, camps d’altitude au Kenya et en Éthiopie, académies de baseball en République dominicaine, bourses universitaires américaines, sport-études ; transferts vers les grands championnats ; fin de carrière et reconversion (entraîneur, consultant télé).
+- **Vivre d’un art ou d’un loisir** : chant (style du pays : afrobeats, K-pop, raï, samba…), rap, musique, DJ, danse, comédie (Hollywood, Bollywood, Nollywood, telenovelas…), humour, écriture, peinture, mannequinat, vidéos en ligne, **télé-réalité** (castings selon les débuts de la télé-réalité dans chaque pays) et une vingtaine de sports. Talent, moyens de la famille, ville ou campagne, époque et règles du pays (sport féminin longtemps amateur, rugby amateur avant 1995, musique interdite par les talibans…) décident ; la plupart restent amateurs, quelques-uns vivent de petits cachets, de rares stars gagnent des fortunes.
+
 ## Nouveautés (version 4) : récits de vie
 
 - **Près de 750 moments de vie** (`moments.js`) entre les grands événements, soit environ une à deux bulles de récit par an au lieu d’une tous les deux ans. Chacun dépend :

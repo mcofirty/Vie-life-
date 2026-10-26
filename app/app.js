@@ -612,8 +612,9 @@ function renderSituation() {
   const L = life;
   const rows = [
     ["home", "Famille d’origine", L.familyLabel()],
-    ["edu", "Études", L.schooling ? `en cours · ${EDU_LABEL[L.schooling]}` : EDU_LABEL[L.edu]],
+    ["edu", "Études", L.schooling ? `en cours · ${eduText(L)}` : eduText(L)],
     ["work", "Travail", L.retired ? "à la retraite" : L.job || (L.homemaker ? "au foyer" : L.age < 6 ? "—" : "sans emploi")],
+    ...(L.passion ? [["leisure", "Passion", L.passionLabel()]] : []),
     ["home", "Lieu de vie", L.urban ? "en ville" : "à la campagne"],
   ];
   if (L.lineage) rows.push(["family", "Lignée", `génération ${L.lineage.gen}`]);
@@ -816,7 +817,7 @@ function deathSheet(rec, mode) {
   const lost = s.children - s.childrenAlive;
   const kids = s.children ? `${s.children}${lost ? ` (${lost} mort${lost > 1 ? "s" : ""} en bas âge)` : ""}` : "aucun";
   const hideCause = prefs.gentle && HEAVY_CAUSES.includes(s.cause);
-  const facts = [["Cause", hideCause ? "non affichée" : s.cause], ["Études", EDU_LABEL[s.edu]], ["Travail", s.job || "aucun"], ["Mariage", s.marriedEver ? "oui" : "non"], ["Enfants", kids]];
+  const facts = [["Cause", hideCause ? "non affichée" : s.cause], ["Études", s.eduText || EDU_LABEL[s.edu]], ["Travail", s.job || "aucun"], ...(s.passion ? [["Passion", s.passion]] : []), ["Mariage", s.marriedEver ? "oui" : "non"], ["Enfants", kids]];
   if (s.grandkids) facts.push(["Petits-enfants", String(s.grandkids)]);
   if (s.business) facts.push(["Entreprise", s.business]);
   const dyn = rec.dyn, heirs = own && dyn && dyn.heirs ? dyn.heirs : [];

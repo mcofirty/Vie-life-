@@ -145,12 +145,13 @@ function dashboardData(L) {
     { id: "net", label: "Patrimoine", value: dollars(net), sub: `plus riche que ${Math.round(L.wealthPct() * 100)} % du pays`, tone: net < 0 ? "bad" : "" },
     { id: "cash", label: "Disponible", value: dollars(liquid), sub: invested > 0 ? `+ ${dollars(invested)} placés` : L.debt > 0 ? `dettes ${dollars(L.debt)}` : "" , tone: liquid < 1 && L.debt > 0 ? "bad" : "" },
   ];
-  const activity = !L.alive ? "—" : L.schooling ? `Études · ${EDU_LABEL[L.schooling]}` : L.retired ? "À la retraite" : L.business ? L.business.label : L.job ? capFirst(L.job) : L.homemaker ? "Au foyer" : L.age < 6 ? "Petite enfance" : L.age < 15 ? "Enfant, hors de l’école" : "Sans emploi";
+  const activity = !L.alive ? "—" : L.schooling ? `Études · ${eduText(L)}` : L.retired ? "À la retraite" : L.business ? L.business.label : L.job ? capFirst(L.job) : L.homemaker ? "Au foyer" : L.age < 6 ? "Petite enfance" : L.age < 15 ? "Enfant, hors de l’école" : "Sans emploi";
   const kids = L.children.filter(k => k.alive);
   const status = [
     { icon: L.schooling ? "edu" : "work", label: L.schooling ? "Études" : "Travail", value: activity },
     { icon: "couple", label: "Couple", value: L.married ? `${L.g("Marié", "Mariée")} à ${L.partner}` : L.age < 16 ? "—" : L.marriedEver ? L.g("Seul (séparé ou veuf)", "Seule (séparée ou veuve)") : L.g("Célibataire", "Célibataire") },
     { icon: "child", label: "Enfants", value: kids.length ? `${kids.length} · ${kids.map(k => `${k.name} ${L.age - k.born}`).join(", ")}` : "Aucun" },
+    ...(L.passion ? [{ icon: "leisure", label: "Passion", value: L.passionLabel() }] : []),
     { icon: "home", label: "Logement", value: `${L.house ? "Propriétaire" : L.age < 23 && !L.married && L.parents.some(p => p.alive) ? "Chez les parents" : "Locataire"} · ${L.urban ? "en ville" : "à la campagne"}` },
   ];
   const todo = [];
@@ -274,7 +275,7 @@ function cleanRecord(r) {
     s: {
       name: str(s.name, 40), sex: s.sex === "m" ? "m" : "f", home: s.home, code: code(s.code), age: clamp(Math.round(num(s.age)), 0, 120),
       year: clamp(Math.round(num(s.year, DATA_YEAR)), MIN_YEAR, MAX_YEAR), alive: false, cause: str(s.cause, 80),
-      edu: EDU_LABEL[s.edu] ? s.edu : "none", job: s.job ? str(s.job, 60) : null, income: num(s.income), incomePct: s.incomePct == null ? null : num(s.incomePct),
+      edu: EDU_LABEL[s.edu] ? s.edu : "none", eduText: s.eduText ? str(s.eduText, 120) : null, passion: s.passion ? str(s.passion, 120) : null, job: s.job ? str(s.job, 60) : null, income: num(s.income), incomePct: s.incomePct == null ? null : num(s.incomePct),
       marriedEver: !!s.marriedEver, children: Math.round(num(s.children)), childrenAlive: Math.round(num(s.childrenAlive)), grandkids: Math.round(num(s.grandkids)),
       wealth: num(s.wealth), house: !!s.house, business: s.business ? str(s.business, 60) : null, gen: clamp(Math.round(num(s.gen, 1)), 1, 99), emigrated: !!s.emigrated, stats: {}, born: "", birthDate: s.birthDate && !isNaN(new Date(s.birthDate)) ? new Date(s.birthDate).toISOString() : null,
     },

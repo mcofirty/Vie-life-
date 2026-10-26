@@ -103,8 +103,12 @@ function jobsFor(L) {
   const c = L.here, y = L.calYear, rank = EDU_RANK[L.edu];
   const sectors = {};
   for (const j of JOBS_LIST) if (y >= j.from && y <= j.to) sectors[j.sector] = (sectors[j.sector] || 0) + 1;
-  return JOBS_LIST.filter(j => y >= j.from && y <= j.to && jobEdu(j, y) <= rank && L.age >= (j.minAge || (jobEdu(j, y) <= 1 ? 10 : 16)) && !(j.sector === "agri" && L.urban && c.agri < 5))
-    .map(j => ({ job: j, weight: sectorWeight(c, j.sector) / sectors[j.sector] * (j.w ?? 1) * genderFit(j, L.sex) * (jobEdu(j, y) === rank ? 1.6 : 1) * (j.sector === "agri" && L.urban ? 0.3 : 1) }))
+  // Spécialité d'université et métier appris (careers.js) : ils ouvrent ou ferment des portes.
+  const field = L.degree && L.edu === "universite" ? FIELD_BY_ID[L.degree.field] : null, short = field && L.degree.level === "court";
+  const trade = L.trade ? TRADE_BY_ID[L.trade] : null, learned = j => !!trade && trade.jobs.includes(j.id);
+  return JOBS_LIST.filter(j => y >= j.from && y <= j.to && jobEdu(j, y) <= rank + (learned(j) ? 1 : 0) && L.age >= (j.minAge || (jobEdu(j, y) <= 1 ? 10 : 16)) && !(j.sector === "agri" && L.urban && c.agri < 5)
+      && !(field && JOB_NEEDS[j.id] && !JOB_NEEDS[j.id].includes(field.id)) && !(short && ["doctor", "lawyer", "professor", "researcher"].includes(j.id)))
+    .map(j => ({ job: j, weight: sectorWeight(c, j.sector) / sectors[j.sector] * (j.w ?? 1) * genderFit(j, L.sex) * (jobEdu(j, y) === rank ? 1.6 : 1) * (j.sector === "agri" && L.urban ? 0.3 : 1) * (field && field.jobs.includes(j.id) ? 6 : 1) * (learned(j) ? 5 : 1) }))
     .filter(x => x.weight > 0.05);
 }
 const jobLabel = (j, sex) => sex === "m" ? j.m : j.f;
@@ -323,7 +327,8 @@ Object.assign(Life.prototype, {
       }
       if (this.business) this.incomePct = incomePctOf(c, this.income);
     } else if (this.job) {
-      this.income = incomeAt(c, this.incomePct) * this.econ;
+      // Les stars gagnent bien plus que le haut de l'échelle des salaires.
+      this.income = incomeAt(c, this.incomePct) * this.econ * (this.jobInfo && this.jobInfo.career ? this.starMult || 1 : 1);
     } else this.income = 0;
     // Revenu du conjoint.
     const pi = this.partnerInfo;
@@ -361,7 +366,7 @@ Object.assign(Life.prototype, {
 
   // --- Travail ---
   takeJob(j) {
-    const z = 0.45 * normInv((this.decile - 0.5) / 10) + 0.4 * EDU_Z[this.edu] + 0.25 * (this.stats.know - 50) / 25 + 0.6 * randn();
+    const z = 0.45 * normInv((this.decile - 0.5) / 10) + 0.4 * EDU_Z[this.edu] + this.degreeZ(j) + 0.25 * (this.stats.know - 50) / 25 + 0.6 * randn();
     const u = clamp(normCdf(z / 0.95), 0.02, 0.98);
     this.incomePct = clamp(j.lo + (j.hi - j.lo) * u, 0.01, 0.99);
     this.job = jobLabel(j, this.sex);
@@ -379,7 +384,7 @@ Object.assign(Life.prototype, {
       if (!this.homemaker) { this.homemaker = true; this.say("Reste au foyer pour s’occuper de la maison et des enfants.", "work", true); }
       return;
     }
-    const z = 0.45 * normInv((this.decile - 0.5) / 10) + 0.4 * EDU_Z[this.edu] + 0.25 * (this.stats.know - 50) / 25 + 0.6 * randn();
+    const z = 0.45 * normInv((this.decile - 0.5) / 10) + 0.4 * EDU_Z[this.edu] + this.degreeZ(null) + 0.25 * (this.stats.know - 50) / 25 + 0.6 * randn();
     const target = clamp(normCdf(z / 0.95), 0.02, 0.98);
     const options = jobsFor(this);
     if (!options.length) return;
