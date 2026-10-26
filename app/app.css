@@ -549,3 +549,8 @@ a { color: var(--tint); text-decoration: none; }
   .ring svg { width: 30px; height: 30px; }
   .ring b { font-size: 16px; }
 }
+
+/* Raccourci « Politique » du tableau de bord */
+.stat-card.link { text-align: left; width: 100%; }
+.stat-card.link:active { background: var(--fill); }
+.stat-card.cta b { color: var(--tint); }
