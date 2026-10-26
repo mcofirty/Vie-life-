@@ -353,24 +353,30 @@ function giveToHeir(L, K, kid) {
   const g = donationFor(L, kid);
   if (!g.inWill) { K.say(`${L.name} ne vous a pas prévu dans son testament : pas de patrimoine à recevoir.`, "money"); return g; }
   if (g.frac <= 0) { K.say(`${L.name} n’a pas de patrimoine à transmettre : ses dettes dépassent ce qu’${L.g("il", "elle")} possède.`, "money"); return g; }
-  const fr = g.frac, keep = 1 - fr, rec = fr * (1 - g.taxRate), parts = [];
+  const fr = g.frac, keep = 1 - fr, rec = fr * (1 - g.taxRate), parts = [], shared = [];
   K.props = K.props || []; K.businesses = K.businesses || [];
   const cash = L.savings * fr;
   if (cash > 1) { L.withdraw(cash); K.addMoney(cash * (1 - g.taxRate)); parts.push(`${money(cash * (1 - g.taxRate))} d’épargne`); }
   if (L.house && L.house.value > 0) {
     const h = L.house;
-    K.props.push({ type: "share", label: `Part de la maison de ${L.name}`, use: "share", value: h.value * rec, loan: h.loan * rec, rate: h.rate, payment: h.payment * rec, yield: 0, happy: 0 });
+    const item = { type: "share", label: `Part de la maison de ${L.name}`, use: "share", value: h.value * rec, loan: h.loan * rec, rate: h.rate, payment: h.payment * rec, yield: 0, happy: 0 };
+    K.props.push(item);
+    shared.push({ kind: "house", ref: item, whole: h.value, wholeLoan: h.loan, wholePay: h.payment });
     h.value *= keep; h.loan *= keep; h.payment *= keep;
     parts.push(fr >= 0.999 ? "la maison familiale (l’aïeul y vit toujours)" : `${Math.round(fr * 100)} % de la maison familiale`);
   }
   for (const p of [...(L.props || [])]) {
-    K.props.push({ ...p, value: p.value * rec, loan: p.loan * rec, payment: (p.payment || 0) * rec });
+    const item = { ...p, value: p.value * rec, loan: p.loan * rec, payment: (p.payment || 0) * rec };
+    K.props.push(item);
+    shared.push({ kind: "prop", ref: item, whole: p.value, wholeLoan: p.loan, wholePay: p.payment || 0 });
     if (fr >= 0.999) L.props.splice(L.props.indexOf(p), 1); else { p.value *= keep; p.loan *= keep; p.payment = (p.payment || 0) * keep; }
   }
   if ((L.props || []).length || g.eq.props > 0) parts.push(fr >= 0.999 ? "ses biens immobiliers" : `${Math.round(fr * 100)} % de ses biens immobiliers`);
   for (const b of [...(L.businesses || [])]) {
     // L'enfant devient actionnaire ; un gérant dirige sa part.
-    K.businesses.push({ ...b, stake: (b.stake ?? 1) * rec, mode: "managed", manager: b.manager ? { ...b.manager } : null, did: {}, sideNoted: false });
+    const clone = { ...b, stake: (b.stake ?? 1) * rec, mode: "managed", manager: b.manager ? { ...b.manager } : null, did: {}, sideNoted: false };
+    K.businesses.push(clone);
+    shared.push({ kind: "biz", ref: clone, wholeStake: b.stake ?? 1 });
     if (fr >= 0.999) { if (L.focusBiz(b)) L.dropBusiness(); L.bizFocus = 0; } else b.stake = (b.stake ?? 1) * keep;
     parts.push(fr >= 0.999 ? `l’entreprise « ${b.label} »` : `${Math.round(fr * 100)} % de l’entreprise « ${b.label} »`);
   }
@@ -378,8 +384,53 @@ function giveToHeir(L, K, kid) {
   L.say(`Transmet de son vivant à ${kid.name} sa part du patrimoine : ${list} (${money(g.tax)} de droits).`, "money", true);
   K.say(`Reçoit de ${L.name}, de son vivant, sa part du patrimoine (≈ ${money(g.net)}) : ${list}.`, "money", true);
   K.bump("happy", 3);
+  // Un héritage partagé : pour chaque bien détenu à plusieurs, c'est à vous de choisir.
+  if (fr < 0.999 && shared.length) {
+    const others = [L.name, ...willCandidates(L).filter(c => activeWill(L).includes(c.key) && c.key !== `kid:${kid.name}`).map(c => c.label)];
+    const co = others.length > 1 ? `${others.slice(0, -1).join(", ")} et ${others[others.length - 1]}` : others[0];
+    for (const it of shared) K.askSharedAsset(it, co, L.name);
+  }
   return g;
 }
+Object.assign(Life.prototype, {
+  // Un bien reçu en partage : garder sa part, racheter celles des autres, y habiter, le louer, ou vendre sa part.
+  askSharedAsset(it, co, from) {
+    const r = it.ref, biz = it.kind === "biz";
+    const mine = biz ? r.value * r.stake : r.value - r.loan;
+    const total = biz ? r.value * it.wholeStake : it.whole - it.wholeLoan;
+    const cost = Math.max(0, total - mine), sell = mine * 0.9, pct = Math.round(mine / Math.max(total, 1) * 100);
+    const can = this.savings >= cost * 0.3 && (this.bank || this.savings >= cost);
+    const name = biz ? `l’entreprise « ${r.label} »` : it.kind === "house" ? `la maison de ${from}` : `« ${r.label} »`;
+    const gone = () => biz ? !(this.businesses || []).includes(r) : !(this.props || []).includes(r);
+    const buy = then => {
+      if (gone()) return;
+      if (!can) { this.say(`N’a pas les moyens de racheter les parts de ${name}.`, "money"); return; }
+      this.pay(cost);
+      if (biz) r.stake = it.wholeStake; else { r.value = it.whole; r.loan = it.wholeLoan; r.payment = it.wholePay; }
+      then();
+    };
+    const opts = [
+      { label: "Garder ma part", sub: biz ? "Rester actionnaire : un gérant dirige, vous touchez votre part des bénéfices." : `Rester copropriétaire avec ${co}.`, autoWeight: 2, apply: () => { if (!gone()) this.say(`Garde sa part de ${name}, avec ${co}.`, "money"); } },
+      { label: "Racheter les parts des autres", sub: `≈ ${money(cost)}${this.savings < cost ? ", en partie emprunté" : ""}${can ? "" : " · pas assez d’argent"} · ${biz ? "l’entreprise est à vous" : "le bien est à vous"}`, autoWeight: can ? 1 : 0, apply: () => buy(() => {
+        if (it.kind === "house") { r.use = "second"; r.happy = 3; r.label = `Maison de ${from}`; }
+        else if (!biz) r.label = r.label.replace(/^Part de /, "");
+        this.say(`Rachète les parts de ${co} : ${name} est désormais entièrement à ${this.g("lui", "elle")}.`, "money", true);
+      }) },
+    ];
+    if (it.kind === "house" && !this.house) opts.push({ label: "Racheter et y habiter", sub: `≈ ${money(cost)} · la maison de famille devient la vôtre`, autoWeight: can ? 0.5 : 0, apply: () => buy(() => {
+      this.props.splice(this.props.indexOf(r), 1);
+      this.house = { value: it.whole, loan: it.wholeLoan, rate: r.rate || 0, payment: it.wholePay };
+      this.say(`Rachète les parts de ${co} et s’installe dans la maison de ${from}.`, "money", true); this.bump("happy", 4);
+    }) });
+    if (!biz && r.use !== "rent") opts.push({ label: "Louer le bien et partager les loyers", sub: `≈ ${money(mine * 0.045)} par an pour vous`, autoWeight: 0.7, apply: () => { if (gone()) return; r.use = "rent"; r.yield = 0.045; this.say(`Avec ${co}, met en location ${name} et partage les loyers.`, "money"); } });
+    opts.push({ label: "Vendre ma part", sub: `≈ ${money(sell)} (une part se vend un peu moins cher qu’un bien entier)`, autoWeight: 1, apply: () => {
+      if (gone()) return;
+      if (biz) { if (this.focusBiz(r)) this.dropBusiness(); this.bizFocus = 0; } else this.props.splice(this.props.indexOf(r), 1);
+      this.addMoney(sell); this.say(`Vend sa part de ${name} (${money(sell)}).`, "money", true);
+    } });
+    this.ask(`Héritage partagé : vous détenez ${pct} % de ${name}, avec ${co}. Que faire ?`, opts);
+  },
+});
 
 // --- Adoption ----------------------------------------------------------------------------
 function adoptPlan(L, id) {
