@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const ctx = vm.createContext({ console, Intl, Math, Date, JSON, Object, Array, Set, Map, String, Number, RegExp });
-for (const f of ["countries.js", "data.js", "sim.js", "economy.js", "moments.js", "careers.js"]) vm.runInContext(fs.readFileSync(path.join(root, f), "utf8"), ctx, { filename: f });
+for (const f of ["countries.js", "data.js", "sim.js", "economy.js", "moments.js", "careers.js", "spending.js"]) vm.runInContext(fs.readFileSync(path.join(root, f), "utf8"), ctx, { filename: f });
 const run = code => vm.runInContext(code, ctx);
 
 // --- Contrôles statiques -------------------------------------------------------

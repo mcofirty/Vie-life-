@@ -657,6 +657,7 @@ function panelSheet(kind) {
       <div class="group">${rowsHtml(moneyRows(L).map(([k, v]) => [k, v.split(" · ")[0], v.split(" · ")[1]]))}</div>
       ${L.age < 16 && !L.job ? `<p class="group-footer">Encore enfant : ces choix compteront dès le premier revenu.</p>` : ""}
       ${budget.length ? `<p class="group-header">Budget de l’année</p><div class="group">${rowsHtml(budget)}</div>` : ""}
+      ${L.alive && L.age >= 6 ? spendHtml(L) : ""}
       <p class="group-header">Train de vie</p>${choice("spend", SPEND, L.spend)}
       <p class="group-header">Placements · répartition visée</p>
       <div class="group">${port.map(r => `<div class="cell column"><div style="display:flex;justify-content:space-between;gap:8px"><b style="font-weight:600">${r.label}</b><span style="color:var(--label-2)">${dollars(r.value)}</span></div><small style="color:var(--label-2);font-size:13px">${r.available ? r.note : "Plus accessible : vendu au prochain rééquilibrage."}</small>${r.available ? `<div class="slider-row"><input type="range" min="0" max="100" step="5" value="${r.target}" data-asset="${r.id}"><output>${Math.round(alloc[r.id] || 0)} %</output></div>` : ""}</div>`).join("")}</div>
@@ -676,6 +677,19 @@ function panelSheet(kind) {
       saveCurrent(L);
     }));
   }
+  // Dépenses, mode de vie, « sans demander » (spending.js).
+  const sp = $("sheetBody").querySelector(".sp");
+  if (sp) sp.addEventListener("click", e => {
+    const msg = spendClick(L, e.target);
+    if (!msg) return;
+    haptic(12); saveCurrent(L); toast(msg);
+    if (L.queue.length) { closeSheet(); setTimeout(decisionSheet, 320); return; }
+    const scroller = [$("sheetBody"), $("sheetBody").parentElement].find(x => x && x.scrollTop > 0) || $("sheetBody");
+    const open = [...$("sheetBody").querySelectorAll("details")].map(d => d.open), top = scroller.scrollTop;
+    panelSheet(kind);
+    $("sheetBody").querySelectorAll("details").forEach((d, i) => { if (open[i]) d.open = true; });
+    scroller.scrollTop = top;
+  });
   $("sheetBody").querySelectorAll("[data-choice]").forEach(b => b.addEventListener("click", () => {
     const v = b.dataset.v, name = b.dataset.choice;
     if (name === "kids") L.wantKids = v;
@@ -882,7 +896,7 @@ function deathSheet(rec, mode) {
     saveRecord(rec); haptic(15); toast("Vie gardée");
     deathSheet(rec, mode === "shared" ? "shared-kept" : "review");
   });
-  on("lineageBtn", () => { keepWords(); heirSheet(rec, mode); });
+  on("lineageBtn", () => { keepWords(); heirSheet(rec, mode, rec.dyn.heirs[0].name, rec.dyn.will || "egal"); });
   on("cardBtn", () => shareCard("death", rec).then(r => r === "downloaded" && toast("Image enregistrée")));
   on("linkBtn", async () => { const r = await shareLink(rec); if (r === "copied") toast("Lien copié (sans vos réponses ni vos mots)"); });
   on("deleteBtn", () => { deleteRecord(rec.id); closeSheet(); renderLives(); toast("Vie supprimée"); });

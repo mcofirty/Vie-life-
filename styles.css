@@ -348,3 +348,25 @@ tfoot td { text-align: left; color: var(--muted); font-size: .78rem; white-space
 @keyframes flash { 30% { box-shadow: 0 0 0 3px var(--accent); } }
 @media (max-width: 1080px) { .dash { grid-template-columns: 1fr 1fr; } .dash-money { grid-column: 1 / -1; } }
 @media (max-width: 640px) { .dash { grid-template-columns: 1fr; } .dash-money { grid-template-columns: 1fr 1fr; } .dash-money .tile:first-child { grid-column: 1 / -1; } }
+
+/* Dépenser et vivre (spending.js) */
+.sp { margin-top: 18px; }
+.sp-head { font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 18px 0 8px; font-weight: 600; }
+.sp-card { display: flex; gap: 12px; align-items: center; justify-content: space-between; border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; margin-bottom: 8px; background: var(--surface); }
+.sp-card.off { opacity: .55; }
+.sp-main { min-width: 0; flex: 1; }
+.sp-main > b { display: block; }
+.sp-main > small, .sp-note { display: block; color: var(--ink-2); font-size: .85rem; line-height: 1.4; }
+.sp-price { display: flex; flex-direction: column; align-items: flex-end; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.sp-price small { color: var(--muted); font-size: .75rem; }
+.sp-buy { border: 1.5px solid var(--ink); border-radius: 12px; padding: 6px 10px; background: transparent; color: var(--ink); cursor: pointer; font: inherit; }
+.sp-buy:hover { background: var(--bg-2); }
+.sp-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.sp-pill { border: 1.5px solid var(--line); border-radius: 999px; padding: .45em .95em; background: transparent; color: var(--ink); font: 500 .9rem var(--sans); cursor: pointer; text-align: left; }
+.sp-pill span { color: var(--muted); font-size: .82rem; font-variant-numeric: tabular-nums; }
+.sp-pill.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.sp-pill.on span { color: inherit; opacity: .75; }
+.sp-pill[disabled] { opacity: .45; cursor: default; }
+.sp-more { margin: 10px 0; border-top: 1px solid var(--line); padding-top: 10px; }
+.sp-more > summary { cursor: pointer; font-weight: 600; margin-bottom: 8px; }
+.sp-more > summary small { font-weight: 400; color: var(--muted); }

@@ -608,7 +608,7 @@ function openPanel(kind) {
     const d = L.houseDeal(), port = portfolioRows(L), alloc = L.validAlloc(), budget = budgetRows(L);
     $("panelTitle").textContent = "Dépenser et investir";
     $("panelBody").innerHTML = rows(moneyRows(L)) + (L.age < 16 && !L.job ? `<p class="notice">Encore enfant : l’argent de la famille n’est pas le vôtre. Ces choix compteront dès le premier revenu.</p>` : "")
-      + (budget.length ? `<h3>Budget de l’année</h3>${rows(budget)}` : "") + `
+      + (budget.length ? `<h3>Budget de l’année</h3>${rows(budget)}` : "") + (L.alive && L.age >= 6 ? spendHtml(L) : "") + `
       <h3>Train de vie</h3>${radios("spend", SPEND, L.spend)}
       <h3>Placements <small>répartition visée, rééquilibrée chaque année</small></h3>
       <div class="alloc">${port.map(r => `<div class="alloc-row${r.available ? "" : " off"}">
@@ -646,6 +646,17 @@ $("panelBody").addEventListener("input", e => {
   saveCurrent(life);
 });
 $("panelBody").addEventListener("click", e => {
+  // Dépenses, mode de vie, « sans demander » (spending.js).
+  const msg = life && e.target.closest(".sp") ? spendClick(life, e.target) : null;
+  if (msg) {
+    saveCurrent(life); toast(msg);
+    const body = $("panelBody"), open = [...body.querySelectorAll("details")].map(d => d.open), top = body.scrollTop, mtop = $("panelModal").scrollTop;
+    if (life.queue.length) { $("panelModal").hidden = true; renderLife(); showDecision(); return; }
+    renderLife();
+    body.querySelectorAll("details").forEach((d, i) => { if (open[i]) d.open = true; });
+    body.scrollTop = top; $("panelModal").scrollTop = mtop;
+    return;
+  }
   const ch = e.target.closest("[data-choice]");
   if (ch && life) {
     const id = $("panelModal").dataset.kind.slice(8);
@@ -824,7 +835,7 @@ function openHeirs() {
   $("heirList").innerHTML = d.heirs.map((h, i) => `<label class="choice"><input type="radio" name="heir" value="${esc(h.name)}"${i === 0 ? " checked" : ""}><span><b>${esc(h.name)}</b><small>${h.sex === "m" ? "Fils" : "Fille"} · ${h.age} ans à la mort de ${esc(rec.s.name)} · ${h.sex === "m" ? "né" : "née"} en ${h.year} ${inCountry(BY_CODE[h.code])}</small></span></label>`).join("");
   $("startList").innerHTML = `<label class="choice"><input type="radio" name="hstart" value="now" checked><span><b>Reprendre sa vie là où elle en est</b><small>Son enfance s’est déroulée sans vous ; vous continuez au moment de la mort de ${esc(rec.s.name)}.</small></span></label>
     <label class="choice"><input type="radio" name="hstart" value="birth"><span><b>Revivre depuis sa naissance</b><small>Votre vie précédente mourra dans la sienne, au même âge et de la même cause.</small></span></label>`;
-  $("willList").innerHTML = Object.entries(WILLS).map(([k, w], i) => `<label class="choice"><input type="radio" name="will" value="${k}"${i === 0 ? " checked" : ""}><span><b>${w.label}</b><small>${w.note}</small></span></label>`).join("");
+  $("willList").innerHTML = Object.entries(WILLS).map(([k, w], i) => `<label class="choice"><input type="radio" name="will" value="${k}"${k === (d.will || "egal") ? " checked" : ""}><span><b>${w.label}</b><small>${w.note}</small></span></label>`).join("");
   updateHeirNote();
   $("heirModal").hidden = false;
 }

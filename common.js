@@ -235,7 +235,7 @@ function dynastyData(L) {
   const heirs = heirOptions(L);
   return {
     lineageId: L.lineage ? L.lineage.id : L.born.getTime(), gen: L.lineage ? L.lineage.gen : 1,
-    ancestors: L.lineage ? L.lineage.ancestors : [], estate: Math.round(L.estate()), fund: Math.round(L.kidsFund || 0),
+    ancestors: L.lineage ? L.lineage.ancestors : [], estate: Math.round(L.estate()), fund: Math.round(L.kidsFund || 0), will: L.will || "egal",
     heirs, allKids: L.children.map(k => ({ name: k.name, sex: k.sex, born: k.born, alive: k.alive })),
     pctAt: L.history.map(h => h ? h.pct : null),
   };
@@ -300,6 +300,7 @@ function cleanDyn(d, str, num) {
   const kid = k => k && ({ name: str(k.name, 40), sex: k.sex === "m" ? "m" : "f", born: Math.round(num(k.born)), alive: k.alive !== false });
   const anc = a => a && BY_CODE[a.home] && ({ name: str(a.name, 40), sex: a.sex === "m" ? "m" : "f", home: a.home, year: Math.round(num(a.year, DATA_YEAR)), age: Math.round(num(a.age)), cause: str(a.cause, 80), wealth: num(a.wealth) });
   return {
+    will: ["egal", "heritier", "oeuvres"].includes(d.will) ? d.will : "egal",
     lineageId: Math.round(num(d.lineageId)), gen: clamp(Math.round(num(d.gen, 1)), 1, 99), estate: Math.max(0, num(d.estate)), fund: Math.max(0, num(d.fund)),
     ancestors: (Array.isArray(d.ancestors) ? d.ancestors : []).slice(0, 99).map(anc).filter(Boolean),
     heirs: (Array.isArray(d.heirs) ? d.heirs : []).slice(0, 20).filter(h => h && BY_CODE[h.code]).map(h => ({ ...kid(h), age: Math.round(num(h.age)), year: clamp(Math.round(num(h.year)), MIN_YEAR, MAX_YEAR), code: h.code, other: h.other ? str(h.other, 40) : null })),
