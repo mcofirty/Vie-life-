@@ -388,7 +388,7 @@ $("startLife").addEventListener("click", () => {
 
 // ---------- Vie ----------
 // Palette d’accompagnement Lifelot pour les données (voir brand/README.md).
-const STATS = [["health", "Santé", "#3CC9A0"], ["happy", "Bonheur", "#FFB23F"], ["know", "Savoir", "#7C9BFF"], ["rel", "Liens", "#FF5A36"]];
+const STATS = [["health", "Santé", "var(--mint)"], ["happy", "Bonheur", "var(--amber)"], ["know", "Savoir", "var(--sky)"], ["rel", "Liens", "var(--coral)"]];
 const RING_C = 2 * Math.PI * 15;
 $("rings").innerHTML = STATS.map(([k, label, color]) => `<div class="ring" style="--rc:${color}"><svg viewBox="0 0 38 38"><circle class="track" cx="19" cy="19" r="15"/><circle class="prog" id="ring-${k}" cx="19" cy="19" r="15" stroke-dasharray="${RING_C}" stroke-dashoffset="${RING_C}"/></svg><div><b id="val-${k}">0</b><small>${label}</small></div></div>`).join("");
 
@@ -794,7 +794,7 @@ function renderPeers() {
 }
 
 // Grille de vie aux couleurs Lifelot : plus l’année est heureuse, plus la case est corail.
-function happyColor(v) { return `color-mix(in srgb, #FF5A36 ${Math.round(25 + v * 0.75)}%, #B9B4C9)`; }
+function happyColor(v) { return `color-mix(in srgb, var(--coral) ${Math.round(25 + v * 0.75)}%, #BDBAC6)`; }
 function renderGrid(node, history, nowAge, ended) {
   const last = history.length - 1, cells = Math.max(100, Math.ceil((last + 1) / 10) * 10);
   let html = "";
