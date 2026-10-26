@@ -558,7 +558,8 @@ Object.assign(Life.prototype, {
     if (M.cost && a >= 18 && canAffordLessons(this, M)) this.pay(median(c) * PASSION_COST[M.cost] * (P.stage >= 2 ? 0.3 : 1));
     if (P.years % 3 === 1 && P.stage === 0 && rand() < 0.5) this.say(practiceLine(this, P.id), "life");
     // Blessures (sport).
-    if (M.kind === "sport" && a >= 12 && rand() < (P.stage >= 2 ? 0.06 : 0.025)) {
+    if (M.kind === "sport" && a >= 12 && rand() < (P.stage >= 2 ? 0.06 : 0.025) * (P.careAt === a ? 0.5 : 1) * (P.campAt === a ? 1.4 : 1)) {
+      P.injuredAt = a;
       P.skill = clamp(P.skill - 10 - rand() * 15, 0, 100); this.bump("health", -4); this.bump("happy", -4);
       this.say(pick(["Une grave blessure au genou l’éloigne des terrains pendant des mois.", "Se blesse à l’entraînement ; la rééducation est longue.", "Une blessure à l’épaule casse sa saison."]).replace("des terrains", M.team ? "des terrains" : "de la compétition"), "health", true);
     }
@@ -926,6 +927,7 @@ Object.assign(BUSINESSES, {
 function specialtyBusiness(L, b) {
   return (b.field && L.degree && L.edu === "universite" && b.field.includes(L.degree.field)) || (b.trade && L.trade && b.trade.includes(L.trade));
 }
-ACTIONS.push({ id: "growbiz", cat: "pro", label: "Développer l’entreprise", desc: L => { const o = L.business && L.growthOption(); return o ? `Devenir une ${o.next.label} : investir ≈ ${money(o.cost)}, chances ${Math.round(o.p * 100)} %.` : "Faire grandir son entreprise, jusqu’à la multinationale."; },
-  when: L => !L.business ? "Pas d’entreprise." : (L.business.size || 0) >= 3 ? "C’est déjà une multinationale." : L.business.grewAt === L.age ? "Déjà tenté cette année." : !L.growthOption().can ? "Pas assez d’argent pour investir." : true,
-  run: L => { L.business.grewAt = L.age; return L.growBusiness(); } });
+ACTIONS.push({ id: "growbiz", cat: "pro", label: "Développer une entreprise", desc: "Faire grandir une de vos entreprises, jusqu’à la multinationale.",
+  when: L => !L.business ? "Pas d’entreprise." : !(L.businesses || []).some(b => (b.size || 0) < 3) ? "Ce sont déjà des multinationales." : true,
+  choices: L => (L.businesses || []).map((b, i) => { L.bizFocus = i; const o = L.growthOption(); L.bizFocus = 0; return o && { id: String(i), label: b.label, sub: `Devenir une ${o.next.label} : investir ≈ ${money(o.cost)}, chances ${Math.round(o.p * 100)} %${b.grewAt === L.age ? " · déjà tenté cette année" : !o.can ? " · pas assez d’argent" : ""}`, disabled: b.grewAt === L.age || !o.can }; }).filter(Boolean),
+  run: (L, i) => { const b = L.businesses[+i]; if (!b || !L.focusBiz(b)) return null; b.grewAt = L.age; const r = L.growBusiness(); L.bizFocus = 0; return r; } });

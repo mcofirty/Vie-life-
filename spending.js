@@ -449,8 +449,10 @@ function spendHtml(L) {
 }
 // Un clic dans la page : renvoie un message court, ou null.
 function spendClick(L, t) {
+  const car = t.closest("[data-car]");
+  if (car) return careerAction(L, car.dataset.car) || "Impossible pour l’instant.";
   const bz = t.closest("[data-biz]");
-  if (bz) return bizAction(L, bz.dataset.biz, bz.dataset.arg) || "Impossible pour l’instant.";
+  if (bz) return bizAction(L, bz.dataset.biz, bz.dataset.arg, bz.dataset.bidx) || "Impossible pour l’instant.";
   const wl = t.closest("[data-will-to]");
   if (wl) {
     const cur = new Set(activeWill(L)), k = wl.dataset.willTo;

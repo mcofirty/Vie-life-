@@ -22,30 +22,32 @@ Object.assign(Life.prototype, {
   },
   // L'entreprise disparaît (faillite, vente) : un emploi tenu à côté reste.
   dropBusiness() {
+    const b = this.business;
     this.business = null;
-    if (this.jobInfo && this.jobInfo.id === "business") { this.job = null; this.jobInfo = null; this.income = 0; }
+    if (b && b.mode === "full" && this.jobInfo && this.jobInfo.id === "business") { this.job = null; this.jobInfo = null; }
   },
   hireManager(quiet = false) {
-    const b = this.business, size = b.size || 0;
+    const b = this.business, size = b.size || 0, wasFull = b.mode === "full";
     b.manager = { name: this.freshName(rand() < 0.6 ? "m" : "f"), skill: clamp(Math.round(45 + size * 6 + randn() * 12), 15, 95), cut: 0.12 + size * 0.03 };
     b.mode = "managed";
-    if (this.jobInfo && this.jobInfo.id === "business") { this.job = null; this.jobInfo = null; }
+    if (wasFull && this.jobInfo && this.jobInfo.id === "business") { this.job = null; this.jobInfo = null; }
     this.say(`Confie la direction de ${b.label.toLowerCase()} à ${b.manager.name}, ${MANAGER_TITLE[size]}.`, "work", !quiet);
   },
   takeBackBusiness() {
     const b = this.business;
     const salaried = this.job && !(this.jobInfo && this.jobInfo.id === "business");
-    b.mode = salaried ? "side" : "full";
+    const otherFull = (this.businesses || []).some(x => x !== b && x.mode === "full");
+    b.mode = salaried || otherFull ? "side" : "full";
     if (b.manager) this.say(`Reprend la direction de ${b.label.toLowerCase()} ; ${b.manager.name} s’en va.`, "work", true);
     b.manager = null;
-    if (!salaried) { this.job = `à la tête d’une ${BIZ_SIZES[b.size || 0].label} (${(b.base || b.label).toLowerCase()})`; this.jobInfo = { id: "business", sector: "serv", informal: this.here.gdp < 15000, self: true }; }
+    if (b.mode === "full") { this.job = `à la tête d’une ${BIZ_SIZES[b.size || 0].label} (${(b.base || b.label).toLowerCase()})`; this.jobInfo = { id: "business", sector: "serv", informal: this.here.gdp < 15000, self: true }; }
   },
   // Un emploi accepté alors qu'on dirige son entreprise : c'est vous qui choisissez.
   askBizWithJob() {
     const b = this.business;
     this.ask(`Vous avez un emploi. Et ${b.label.toLowerCase()} ?`, [
-      { label: "La mener à côté", sub: "Deux fois plus de travail : santé, proches et bonheur en pâtissent ; l’entreprise grandit un peu moins vite.", autoWeight: 1, apply: () => { if (this.business) { b.mode = "side"; this.say("Garde son entreprise à côté de son nouvel emploi.", "work"); } } },
-      { label: "La confier à un gérant", sub: "Il prend une part des bénéfices ; tout dépend de son talent.", autoWeight: 1, apply: () => { if (this.business) this.hireManager(); } },
+      { label: "La mener à côté", sub: "Deux fois plus de travail : santé, proches et bonheur en pâtissent ; l’entreprise grandit un peu moins vite.", autoWeight: 1, apply: () => { if (this.focusBiz(b)) { b.mode = "side"; this.say("Garde son entreprise à côté de son nouvel emploi.", "work"); } this.bizFocus = 0; } },
+      { label: "La confier à un gérant", sub: "Il prend une part des bénéfices ; tout dépend de son talent.", autoWeight: 1, apply: () => { if (this.focusBiz(b)) this.hireManager(); this.bizFocus = 0; } },
     ]);
   },
   // Chaque année : charge de travail, climat social, effectifs, conseil d'administration.
@@ -53,10 +55,15 @@ Object.assign(Life.prototype, {
     const b = this.business, size = b.size || 0;
     if (b.mode == null) { b.mode = b.managed ? "managed" : this.jobInfo && this.jobInfo.id === "business" ? "full" : this.job ? "side" : "full"; b.staff = b.staff || STAFF_RANGE[size][0]; b.morale = b.morale ?? 55; b.stake = b.stake ?? 1; b.policy = b.policy || "pay"; }
     if (b.mode === "managed" && !b.manager) this.hireManager(true);
-    if (b.mode === "side" && this.job) {
+    // Une entreprise menée « à côté » (d'un emploi, ou d'une autre entreprise) : deux fois plus de travail.
+    if (b.mode === "side") {
       this.bump("health", -1); this.bump("rel", -1.5); this.bump("happy", -0.5);
-      if (!b.sideNoted) { b.sideNoted = true; this.say("Mène de front son emploi et son entreprise : les soirées et les week-ends y passent.", "work"); }
+      if (!b.sideNoted) { b.sideNoted = true; this.say(this.job && !(this.jobInfo && this.jobInfo.id === "business") ? "Mène de front son emploi et son entreprise : les soirées et les week-ends y passent." : `Dirige plusieurs entreprises à la fois : ${b.label.toLowerCase()} prend les soirées et les week-ends.`, "work"); }
     }
+    // Des entreprises qui servent une passion : un label pour un musicien, une maison de production pour un acteur, un club pour un sportif.
+    const P = this.passion, syn = { label: ["chant", "rap", "music", "dj"], film: ["acting", "humour"], club: ["foot", "basket", "rugby", "hockey", "baseball", "cricket"], fashion: ["model"], gamestudio: ["esport", "video"] }[b.type];
+    if (P && syn && syn.includes(P.id) && P.stage >= 1) { P.fame = clamp(P.fame + 2, 0, 100); if (!b.synNoted) { b.synNoted = true; this.say(`${b.label} sert aussi sa carrière : on parle davantage de ${this.g("lui", "elle")}.`, "work"); } }
+    if (b.type === "club") this.bump("happy", 1);
     b.morale = clamp((b.morale ?? 55) + (55 - b.morale) * 0.15 + (b.mode === "managed" && b.manager ? (b.manager.skill - 50) / 20 : 0) + randn() * 4, 0, 100);
     if (b.morale < 25 && rand() < 0.25) { this.say(size >= 2 ? "Grève dans l’entreprise : les sites sont bloqués plusieurs jours." : "Des salariés claquent la porte ; l’ambiance est mauvaise.", "work", true); b.mult *= 0.93; }
     const [lo, hi] = STAFF_RANGE[size];
@@ -75,7 +82,7 @@ Object.assign(Life.prototype, {
     ];
     const [what, sub, run] = pick(props);
     this.ask(`Le conseil d’administration de ${b.label.toLowerCase()} propose de ${what}. Votre vote ?`, [
-      { label: "Voter pour", sub, autoWeight: 1, apply: () => { if (this.business === b) run(); } },
+      { label: "Voter pour", sub, autoWeight: 1, apply: () => { if (this.focusBiz(b)) run(); this.bizFocus = 0; } },
       { label: "Voter contre", sub: (b.stake ?? 1) < 0.5 ? "Vous êtes minoritaire, mais votre voix pèse : la proposition est retirée." : "La proposition est retirée.", autoWeight: 1, apply: () => this.say("Vote contre une proposition du conseil d’administration.", "work") },
     ]);
     this.queue[this.queue.length - 1].board = true;
@@ -83,7 +90,11 @@ Object.assign(Life.prototype, {
 });
 
 // Les gestes possibles, avec leur effet.
-function bizAction(L, id, arg) {
+function bizAction(L, id, arg, idx = 0) {
+  L.bizFocus = clamp(+idx || 0, 0, Math.max(0, (L.businesses || []).length - 1));
+  try { return bizActionOn(L, id, arg); } finally { L.bizFocus = 0; }
+}
+function bizActionOn(L, id, arg) {
   const b = L.business;
   if (!b || !L.alive) return null;
   b.did = b.did || {};
@@ -110,17 +121,26 @@ function bizAction(L, id, arg) {
   return null;
 }
 
-// La page « Votre entreprise ».
+// La page « Vos entreprises » : une fiche par entreprise.
 function businessHtml(L) {
+  const list = L.businesses || [];
+  if (!list.length) return "";
+  const parts = list.map((b, i) => { L.bizFocus = i; return oneBusinessHtml(L, i, list.length > 1); });
+  L.bizFocus = 0;
+  const total = list.reduce((s, b) => s + median(L.here) * b.mult * L.econ, 0);
+  return `<div class="sp"><p class="sp-head">${list.length > 1 ? `Vos ${list.length} entreprises · bénéfice total ≈ ${eur(total)} par an` : "Votre entreprise"}</p>${parts.join("")}
+    <p class="sp-note">Créer une autre entreprise, dans n’importe quel domaine : « Agir » › « Créer une entreprise » (six au plus). Mener plusieurs entreprises soi-même double la charge de travail ; un gérant libère du temps mais prend sa part.</p></div>`;
+}
+function oneBusinessHtml(L, i, many) {
   const b = L.business;
   if (!b) return "";
   if (b.mode == null) L.bizYear();
   const size = b.size || 0, g = L.business && L.growthOption(), profit = median(L.here) * b.mult * L.econ;
-  const btn = (id, label, sub = "", arg = "", dis = false) => `<button class="sp-pill${arg && b.policy === arg ? " on" : ""}" data-biz="${id}"${arg ? ` data-arg="${arg}"` : ""}${dis ? " disabled" : ""}>${esc(label)}${sub ? ` <span>${esc(sub)}</span>` : ""}</button>`;
+  const btn = (id, label, sub = "", arg = "", dis = false) => `<button class="sp-pill${arg && b.policy === arg ? " on" : ""}" data-biz="${id}" data-bidx="${i}"${arg ? ` data-arg="${arg}"` : ""}${dis ? " disabled" : ""}>${esc(label)}${sub ? ` <span>${esc(sub)}</span>` : ""}</button>`;
   const canIpo = size >= 2 && !b.listed && L.here.mcap >= 10 && !planned(L.code, L.calYear);
-  return `<div class="sp">
-    <p class="sp-head">Votre entreprise</p>
-    <div class="sp-card"><div class="sp-main"><b>${esc(b.label)}</b>
+  const dom = BIZ_DOMAIN[b.type] || (BUSINESSES[b.type] && BUSINESSES[b.type].domain) || "";
+  const inner = `
+    <div class="sp-card"><div class="sp-main"><b>${esc(b.label)}</b>${dom ? `<small>${esc(dom)}</small>` : ""}
       <small>${capFirst(BIZ_SIZES[size].label)} · ≈ ${b.staff.toLocaleString("fr-FR")} salarié${b.staff > 1 ? "s" : ""} · climat social ${moraleLabel(b.morale)} · bénéfice ≈ ${eur(profit)} par an · valeur ≈ ${eur(b.value)}${(b.stake ?? 1) < 1 ? ` · vous détenez ${Math.round(b.stake * 100)} % des parts` : ""}${b.listed ? " · cotée en Bourse" : ""}</small>
       <small>${BIZ_MODES[b.mode]}${b.manager ? ` · ${MANAGER_TITLE[size]} : ${esc(b.manager.name)} (talent ${b.manager.skill}/100, ${Math.round(b.manager.cut * 100)} % des bénéfices)` : ""}</small></div></div>
     <p class="sp-head">Direction</p>
@@ -132,6 +152,52 @@ function businessHtml(L) {
     <div class="sp-pills">${btn("policy", "Vous les verser", "", "pay")}${btn("policy", "Les réinvestir", "croissance +, revenu ÷2", "reinvest")}</div>
     <p class="sp-head">Grandir</p>
     <div class="sp-pills">${g ? btn("grow", `Devenir une ${g.next.label}`, `≈ ${eur(g.cost)} · chances ${Math.round(g.p * 100)} %`, "", !g.can) : `<span class="sp-note">C’est une multinationale.</span>`}${canIpo ? btn("ipo", "Entrer en Bourse", `vendre 30 % de vos parts ≈ ${eur(b.value * 0.3 * (b.stake ?? 1))}`) : ""}${btn("sell", "Vendre l’entreprise", `≈ ${eur(b.value * (b.stake ?? 1))}`)}</div>
-    <p class="sp-note">Mener l’entreprise à côté d’un emploi double la charge de travail : santé, proches et bonheur en pâtissent. Un gérant libère du temps mais prend sa part, et tout dépend de son talent.</p>
-  </div>`;
+`;
+  return many ? `<details class="sp-more"${i === 0 ? " open" : ""}><summary><b>${esc(b.label)}</b> <small>${esc(dom)} · ${BIZ_MODES[b.mode].split(" ;")[0].split(" :")[0].toLowerCase()} · bénéfice ≈ ${eur(median(L.here) * b.mult * L.econ)}</small></summary>${inner}</details>` : inner;
 }
+
+// --- Des entreprises dans des domaines très différents ------------------------------------
+// cost : mise de départ en années de revenu médian ; les plus grosses demandent une fortune.
+Object.assign(BUSINESSES, {
+  hotel: { label: "Hôtel", domain: "Tourisme", cost: 3, mult: 1.6, sd: 0.6, risk: 1.1 },
+  travel: { label: "Agence de voyages", domain: "Tourisme", cost: 0.6, mult: 1.1, sd: 0.6, risk: 1.2, from: 1950 },
+  vineyard: { label: "Domaine viticole", domain: "Agriculture", cost: 4, mult: 1.3, sd: 0.5, risk: 0.9, rural: true },
+  plantation: { label: "Plantation (café, cacao, thé)", domain: "Agriculture", cost: 2, mult: 1.2, sd: 0.6, risk: 1.1, maxGdp: 25000, rural: true },
+  fishing: { label: "Armement de pêche", domain: "Agriculture", cost: 2, mult: 1.3, sd: 0.6, risk: 1.2 },
+  mine: { label: "Mine (or, cuivre, cobalt…)", domain: "Ressources", cost: 10, mult: 3, sd: 1.0, risk: 1.6 },
+  oil: { label: "Société pétrolière", domain: "Énergie", cost: 40, mult: 6, sd: 1.0, risk: 1.4 },
+  solar: { label: "Centrale solaire et éolienne", domain: "Énergie", cost: 6, mult: 1.6, sd: 0.5, risk: 0.9, from: 2005 },
+  carmaker: { label: "Constructeur automobile", domain: "Industrie", cost: 50, mult: 6, sd: 1.0, risk: 1.6, edu: 2 },
+  factory2: { label: "Usine de textile", domain: "Industrie", cost: 4, mult: 1.6, sd: 0.6, risk: 1.1 },
+  shipping: { label: "Compagnie maritime", domain: "Transport", cost: 15, mult: 3.5, sd: 0.8, risk: 1.4 },
+  aerospace: { label: "Entreprise spatiale", domain: "Technologie", cost: 80, mult: 5, sd: 1.5, risk: 2.0, from: 2005, minGdp: 20000, edu: 3 },
+  ai: { label: "Start-up d’intelligence artificielle", domain: "Technologie", cost: 3, mult: 0.8, sd: 1.6, risk: 2.0, from: 2015, net: 50, edu: 2 },
+  ecommerce: { label: "Site de vente en ligne", domain: "Commerce", cost: 1, mult: 1.2, sd: 1.1, risk: 1.3, from: 1997, net: 30 },
+  supermarket: { label: "Chaîne de supermarchés", domain: "Commerce", cost: 8, mult: 2.5, sd: 0.5, risk: 1.0, from: 1950 },
+  fashion: { label: "Marque de mode", domain: "Mode", cost: 2, mult: 1.3, sd: 1.1, risk: 1.3 },
+  cosmetics: { label: "Marque de cosmétiques", domain: "Mode", cost: 2, mult: 1.4, sd: 1.0, risk: 1.2, from: 1920 },
+  bank: { label: "Banque", domain: "Finance", cost: 25, mult: 4, sd: 0.6, risk: 1.0, edu: 2, bank: true },
+  insurance: { label: "Compagnie d’assurance", domain: "Finance", cost: 12, mult: 3, sd: 0.5, risk: 0.8, bank: true },
+  fund: { label: "Fonds d’investissement", domain: "Finance", cost: 10, mult: 2.5, sd: 1.2, risk: 1.3, from: 1970, bank: true },
+  cryptox: { label: "Plateforme de cryptomonnaies", domain: "Finance", cost: 2, mult: 1.0, sd: 1.8, risk: 2.2, from: 2014, net: 40 },
+  tv: { label: "Chaîne de télévision", domain: "Médias", cost: 20, mult: 3, sd: 0.8, risk: 1.2, from: 1950 },
+  newspaper: { label: "Journal", domain: "Médias", cost: 2, mult: 1.1, sd: 0.6, risk: 1.2 },
+  label: { label: "Label de musique", domain: "Culture", cost: 1.5, mult: 1.2, sd: 1.1, risk: 1.3, from: 1920 },
+  film: { label: "Société de production de cinéma", domain: "Culture", cost: 4, mult: 1.5, sd: 1.2, risk: 1.5, from: 1915 },
+  gamestudio: { label: "Studio de jeux vidéo", domain: "Culture", cost: 2, mult: 1.2, sd: 1.3, risk: 1.5, from: 1980 },
+  gallery: { label: "Galerie d’art", domain: "Culture", cost: 1, mult: 1.0, sd: 1.0, risk: 1.2, urban: true },
+  club: { label: "Club de football professionnel", domain: "Sport", cost: 30, mult: 1.5, sd: 1.0, risk: 1.2 },
+  esportteam: { label: "Équipe d’e-sport", domain: "Sport", cost: 1.5, mult: 1.1, sd: 1.2, risk: 1.5, from: 2010, net: 60 },
+  pharma: { label: "Laboratoire pharmaceutique", domain: "Santé", cost: 15, mult: 3, sd: 1.0, risk: 1.2, from: 1920, edu: 2 },
+  promoter: { label: "Promotion immobilière", domain: "Immobilier", cost: 6, mult: 2.0, sd: 0.8, risk: 1.3 },
+  nightclub: { label: "Boîte de nuit", domain: "Loisirs", cost: 1.5, mult: 1.3, sd: 0.8, risk: 1.4, urban: true, from: 1960 },
+  themepark: { label: "Parc d’attractions", domain: "Loisirs", cost: 20, mult: 2.5, sd: 0.8, risk: 1.2, from: 1955, minGdp: 10000 },
+  security2: { label: "Société de gardiennage", domain: "Services", cost: 0.8, mult: 1.1, sd: 0.4, risk: 0.9 },
+  cleaning: { label: "Entreprise de nettoyage", domain: "Services", cost: 0.4, mult: 1.0, sd: 0.4, risk: 0.9 },
+});
+Object.assign(BIZ_DOMAIN, {
+  clinic: "Santé", nursing: "Santé", biotech: "Santé", lawfirm: "Services", consulting: "Services", engineering: "Ingénierie", software: "Technologie", archi: "Ingénierie",
+  media: "Médias", studio: "Culture", school: "Éducation", publishing: "Culture", gym: "Sport", agrobiz: "Agriculture", airline: "Transport",
+  electric: "Artisanat", garage: "Artisanat", salon: "Services", bistro: "Restauration", couture: "Mode", itshop: "Technologie", carehome: "Santé",
+  logistics: "Transport", security: "Services", shop2: "Commerce", builder2: "Bâtiment", farm2: "Agriculture",
+});

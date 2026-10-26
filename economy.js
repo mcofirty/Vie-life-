@@ -256,6 +256,10 @@ const BUSINESSES = {
   startup: { label: "Start-up technologique", cost: 2.0, mult: 0.6, sd: 1.3, risk: 2, from: 1995, edu: 2, net: 30 },
 };
 
+// Domaine de chaque entreprise (pour s'y retrouver quand on en crée plusieurs).
+const BIZ_DOMAIN = { shop: "Commerce", workshop: "Artisanat", restaurant: "Restauration", farm: "Agriculture", transport: "Transport", building: "Bâtiment", micro: "Commerce", startup: "Technologie" };
+Life.prototype.focusBiz = function (b) { const i = (this.businesses || []).indexOf(b); if (i < 0) return false; this.bizFocus = i; return true; };
+
 // Tailles d'entreprise : chacune s'atteint quand l'activité le permet, en investissant.
 const BIZ_SIZES = [
   { label: "petite entreprise" },
@@ -272,6 +276,18 @@ Object.defineProperty(Life.prototype, "savings", {
   get() { return Object.values(this.assets || {}).reduce((s, v) => s + v, 0); },
   configurable: true,
 });
+// Plusieurs entreprises : « business » désigne celle dont on s'occupe en ce moment (bizFocus) ;
+// la liste complète est « businesses ». Les anciennes sauvegardes (une seule entreprise) y entrent d'elles-mêmes.
+Object.defineProperty(Life.prototype, "business", {
+  get() { const l = this.businesses; return l && l.length ? l[Math.min(this.bizFocus || 0, l.length - 1)] : null; },
+  set(v) {
+    if (!this.businesses) this.businesses = [];
+    const i = Math.min(this.bizFocus || 0, this.businesses.length - 1);
+    if (v == null) { if (this.businesses.length) this.businesses.splice(i, 1); this.bizFocus = 0; }
+    else if (!this.businesses.includes(v)) { if (this.businesses.length) this.businesses[i] = v; else this.businesses.push(v); }
+  },
+  configurable: true,
+});
 Object.assign(Life.prototype, {
   initMoney() {
     this.assets = { cash: 0 };
@@ -282,7 +298,8 @@ Object.assign(Life.prototype, {
     this.bank = false;
     this.bankLatent = rand(); // compte en banque dès que l'accès du pays (et du milieu) le permet
     this.urban = rand() < this.country.urban / 100;
-    this.business = null;
+    this.businesses = [];
+    this.bizFocus = 0;
     this.pension = 0;
     this.partnerInfo = null;
     this.budget = null;
@@ -294,7 +311,7 @@ Object.assign(Life.prototype, {
   netIncome() { return this.budget ? this.budget.net : this.income; },
   netWorth() {
     const h = this.house ? this.house.value - this.house.loan : 0;
-    const b = this.business ? this.business.value : 0;
+    const b = (this.businesses || []).reduce((s, x) => s + x.value * (x.stake ?? 1), 0);
     return this.savings + h + b - this.debt;
   },
   // Patrimoine comparé au reste du pays (patrimoine médian ≈ 2 à 4 années de revenu médian).
@@ -354,7 +371,14 @@ Object.assign(Life.prototype, {
   computeIncome() {
     const c = this.here;
     // L'entreprise (dirigée, menée à côté d'un emploi, ou confiée à un gérant) : votre part des bénéfices.
-    const biz = this.business ? this.runBusiness() * (this.business ? this.bizShare() : 1) : 0;
+    // Chaque entreprise vit son année ; vous touchez votre part de chacune.
+    let biz = 0;
+    for (const b of [...(this.businesses || [])]) {
+      if (!this.focusBiz(b)) continue;
+      const inc = this.runBusiness();
+      if (this.focusBiz(b)) biz += inc * this.bizShare();
+    }
+    this.bizFocus = 0;
     const salaried = this.job && !(this.jobInfo && this.jobInfo.id === "business");
     if (this.retired) {
       const kids = this.children.filter(k => k.alive && this.age - k.born >= 20).length;
@@ -397,7 +421,7 @@ Object.assign(Life.prototype, {
       const offer = b.type === "startup" && size === 0 ? median(c) * (60 + rand() * 300) : b.value * (1.1 + rand() * 0.6);
       this.ask(`Un acheteur propose ${money(offer)} pour racheter ${b.label.toLowerCase()}. Vendre ?`, [
         { label: `Vendre pour ${money(offer)}`, sub: `≈ ${euroMonthly(offer * 12)} aux prix français · vous ne dirigez plus l’entreprise`, autoWeight: 1, apply: () => {
-          if (!this.business) return;
+          if (!this.focusBiz(b)) return;
           this.say(`Vend ${b.label.toLowerCase()} pour ${money(offer)} !`, "money", true);
           this.addMoney(offer); this.bump("happy", 10);
           this.dropBusiness();
@@ -440,10 +464,10 @@ Object.assign(Life.prototype, {
     return "L’expansion échoue.";
   },
   askGrowth() {
-    const o = this.growthOption();
+    const o = this.growthOption(), b = this.business;
     if (!o) return;
     this.ask(`${this.business.label} marche très bien. ${o.next.ask} ?`, [
-      { label: o.next.verb, sub: `Investir ≈ ${money(o.cost)}${this.savings < o.cost ? ", en partie emprunté" : ""} · chances de réussir ${Math.round(o.p * 100)} %${o.can ? "" : " · pas assez d’argent pour l’apport"}`, autoWeight: o.can ? 1.5 : 0, apply: () => { if (!this.business) return; if (!this.growBusiness()) this.say("N’a pas les moyens d’investir pour grandir.", "work"); } },
+      { label: o.next.verb, sub: `Investir ≈ ${money(o.cost)}${this.savings < o.cost ? ", en partie emprunté" : ""} · chances de réussir ${Math.round(o.p * 100)} %${o.can ? "" : " · pas assez d’argent pour l’apport"}`, autoWeight: o.can ? 1.5 : 0, apply: () => { if (!this.focusBiz(b)) return; if (!this.growBusiness()) this.say("N’a pas les moyens d’investir pour grandir.", "work"); } },
       { label: "Garder la taille actuelle", sub: "Moins de risques, moins de croissance.", autoWeight: 1, apply: () => this.say("Choisit de garder son entreprise à taille humaine.", "work") },
     ]);
   },
@@ -467,7 +491,8 @@ Object.assign(Life.prototype, {
     const last = this.income;
     this.pension = last * this.pensionRate(informal) * (early ? 0.75 : 1);
     // L'entreprise est gardée : un gérant la dirige et elle verse des dividendes. On ne la vend que si vous le décidez.
-    if (this.business && this.business.mode !== "managed") this.hireManager(true);
+    for (const b of this.businesses || []) if (b.mode !== "managed" && this.focusBiz(b)) this.hireManager(true);
+    this.bizFocus = 0;
     this.retired = true; this.job = null; this.jobInfo = null;
     this.income = this.pension;
     this.say(this.pension > median(this.here) * 0.3 ? `Prend sa retraite : ${money(this.pension)} par an.` : "Arrête de travailler ; il faudra vivre de l’épargne et de l’aide des enfants.", "work", true);
@@ -585,7 +610,8 @@ Object.assign(Life.prototype, {
   moveTo(dest) {
     this.emigrated = true; this.code = dest.code;
     // Une entreprise laissée au pays reste à vous : un gérant la dirige ; la vendre reste votre choix.
-    if (this.business && this.business.mode !== "managed") this.hireManager(true);
+    for (const b of this.businesses || []) if (b.mode !== "managed" && this.focusBiz(b)) this.hireManager(true);
+    this.bizFocus = 0;
     this.job = null; this.jobInfo = null;
     this.bank = this.bank || rand() < dest.bank / 100;
     this.urban = true;
@@ -1028,11 +1054,12 @@ const ACTIONS = [
       return "Inscription réussie.";
     } },
   { id: "business", cat: "pro", label: "Créer une entreprise", desc: "Commerce, atelier, ferme, start-up… Beaucoup échouent dans les cinq ans ; certaines réussissent très bien.",
-    when: L => L.age < 18 || L.age > 70 ? "Entre 18 et 70 ans." : L.business ? "Vous avez déjà une entreprise." : L.retired ? "À la retraite." : planned(L.code, L.calYear) ? "Interdit dans une économie planifiée." : true,
+    when: L => L.age < 18 || L.age > 70 ? "Entre 18 et 70 ans." : (L.businesses || []).length >= 6 ? "Six entreprises au plus." : L.retired ? "À la retraite." : planned(L.code, L.calYear) ? "Interdit dans une économie planifiée." : true,
     choices: L => businessChoices(L), run: (L, id) => startBusiness(L, id) },
-  { id: "sellbiz", cat: "pro", label: "Vendre son entreprise", desc: "Récupérer la valeur de l’entreprise et chercher autre chose.",
+  { id: "sellbiz", cat: "pro", label: "Vendre une entreprise", desc: "Récupérer la valeur d’une de vos entreprises.",
     when: L => !L.business ? "Pas d’entreprise." : true,
-    run: L => { const v = L.business.value * (L.business.stake ?? 1); L.addMoney(v); L.say(`Vend ${L.business.label.toLowerCase()} pour ${money(v)}.`, "money", true); L.dropBusiness(); L.income = 0; return `+${money(v)}.`; } },
+    choices: L => (L.businesses || []).map((b, i) => ({ id: String(i), label: b.label, sub: `Valeur de votre part ≈ ${money(b.value * (b.stake ?? 1))}` })),
+    run: (L, i) => { const b = L.businesses[+i]; if (!b || !L.focusBiz(b)) return null; const v = b.value * (b.stake ?? 1); L.addMoney(v); L.say(`Vend ${b.label.toLowerCase()} pour ${money(v)}.`, "money", true); L.dropBusiness(); return `+${money(v)}.`; } },
   { id: "abroad", cat: "pro", label: "Partir travailler à l’étranger", desc: "Les chances dépendent de l’époque, du passeport, des diplômes et des langues.",
     when: L => L.age < 18 || L.age > 55 ? "Entre 18 et 55 ans." : planned(L.code, L.calYear) && L.calYear > 1930 ? "Les frontières sont fermées." : true,
     choices: L => destinations(L), run: (L, code) => tryEmigrate(L, code) },
@@ -1120,10 +1147,10 @@ function applyJob(L, id) {
   L.offers = { age: L.age, list: (L.offers ? L.offers.list : []).filter(o => o.id !== id) };
   if (rand() < hireChance(L, j)) {
     const before = L.job;
-    const biz = L.business && L.business.mode === "full";
+    const full = (L.businesses || []).find(b => b.mode === "full");
     L.takeJob(j);
-    L.say(before && !biz ? `Change de métier : devient ${L.job}.` : `Est ${L.g("embauché", "embauchée")} : ${L.job}.`, "work", true);
-    if (biz) L.askBizWithJob();
+    L.say(before && !full ? `Change de métier : devient ${L.job}.` : `Est ${L.g("embauché", "embauchée")} : ${L.job}.`, "work", true);
+    if (full && L.focusBiz(full)) L.askBizWithJob();
     L.bump("happy", 3);
     return `Embauche : ${L.job}.`;
   }
@@ -1132,12 +1159,13 @@ function applyJob(L, id) {
 }
 function businessChoices(L) {
   const c = L.here, y = L.calYear, m = median(c);
-  return Object.entries(BUSINESSES).filter(([, b]) => (!b.from || y >= b.from) && (!b.maxGdp || c.gdp < b.maxGdp) && (!b.edu || EDU_RANK[L.edu] >= b.edu) && (!b.net || c.net >= b.net) && (!b.rural || !L.urban) && (!b.field && !b.trade || specialtyBusiness(L, b)))
+  return Object.entries(BUSINESSES).filter(([, b]) => (!b.from || y >= b.from) && (!b.to || y <= b.to) && (!b.maxGdp || c.gdp < b.maxGdp) && (!b.minGdp || c.gdp >= b.minGdp) && (!b.urban || L.urban) && (!b.bank || L.bank) && (!b.edu || EDU_RANK[L.edu] >= b.edu) && (!b.net || c.net >= b.net) && (!b.rural || !L.urban) && (!b.field && !b.trade || specialtyBusiness(L, b)))
     .map(([k, b]) => {
       const cost = m * b.cost;
       const can = b.loan ? true : L.savings >= cost * 0.5 && (L.bank || L.savings >= cost);
-      return { id: k, label: b.label + (b.field || b.trade ? " · votre spécialité" : ""), spec: !!(b.field || b.trade), sub: `Mise de départ ≈ ${money(cost)}${b.loan ? " (prêtée)" : L.savings < cost ? ", le reste emprunté" : ""}${can ? "" : " · pas assez d’épargne"}`, disabled: !can };
-    }).sort((a, b) => b.spec - a.spec);
+      const dom = BIZ_DOMAIN[k] || b.domain || "Services";
+      return { id: k, label: b.label + (b.field || b.trade ? " · votre spécialité" : ""), spec: !!(b.field || b.trade), dom, cost, sub: `${dom} · mise de départ ≈ ${money(cost)}${b.loan ? " (prêtée)" : L.savings < cost ? ", le reste emprunté" : ""}${can ? "" : " · pas assez d’épargne"}`, disabled: !can };
+    }).sort((a, b) => b.spec - a.spec || a.dom.localeCompare(b.dom, "fr") || a.cost - b.cost);
 }
 function startBusiness(L, k) {
   const b = BUSINESSES[k], c = L.here;
@@ -1147,14 +1175,23 @@ function startBusiness(L, k) {
   // Dans sa spécialité, on part avec un avantage : on connaît le métier.
   const mult = b.mult * Math.exp(b.sd * randn() - b.sd * b.sd / 2 + (L.stats.know - 50) / 200 + (b.field || b.trade ? 0.2 : 0));
   // Avec un emploi, l'entreprise se monte à côté : deux fois plus de travail.
-  const side = !!L.job && !(L.jobInfo && L.jobInfo.id === "business");
-  L.business = { type: k, label: b.label, base: b.label, mult, years: 0, value: cost, size: 0, mode: side ? "side" : "full", staff: 1 + Math.floor(rand() * 3), morale: 55, stake: 1, policy: "pay" };
+  // Avec déjà une entreprise dirigée à plein temps, c'est vous qui choisissez qui dirige la nouvelle.
+  const salaried = !!L.job && !(L.jobInfo && L.jobInfo.id === "business");
+  const other = (L.businesses || []).find(x => x.mode === "full");
+  const side = salaried || !!other;
+  const nb = { type: k, label: b.label, base: b.label, mult, years: 0, value: cost, size: 0, mode: side ? "side" : "full", staff: 1 + Math.floor(rand() * 3), morale: 55, stake: 1, policy: "pay" };
+  L.businesses = [...(L.businesses || []), nb];
+  L.bizFocus = L.businesses.length - 1;
   if (!side) {
     L.job = `à la tête d’une entreprise (${b.label.toLowerCase()})`;
     L.jobInfo = { id: "business", sector: "serv", informal: c.gdp < 15000, self: true };
   }
-  L.say(side ? `Crée son entreprise à côté de son emploi : ${b.label.toLowerCase()}. Les soirées et les week-ends y passeront.` : `Crée son entreprise : ${b.label.toLowerCase()}.`, "work", true);
-  L.computeIncome();
+  L.say(salaried ? `Crée son entreprise à côté de son emploi : ${b.label.toLowerCase()}. Les soirées et les week-ends y passeront.` : other ? `Crée une ${L.businesses.length}e entreprise : ${b.label.toLowerCase()}.` : `Crée son entreprise : ${b.label.toLowerCase()}.`, "work", true);
+  if (other && !salaried) L.ask(`Qui dirige ${b.label.toLowerCase()} ?`, [
+    { label: "Vous, en plus de l’autre", sub: "Deux fois plus de travail : santé, proches et bonheur en pâtissent.", autoWeight: 1, apply: () => { if (L.focusBiz(nb)) nb.mode = "side"; L.bizFocus = 0; } },
+    { label: "Un gérant", sub: "Il prend une part des bénéfices ; tout dépend de son talent.", autoWeight: 1.5, apply: () => { if (L.focusBiz(nb)) L.hireManager(); L.bizFocus = 0; } },
+  ]);
+  L.bizFocus = 0;
   return `Entreprise créée (${money(cost)}).`;
 }
 function destinations(L) {

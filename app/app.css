@@ -527,3 +527,5 @@ a { color: var(--tint); text-decoration: none; }
 .sp-more { margin: 6px 0 4px; }
 .sp-more > summary { cursor: pointer; font-weight: 600; padding: 10px 6px; color: var(--tint); }
 .sp-more > summary small { font-weight: 400; color: var(--label-2); }
+.sp-bar { display: inline-block; width: 52px; height: 6px; border-radius: 3px; background: rgba(127,127,127,.25); vertical-align: middle; overflow: hidden; }
+.sp-bar i { display: block; height: 100%; background: currentColor; opacity: .7; }
