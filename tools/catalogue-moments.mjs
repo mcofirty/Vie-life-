@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const ctx = vm.createContext({ console, Intl, Math, Date, JSON, Object, Array, Set, Map, String, Number, RegExp });
-for (const f of ["countries.js", "data.js", "sim.js", "economy.js", "moments.js", "careers.js", "company.js", "spending.js"]) vm.runInContext(fs.readFileSync(path.join(root, f), "utf8"), ctx, { filename: f });
+for (const f of ["countries.js", "data.js", "sim.js", "economy.js", "moments.js", "careers.js", "company.js", "stardom.js", "spending.js"]) vm.runInContext(fs.readFileSync(path.join(root, f), "utf8"), ctx, { filename: f });
 const { MOMENTS, BY_CODE, REGION_NAMES, TIER_LABEL, TIER_CUTS, JOB_BY_ID, SECTOR_LABEL } = vm.runInContext("({ MOMENTS, BY_CODE, REGION_NAMES, TIER_LABEL, TIER_CUTS, JOB_BY_ID, SECTOR_LABEL })", ctx);
 
 const ZONE_LABEL = {

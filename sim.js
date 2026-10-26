@@ -632,16 +632,17 @@ class Life {
     this.academyOffer();
     this.passionYear();
     this.computeIncome();
-    if (this.business && !this.retired && a >= this.retireAge() && (this.bizRetireAt == null || a - this.bizRetireAt >= 3)) {
+    const runBiz = (this.businesses || []).find(x => x.mode !== "managed");
+    if (runBiz && !this.retired && a >= this.retireAge() && (this.bizRetireAt == null || a - this.bizRetireAt >= 3)) {
       // Chef d'entreprise : c'est vous qui décidez de la retraite et du sort de l'entreprise.
       this.bizRetireAt = a;
-      const b = this.business;
+      const b = runBiz, v = b.value * (b.stake ?? 1);
       this.ask(`Âge de la retraite. Que faire de ${b.label.toLowerCase()} ?`, [
         { label: "Continuer à diriger", autoWeight: 1, apply: () => this.say("Continue à diriger son entreprise.", "work") },
         { label: "Prendre sa retraite et garder l’entreprise", sub: "Un directeur la gère ; vous touchez une part des bénéfices.", autoWeight: 2, apply: () => this.retire() },
-        { label: `Vendre (≈ ${money(b.value)}) et prendre sa retraite`, autoWeight: 1, apply: () => { if (!this.business) return; this.addMoney(b.value); this.say(`Vend ${b.label.toLowerCase()} (${money(b.value)}).`, "money", true); this.business = null; this.retire(); } },
+        { label: `Vendre (≈ ${money(v)}) et prendre sa retraite`, autoWeight: 1, apply: () => { if (!this.focusBiz(b)) return; this.addMoney(v); this.say(`Vend ${b.label.toLowerCase()} (${money(v)}).`, "money", true); this.dropBusiness(); this.retire(); } },
       ]);
-    } else if (this.job && !this.business && !this.retired && a >= this.retireAge() && (this.retireAskedAt == null || a - this.retireAskedAt >= 2)) {
+    } else if (!runBiz && this.job && !this.retired && a >= this.retireAge() && (this.retireAskedAt == null || a - this.retireAskedAt >= 2)) {
       // La retraite : c'est vous qui décidez.
       this.retireAskedAt = a;
       this.ask(`${a} ans : l’âge de la retraite est là. Prendre sa retraite ?`, [
@@ -777,7 +778,7 @@ class Life {
       name: this.name, sex: this.sex, home: this.home, code: this.code, age: this.age, year: this.year, alive: this.alive, cause: this.cause,
       edu: this.edu, eduText: eduText(this), passion: this.passion ? this.passionLabel() : null, job: this.job, income: Math.round(this.income), incomePct: this.incomePct,
       marriedEver: this.marriedEver, children: this.children.length, childrenAlive: living, grandkids: this.grandkids,
-      wealth: Math.round(this.netWorth()), house: !!this.house, business: this.business ? this.business.label : null,
+      wealth: Math.round(this.netWorth()), house: !!this.house, business: (this.businesses || []).length ? this.businesses.map(b => b.label).join(", ") : null,
       gen: this.lineage ? this.lineage.gen : 1,
       emigrated: this.emigrated, stats: { ...this.stats }, born: this.born.toISOString(), birthDate: this.birthDate.toISOString(), classroom: this.classroom,
     };

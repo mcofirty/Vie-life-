@@ -130,7 +130,7 @@ function moneyRows(L) {
   if (L.house) rows.push(["Logement", `${dollars(L.house.value)}${L.house.loan > 0 ? ` · reste ${dollars(L.house.loan)} à rembourser` : ""}`]);
   else rows.push(["Logement", L.urban ? "locataire, en ville" : "locataire ou chez la famille, à la campagne"]);
   if ((L.props || []).length) rows.push(["Biens immobiliers", `${L.props.length} · valeur ${dollars(L.props.reduce((x, p) => x + p.value, 0))}${L.props.some(p => p.loan > 0) ? ` · reste ${dollars(L.props.reduce((x, p) => x + p.loan, 0))} à rembourser` : ""}`]);
-  if (L.business) rows.push(["Entreprise", `${L.business.label} · valeur ≈ ${dollars(L.business.value)}`]);
+  for (const b of L.businesses || []) rows.push(["Entreprise", `${b.label} · valeur de votre part ≈ ${dollars(b.value * (b.stake ?? 1))}`]);
   rows.push(["Dettes", L.debt > 0 ? dollars(L.debt) : "aucune"]);
   rows.push(["Patrimoine net", `${dollars(L.netWorth())} · plus riche que ${Math.round(L.wealthPct() * 100)} % du pays`]);
   rows.push(["Compte en banque", L.bank ? "oui" : "non"]);
@@ -280,7 +280,7 @@ function cleanRecord(r) {
       year: clamp(Math.round(num(s.year, DATA_YEAR)), MIN_YEAR, MAX_YEAR), alive: false, cause: str(s.cause, 80),
       edu: EDU_LABEL[s.edu] ? s.edu : "none", eduText: s.eduText ? str(s.eduText, 120) : null, passion: s.passion ? str(s.passion, 120) : null, job: s.job ? str(s.job, 60) : null, income: num(s.income), incomePct: s.incomePct == null ? null : num(s.incomePct),
       marriedEver: !!s.marriedEver, children: Math.round(num(s.children)), childrenAlive: Math.round(num(s.childrenAlive)), grandkids: Math.round(num(s.grandkids)),
-      wealth: num(s.wealth), house: !!s.house, business: s.business ? str(s.business, 60) : null, gen: clamp(Math.round(num(s.gen, 1)), 1, 99), emigrated: !!s.emigrated, stats: {}, born: "", birthDate: s.birthDate && !isNaN(new Date(s.birthDate)) ? new Date(s.birthDate).toISOString() : null,
+      wealth: num(s.wealth), house: !!s.house, business: s.business ? str(s.business, 200) : null, gen: clamp(Math.round(num(s.gen, 1)), 1, 99), emigrated: !!s.emigrated, stats: {}, born: "", birthDate: s.birthDate && !isNaN(new Date(s.birthDate)) ? new Date(s.birthDate).toISOString() : null,
     },
     real: BY_CODE[r.real] ? r.real : null,
     highlights: (Array.isArray(r.highlights) ? r.highlights : []).slice(0, 200).map(line).filter(Boolean),

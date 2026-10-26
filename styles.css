@@ -370,3 +370,5 @@ tfoot td { text-align: left; color: var(--muted); font-size: .78rem; white-space
 .sp-more { margin: 10px 0; border-top: 1px solid var(--line); padding-top: 10px; }
 .sp-more > summary { cursor: pointer; font-weight: 600; margin-bottom: 8px; }
 .sp-more > summary small { font-weight: 400; color: var(--muted); }
+.sp-bar { display: inline-block; width: 52px; height: 6px; border-radius: 3px; background: rgba(127,127,127,.25); vertical-align: middle; overflow: hidden; }
+.sp-bar i { display: block; height: 100%; background: currentColor; opacity: .7; }

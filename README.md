@@ -6,6 +6,14 @@ Simulation de vie en français, inspirée du concept de [1in8b.life](https://1in
 
 Vous naissez au hasard parmi les bébés de l’année (ou parmi les 8 milliards d’humains), puis vous vivez une vie entière, année après année, guidée par les statistiques réelles de tous les pays et territoires du monde (216), de 1900 à 2100.
 
+## Nouveautés (version 8) : carrières d’artiste et de sportif, plusieurs entreprises
+
+- **Votre carrière** (panneau « Dépenser et investir ») : niveau, notoriété, fans ou abonnés, agent, contrat, palmarès. Des gestes une fois par an :
+  - pour tous : prendre un agent, cours avec un grand maître ou stage de préparation, contrat publicitaire, image sur les réseaux, fondation et gala, mémoires, masterclass ;
+  - artistes : un projet propre à la discipline (album, film, livre, exposition, spectacle, campagne, série de vidéos), tournée, collaboration avec une star, se réinventer ; les récompenses (disque d’or, prix d’interprétation, prix littéraire…) viennent plus souvent l’année d’un succès ;
+  - sportifs : kiné et nutrition contre les blessures, préparer la grande compétition, renégocier son contrat, demander un transfert ; les Jeux olympiques (été et hiver, aux vraies dates), la Coupe du monde (football, rugby, cricket, basket), le Grand Chelem, le Tour de France, les titres mondiaux et le championnat du pays se jouent quand votre niveau vous y qualifie.
+- **Plusieurs entreprises** (six au plus), dans des domaines très différents : une trentaine de nouvelles (hôtel, domaine viticole, mine, société pétrolière, constructeur automobile, compagnie maritime, entreprise spatiale, start-up d’IA, banque, assurance, fonds d’investissement, chaîne de télévision, label de musique, production de cinéma, studio de jeux vidéo, club de football, laboratoire pharmaceutique, promotion immobilière, parc d’attractions…), rangées par domaine. Chacune a sa fiche de gestion ; une seule se dirige à plein temps, les autres se mènent à côté (deux fois plus de travail) ou par un gérant, c’est vous qui choisissez. Un label sert la carrière d’un musicien, une production celle d’un acteur, un club celle d’un sportif.
+
 ## Nouveautés (version 7) : adoption, testament, héritage de son vivant
 
 - **Adopter un enfant** (action « Adopter un enfant ») : un bébé, un enfant de 5 ou 10 ans, deux frères et sœurs, ou un enfant d’un autre pays ; frais, délai d’attente et chances d’agrément affichés (moins élevées pour un célibataire ou après 45 ans). Quand l’enfant est confié, c’est à vous de l’accueillir ou d’y renoncer. Il compte comme n’importe quel autre enfant : héritier, personnage jouable, lignée.
