@@ -2,7 +2,7 @@
 // placements, retraite, entreprise, héritage ; actions personnelles et
 // professionnelles ; descendance. Montants en dollars PPA, à prix constants.
 
-const money = x => `${(Math.round(x / 10) * 10).toLocaleString("fr-FR")} $`;
+const money = x => compactMoney(x, "$");
 const EDU_RANK = { none: 0, primaire: 1, secondaire: 2, universite: 3 };
 const median = c => incomeAt(c, 0.5);
 // Position dans la distribution des revenus d'un pays (inverse d'incomeAt).
@@ -154,7 +154,7 @@ function jobTraits(L, j, pay) {
   if (j.hi >= 0.95 && ratio < 2.5) pros.push("belles perspectives");
   return { pros: pros.slice(0, 3), cons: cons.slice(0, 3) };
 }
-const euroMonthly = x => `${(Math.round(x * 0.72 / 12 / 10) * 10).toLocaleString("fr-FR")} €`;
+const euroMonthly = x => compactMoney(x * 0.72 / 12, "€");
 
 // --- Placements --------------------------------------------------------------
 const ASSETS = {
@@ -1182,7 +1182,7 @@ function startBusiness(L, k) {
     L.jobInfo = { id: "business", sector: "serv", informal: c.gdp < 15000, self: true };
   }
   L.say(salaried ? `Crée son entreprise à côté de son emploi : ${b.label.toLowerCase()}. Les soirées et les week-ends y passeront.` : other ? `Crée une ${L.businesses.length}e entreprise : ${b.label.toLowerCase()}.` : `Crée son entreprise : ${b.label.toLowerCase()}.`, "work", true);
-  if (other && !salaried) L.ask(`Qui dirige ${b.label.toLowerCase()} ?`, [
+  if (other && !salaried) L.ask(`Qui dirige votre ${b.label.toLowerCase()} ?`, [
     { label: "Vous, en plus de l’autre", sub: "Deux fois plus de travail : santé, proches et bonheur en pâtissent.", autoWeight: 1, apply: () => { if (L.focusBiz(nb)) nb.mode = "side"; L.bizFocus = 0; } },
     { label: "Un gérant", sub: "Il prend une part des bénéfices ; tout dépend de son talent.", autoWeight: 1.5, apply: () => { if (L.focusBiz(nb)) L.hireManager(); L.bizFocus = 0; } },
   ]);

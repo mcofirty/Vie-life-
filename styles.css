@@ -251,7 +251,8 @@ select, textarea, input[type="text"], .name-field input {
 .file-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 caption { caption-side: top; text-align: left; padding: 8px 10px; color: var(--muted); font-size: .8rem; }
 
-.age .calyear { position: absolute; top: -2px; right: -2.6em; font-size: .72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.age .calyear { font-size: .85rem; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.age .calyear:not(:empty)::before { content: "· "; }
 .age { margin-right: 2.4em; }
 .menu-wrap { position: relative; }
 .menu { position: absolute; right: 0; top: calc(100% + 6px); z-index: 10; min-width: 240px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); padding: 6px; display: grid; }
@@ -293,9 +294,25 @@ caption { caption-side: top; text-align: left; padding: 8px 10px; color: var(--m
 .note-row input { flex: 1; }
 .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 50; background: var(--ink); color: var(--bg); padding: .7em 1.2em; border-radius: 999px; font-size: .9rem; box-shadow: var(--shadow); max-width: calc(100% - 32px); text-align: center; animation: rise .25s ease; }
 @media (max-width: 640px) {
-  .lifebar { gap: 10px; }
-  .controls { width: 100%; }
+  /* En-tête de vie compact sur téléphone : deux lignes nettes, et la barre de l'année sur toute la largeur, collée au bas du bandeau */
+  .lifebar { gap: 6px 10px; padding: 8px 12px 11px; }
+  .who > span { font-size: 1.6rem; }
+  .who b { font-size: 1.05rem; }
+  .age { position: static; padding-bottom: 0; }
+  .age b { font-size: 1.8rem; }
+  .yearbar { bottom: -1px; height: 3px; border-radius: 0; }
+  .controls { width: 100%; flex-wrap: nowrap; justify-content: space-between; gap: 6px; }
+  .controls .icon-btn { width: 34px; height: 34px; }
+  .speeds button { padding: .35em .5em; }
+  .speeds button:nth-child(n+4) { display: none; }
   #nextDecBtn { display: none; }
+  .toggle { font-size: .8rem; }
+  .controls .btn { white-space: nowrap; padding-left: .8em; padding-right: .8em; }
+}
+@media (max-width: 400px) {
+  .controls { gap: 4px; }
+  .controls .icon-btn { width: 32px; height: 32px; }
+  .speeds button:nth-child(n+3) { display: none; }
 }
 
 /* --- Agir, placements, lignée --- */
@@ -331,7 +348,7 @@ tfoot td { text-align: left; color: var(--muted); font-size: .78rem; white-space
 .dash-money { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .dash .tile { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .dash .tile small, .dash .chip-row small { color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
-.dash .tile b { font: 700 1.3rem var(--serif); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dash .tile b { font: 700 clamp(1.05rem, 2.6vw, 1.3rem) var(--serif); font-variant-numeric: tabular-nums; line-height: 1.2; overflow-wrap: anywhere; }
 .dash .tile span { color: var(--muted); font-size: .78rem; }
 .dash .tile.bad b { color: var(--bad); }
 .dash-status { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 14px; }
@@ -372,3 +389,7 @@ tfoot td { text-align: left; color: var(--muted); font-size: .78rem; white-space
 .sp-more > summary small { font-weight: 400; color: var(--muted); }
 .sp-bar { display: inline-block; width: 52px; height: 6px; border-radius: 3px; background: rgba(127,127,127,.25); vertical-align: middle; overflow: hidden; }
 .sp-bar i { display: block; height: 100%; background: currentColor; opacity: .7; }
+@media (max-width: 360px) {
+  .controls .btn { font-size: .8rem; padding-left: .6em; padding-right: .6em; }
+  .toggle { gap: 2px; }
+}
