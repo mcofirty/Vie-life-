@@ -661,7 +661,7 @@ $("panelBody").addEventListener("click", e => {
   const play = e.target.closest("[data-play]"), res = e.target.closest("[data-resume]");
   if ((play || res) && life) {
     const kid = play && life.children[+play.dataset.play];
-    if (play && !confirm(`Jouer la vie de ${kid.name} ? La vie de ${life.name} est mise en pause : vous pourrez la reprendre.`)) return;
+    if (play && !confirm(`Jouer la vie de ${kid.name} ? La vie de ${life.name} est mise en pause : vous pourrez la reprendre.${(g => g.net > 0 ? ` ${kid.name} recevra tout de suite ≈ ${eur(g.net)} de votre patrimoine.` : "")(donationFor(life, kid))}`)) return;
     setRunning(false);
     const r = play ? playDescendant(life, peers, +play.dataset.play, prefs.classroom) : resumePaused(+res.dataset.resume, life, peers);
     if (!r) return;
@@ -849,23 +849,19 @@ $("deleteBtn").addEventListener("click", () => {
 });
 
 // ---------- Descendance ----------
-const WILLS = {
-  egal: { label: "Parts égales", note: "Chaque enfant reçoit la même part." },
-  heritier: { label: "Tout à l’enfant choisi", note: "Les autres enfants n’ont rien." },
-  oeuvres: { label: "La moitié aux œuvres", note: "Une moitié pour des associations, le reste partagé entre les enfants." },
-};
 function openHeirs() {
   const rec = reviewRecord, d = rec.dyn;
   $("heirIntro").textContent = `${rec.s.name} laisse ${dollars(d.estate)} (après dettes). Vous continuez avec l’enfant choisi : soit à l’âge qu’il a à la mort de ${rec.s.name}, soit en revivant son enfance.`;
   $("heirList").innerHTML = d.heirs.map((h, i) => `<label class="choice"><input type="radio" name="heir" value="${esc(h.name)}"${i === 0 ? " checked" : ""}><span><b>${esc(h.name)}</b><small>${h.sex === "m" ? "Fils" : "Fille"} · ${h.age} ans à la mort de ${esc(rec.s.name)} · ${h.sex === "m" ? "né" : "née"} en ${h.year} ${inCountry(BY_CODE[h.code])}</small></span></label>`).join("");
   $("startList").innerHTML = `<label class="choice"><input type="radio" name="hstart" value="now" checked><span><b>Reprendre sa vie là où elle en est</b><small>Son enfance s’est déroulée sans vous ; vous continuez au moment de la mort de ${esc(rec.s.name)}.</small></span></label>
     <label class="choice"><input type="radio" name="hstart" value="birth"><span><b>Revivre depuis sa naissance</b><small>Votre vie précédente mourra dans la sienne, au même âge et de la même cause.</small></span></label>`;
-  $("willList").innerHTML = Object.entries(WILLS).map(([k, w], i) => `<label class="choice"><input type="radio" name="will" value="${k}"${k === (d.will || "egal") ? " checked" : ""}><span><b>${w.label}</b><small>${w.note}</small></span></label>`).join("");
+  const { cands, sel } = heirWillOptions(d);
+  $("willList").innerHTML = cands.map(c => `<label class="choice"><input type="checkbox" name="will" value="${esc(c.key)}"${sel.includes(c.key) ? " checked" : ""}><span><b>${esc(c.label)}</b>${c.sub ? `<small>${esc(c.sub)}</small>` : ""}</span></label>`).join("");
   updateHeirNote();
   $("heirModal").hidden = false;
 }
 function updateHeirNote() {
-  const rec = reviewRecord, name = document.querySelector("input[name=heir]:checked").value, will = document.querySelector("input[name=will]:checked").value;
+  const rec = reviewRecord, name = document.querySelector("input[name=heir]:checked").value, will = [...document.querySelectorAll("input[name=will]:checked")].map(i => i.value);
   const opts = lineageFor(rec, name, will), now = document.querySelector("input[name=hstart]:checked").value === "now";
   $("heirNote").textContent = `${name} héritera d’environ ${dollars(opts.lineage.estate)} à ${opts.lineage.parent.deathAt} ans (après droits de succession). ${now ? `Vous reprenez sa vie à ${opts.lineage.parent.deathAt} ans, en ${opts.year + opts.lineage.parent.deathAt}.` : `Vous revivez sa vie depuis ${opts.year}.`} Génération ${opts.lineage.gen}.`;
   $("heirGo").textContent = now ? `Reprendre la vie de ${name}` : "Vivre sa vie";
@@ -874,7 +870,7 @@ $("heirModal").addEventListener("change", updateHeirNote);
 $("heirClose").addEventListener("click", () => $("heirModal").hidden = true);
 $("lineageBtn").addEventListener("click", openHeirs);
 $("heirGo").addEventListener("click", () => {
-  const rec = reviewRecord, name = document.querySelector("input[name=heir]:checked").value, will = document.querySelector("input[name=will]:checked").value;
+  const rec = reviewRecord, name = document.querySelector("input[name=heir]:checked").value, will = [...document.querySelectorAll("input[name=will]:checked")].map(i => i.value);
   const opts = lineageFor(rec, name, will), now = document.querySelector("input[name=hstart]:checked").value === "now";
   $("heirModal").hidden = true;
   closeDeath();

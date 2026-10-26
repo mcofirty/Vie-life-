@@ -596,6 +596,7 @@ Object.assign(Life.prototype, {
   },
   // Héritage des parents (hors lignée) : selon l'aisance de la famille d'origine.
   inheritFrom(p) {
+    if (p.paused) return; // un parent dont la vie est en pause : il a déjà transmis sa part de son vivant
     const c = this.here;
     let amount = 0;
     if (p.previous) amount = p.estate || 0;
@@ -919,12 +920,17 @@ function birthDetails(L) {
 function heirOptions(L) {
   return L.children.filter(k => k.alive).map(k => ({ name: k.name, sex: k.sex, born: k.born, age: L.age - k.born, year: L.year + k.born, code: k.code || L.home, other: k.other }));
 }
+// Les bénéficiaires du testament à la mort : une liste de personnes (les clés « kid:Prénom », « partner »…).
+// Les anciennes sauvegardes gardent « egal », « heritier » ou « oeuvres ».
+const willDefaultKeys = d => d.heirs.map(h => `kid:${h.name}`);
 function lineageFor(rec, heirName, will) {
   const d = rec.dyn, kid = d.heirs.find(h => h.name === heirName);
   if (!kid) return null;
   const n = d.heirs.length, c = countryAt(kid.code, kid.year);
   const taxed = d.estate * (1 - (c.gdp > 30000 ? 0.15 : 0.05));
-  const share = will === "heritier" ? taxed : will === "oeuvres" ? taxed / 2 / n : taxed / n;
+  const keys = Array.isArray(will) && will.length ? will : null;
+  const share = keys ? (keys.includes(`kid:${heirName}`) ? taxed / keys.length : 0)
+    : will === "heritier" ? taxed : will === "oeuvres" ? taxed / 2 / n : taxed / n;
   const pct = d.pctAt[kid.born] ?? 0.4;
   return {
     mode: "births", year: kid.year, code: kid.code, sex: kid.sex, name: kid.name,
@@ -953,7 +959,7 @@ function fastForwardHeir(L) {
 
 // Jouer un enfant sans mettre fin à la vie en cours : celle-ci est mise en pause.
 // La vie de l'enfant se déroule d'elle-même jusqu'à son âge d'aujourd'hui.
-function descendantLife(L, kid, classroom = false) {
+function descendantLife(L, kid, classroom = false, gift = null) {
   if (!kid || !kid.alive) return null;
   const kidAge = L.age - kid.born, year = L.year + kid.born, code = kid.code || L.home, c = countryAt(code, year);
   const h = L.history[kid.born], pct = h && h.pct != null ? h.pct : (L.decile - 0.5) / 10;
@@ -971,6 +977,17 @@ function descendantLife(L, kid, classroom = false) {
   K.protectUntil = kidAge;
   K.wantKids = "demander";
   fastForwardHeir(K);
+  // Un enfant adopté : le récit le dit à l'âge de l'adoption.
+  if (kid.adopted) {
+    const at = kid.adoptAge ?? 0, e = { age: at, year: K.year + at, kind: "family", text: `Est ${K.g("adopté", "adoptée")} par ${L.name}${kid.origin && kid.origin !== code ? `, après être ${K.g("né", "née")} ${inCountry(BY_CODE[kid.origin])}` : ""}.`, hl: true };
+    let i = K.log.findIndex(x => x.age > at); if (i < 0) i = K.log.length;
+    K.log.splice(i, 0, e);
+  }
+  // Le patrimoine de l'aïeul, de son vivant : sa part du testament, après droits.
+  if (gift) {
+    if (gift.net > 0) { K.addMoney(gift.net); K.say(`Reçoit ${money(gift.net)} du patrimoine de ${L.name}, qui vous le transmet de son vivant${gift.capped ? " (dans la limite de son épargne)" : ""}.`, "money", true); K.bump("happy", 3); }
+    else if (!gift.inWill) K.say(`${L.name} ne vous a pas prévu dans son testament : pas de patrimoine à recevoir.`, "money");
+  }
   return K;
 }
 

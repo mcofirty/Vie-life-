@@ -113,7 +113,8 @@ function familyRows(L) {
   const sibs = L.sibs.filter(s => s.born <= L.age);
   rows.push(["Frères et sœurs", sibs.length ? sibs.map(s => `${s.name}${s.alive ? "" : " †"}`).join(", ") : "aucun"]);
   rows.push(["Couple", L.married ? `${L.g("marié", "mariée")} à ${L.partner}` : L.marriedEver ? L.g("seul aujourd’hui", "seule aujourd’hui") : "célibataire"]);
-  rows.push(["Enfants", L.children.length ? L.children.map(k => `${k.name}${k.alive ? ` (${ans(L.age - k.born)})` : " †"}`).join(", ") : "aucun"]);
+  rows.push(["Enfants", L.children.length ? L.children.map(k => `${k.name}${k.adopted ? " (adopté)" : ""}${k.alive ? ` (${ans(L.age - k.born)})` : " †"}`).join(", ") : "aucun"]);
+  if ((L.adoptions || []).length) rows.push(["Adoption", `dossier accepté, enfant attendu vers ${L.age + Math.max(0, L.adoptions[0].arrive - L.age)} ans`]);
   if (L.grandkids) rows.push(["Petits-enfants", String(L.grandkids)]);
   rows.push(["Projet d’enfants", KIDS_PLAN[L.wantKids]]);
   if (L.lineage) rows.push(["Lignée", `génération ${L.lineage.gen} · ${L.lineage.ancestors.map(a => a.name).join(" → ")}`]);
@@ -236,7 +237,8 @@ function dynastyData(L) {
   const heirs = heirOptions(L);
   return {
     lineageId: L.lineage ? L.lineage.id : L.born.getTime(), gen: L.lineage ? L.lineage.gen : 1,
-    ancestors: L.lineage ? L.lineage.ancestors : [], estate: Math.round(L.estate()), fund: Math.round(L.kidsFund || 0), will: L.will || "egal",
+    ancestors: L.lineage ? L.lineage.ancestors : [], estate: Math.round(L.estate()), fund: Math.round(L.kidsFund || 0),
+    willTo: activeWill(L), cands: willCandidates(L).map(c => ({ key: c.key, label: c.label, sub: c.sub })),
     heirs, allKids: L.children.map(k => ({ name: k.name, sex: k.sex, born: k.born, alive: k.alive })),
     pctAt: L.history.map(h => h ? h.pct : null),
   };
@@ -301,7 +303,8 @@ function cleanDyn(d, str, num) {
   const kid = k => k && ({ name: str(k.name, 40), sex: k.sex === "m" ? "m" : "f", born: Math.round(num(k.born)), alive: k.alive !== false });
   const anc = a => a && BY_CODE[a.home] && ({ name: str(a.name, 40), sex: a.sex === "m" ? "m" : "f", home: a.home, year: Math.round(num(a.year, DATA_YEAR)), age: Math.round(num(a.age)), cause: str(a.cause, 80), wealth: num(a.wealth) });
   return {
-    will: ["egal", "heritier", "oeuvres"].includes(d.will) ? d.will : "egal",
+    willTo: (Array.isArray(d.willTo) ? d.willTo : []).slice(0, 30).map(x => str(x, 60)),
+    cands: (Array.isArray(d.cands) ? d.cands : []).slice(0, 30).filter(c => c && c.key).map(c => ({ key: str(c.key, 60), label: str(c.label, 60), sub: str(c.sub, 40) })),
     lineageId: Math.round(num(d.lineageId)), gen: clamp(Math.round(num(d.gen, 1)), 1, 99), estate: Math.max(0, num(d.estate)), fund: Math.max(0, num(d.fund)),
     ancestors: (Array.isArray(d.ancestors) ? d.ancestors : []).slice(0, 99).map(anc).filter(Boolean),
     heirs: (Array.isArray(d.heirs) ? d.heirs : []).slice(0, 20).filter(h => h && BY_CODE[h.code]).map(h => ({ ...kid(h), age: Math.round(num(h.age)), year: clamp(Math.round(num(h.year)), MIN_YEAR, MAX_YEAR), code: h.code, other: h.other ? str(h.other, 40) : null })),
@@ -538,14 +541,20 @@ function resumePaused(id, current, currentPeers) {
   if (current && current.alive && current.born.getTime() !== id) pauseLife(current, currentPeers);
   try { return { life: reviveLife(item.life), peers: (item.peers || []).map(reviveLife) }; } catch { return null; }
 }
+// Testament au moment de la mort : les personnes proposées, et celles cochées au départ.
+function heirWillOptions(d) {
+  const cands = d.cands && d.cands.length ? d.cands : d.heirs.map(h => ({ key: `kid:${h.name}`, label: h.name, sub: h.sex === "m" ? "fils" : "fille" }));
+  const sel = d.willTo && d.willTo.length ? d.willTo : willDefaultKeys(d);
+  return { cands, sel };
+}
 // Les enfants qu'on peut jouer, et les vies en pause (pour les panneaux Famille).
 function descendantsHtml(L) {
   const kids = L.children.map((k, i) => ({ k, i })).filter(x => x.k.alive);
   const paused = pausedLives().filter(x => x.id !== L.born.getTime());
   if (!kids.length && !paused.length) return "";
   return `<div class="sp"><p class="sp-head">Jouer un descendant</p>
-    ${kids.map(({ k, i }) => `<div class="sp-card"><div class="sp-main"><b>${esc(k.name)}</b><small>${k.sex === "m" ? "Fils" : "Fille"} · ${ans(L.age - k.born)} · ${countryAt(k.code || L.home, L.calYear).flag} ${countryAt(k.code || L.home, L.calYear).name}</small></div><button class="sp-buy" data-play="${i}">Jouer sa vie</button></div>`).join("") || `<p class="sp-note">Pas encore d’enfant.</p>`}
-    <p class="sp-note">La vie de ${esc(L.name)} est mise en pause, sans mourir : vous pourrez la reprendre depuis l’accueil ou ici.</p>
+    ${kids.map(({ k, i }) => { const gf = donationFor(L, k); return `<div class="sp-card"><div class="sp-main"><b>${esc(k.name)}</b><small>${k.adopted ? (k.sex === "m" ? "Fils adopté" : "Fille adoptée") : k.sex === "m" ? "Fils" : "Fille"} · ${ans(L.age - k.born)} · ${countryAt(k.code || L.home, L.calYear).flag} ${countryAt(k.code || L.home, L.calYear).name}${gf.net > 0 ? ` · recevra ≈ ${eur(gf.net)} de votre patrimoine` : ""}</small></div><button class="sp-buy" data-play="${i}">Jouer sa vie</button></div>`; }).join("") || `<p class="sp-note">Pas encore d’enfant.</p>`}
+    <p class="sp-note">La vie de ${esc(L.name)} est mise en pause, sans mourir : vous pourrez la reprendre depuis l’accueil ou ici. L’enfant reçoit tout de suite sa part de votre patrimoine, selon votre testament.</p>
     ${paused.length ? `<p class="sp-head">Vies en pause</p>${paused.map(p => `<div class="sp-card"><div class="sp-main"><b>${p.flag} ${esc(p.name)}</b><small>${ans(p.age)} · ${p.year}</small></div><button class="sp-buy" data-resume="${p.id}">Reprendre</button></div>`).join("")}` : ""}
   </div>`;
 }
@@ -553,8 +562,14 @@ function descendantsHtml(L) {
 function playDescendant(L, peers, kidIndex, classroom) {
   const kid = L.children[kidIndex];
   if (!kid || !kid.alive) return null;
+  // Le patrimoine de l'aïeul passe à l'enfant tout de suite : sa part du testament, de son vivant.
+  const gift = donationFor(L, kid);
+  if (gift.gross > 0) {
+    L.withdraw(gift.gross);
+    L.say(`Transmet ${money(gift.gross)} à ${kid.name} de son vivant (${money(gift.tax)} de droits).`, "money", true);
+  }
   pauseLife(L, peers);
-  const K = descendantLife(L, kid, classroom);
+  const K = descendantLife(L, kid, classroom, gift);
   const year = K.year;
   return { life: K, peers: Array.from({ length: 4 }, () => simulateWhole({ mode: "births", year, classroom })) };
 }

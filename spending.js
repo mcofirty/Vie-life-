@@ -61,17 +61,6 @@ const SPENDS = [
     when: L => L.children.some(k => isAdultKid(L, k) && k.code && k.code !== L.code) || "Aucun enfant à l’étranger.",
     args: L => companions(L).filter(([k]) => k !== "friends").map(([k, l]) => [k, l, median(L.here) * 0.1]),
     run: (L, arg) => { const k = L.children.find(k => isAdultKid(L, k) && k.code && k.code !== L.code); L.bump("happy", 6); L.bump("rel", 3); L.say(`Rend visite à ${k.name}, ${inCountry(BY_CODE[k.code])}.`, "family", true); } },
-  { id: "will", label: "Rédiger un testament", fx: "Décider à qui reviendra ce que vous laissez, et comment", cost: () => 0,
-    when: L => L.age < 30 ? "Plus tard dans la vie." : L.willAt === L.age ? "Déjà fait cette année." : true,
-    run: L => {
-      L.willAt = L.age;
-      L.ask("Votre testament : comment partager ce que vous laisserez ?", [
-        { label: "Parts égales entre les enfants", autoWeight: 3, apply: () => { L.will = "egal"; L.say("Rédige son testament : parts égales entre les enfants.", "family"); } },
-        { label: "Tout à un seul enfant", autoWeight: 1, apply: () => { L.will = "heritier"; L.say("Rédige son testament : tout ira à un seul enfant.", "family"); } },
-        { label: "La moitié aux œuvres", autoWeight: 1, apply: () => { L.will = "oeuvres"; L.say("Rédige son testament : la moitié ira à des associations.", "family"); } },
-      ]);
-      return "une décision vous attend";
-    } },
   { id: "treat", label: "Régaler vos amis", fx: "Relations +5", cost: L => median(L.here) * 0.025,
     when: L => L.age < 16 ? "À partir de 16 ans." : true,
     run: L => { L.bump("rel", 5); L.network += 0.2; L.say(pick(["Régale ses amis toute une soirée.", "Paie la tournée ; on s’en souviendra."]), "family"); } },
@@ -176,6 +165,7 @@ Object.assign(Life.prototype, {
   lifestyleYear() {
     if (!this.alive || this.age < 18) return;
     this.propertiesYear();
+    this.adoptionYear();
     // Sans argent devant soi (ou avec de lourdes dettes), ces dépenses de mode de vie sont suspendues.
     const ls = this.lifeStyle(), m = median(this.here), poor = (this.savings < m * 0.1 && this.netIncome() < m * 0.6) || this.debt > Math.max(this.netIncome(), m) * 0.5;
     if (!poor) {
@@ -323,6 +313,100 @@ Object.assign(Life.prototype, {
   Life.prototype.netWorth = function () { return netWorth.call(this) + (this.props || []).reduce((s, p) => s + p.value - p.loan, 0); };
 }
 
+// --- Testament : à qui laisser son héritage ------------------------------------------
+function willCandidates(L) {
+  const out = [], g = (m, f, sex) => sex === "m" ? m : f;
+  for (const k of L.children) if (k.alive) out.push({ key: `kid:${k.name}`, label: k.name, sub: `${k.adopted ? g("fils adopté", "fille adoptée", k.sex) : g("fils", "fille", k.sex)}, ${L.age - k.born} an${L.age - k.born > 1 ? "s" : ""}` });
+  if (L.married && L.partner) out.push({ key: "partner", label: L.partner, sub: L.sex === "m" ? "épouse" : "époux" });
+  for (const s of L.sibs) if (s.alive && s.born <= L.age) out.push({ key: `sib:${s.name}`, label: s.name, sub: g("frère", "sœur", s.sex) });
+  for (const p of L.parents) if (p.alive) out.push({ key: `parent:${p.name}`, label: p.name, sub: g("père", "mère", p.sex) });
+  if (L.grandkids) out.push({ key: "grand", label: "Les petits-enfants", sub: String(L.grandkids) });
+  out.push({ key: "friends", label: "Vos amis proches", sub: "" }, { key: "charity", label: "Des associations", sub: "" });
+  return out;
+}
+const willDefault = L => L.children.filter(k => k.alive).map(k => `kid:${k.name}`);
+// Les bénéficiaires du testament encore en vie (par défaut : vos enfants).
+function activeWill(L) {
+  const ok = new Set(willCandidates(L).map(c => c.key));
+  return (L.willTo ?? willDefault(L)).filter(k => ok.has(k));
+}
+// Don fait de son vivant à un enfant dont on joue la vie : sa part du testament, dans la limite de l'épargne.
+function donationFor(L, kid) {
+  const keys = activeWill(L), key = `kid:${kid.name}`, inWill = keys.includes(key);
+  const c = countryAt(kid.code || L.code, L.calYear), taxRate = c.gdp > 30000 ? 0.15 : 0.05;
+  const share = inWill ? Math.max(0, L.netWorth()) / keys.length : 0;
+  const gross = Math.min(share, Math.max(0, L.savings) * 0.9);
+  return { share, gross, net: gross * (1 - taxRate), capped: gross < share - 1, inWill, tax: gross * taxRate };
+}
+
+// --- Adoption ----------------------------------------------------------------------------
+function adoptPlan(L, id) {
+  const m = median(L.here), [kind, a, b] = id.split(":");
+  const ages = kind === "nat" ? (a === "pair" ? [3, 6] : [+a]) : [+b], origin = kind === "int" ? a : null;
+  const older = Math.min(...ages) >= 8, baby = ages[0] <= 1;
+  const p = clamp((kind === "int" ? 0.55 : 0.75) + (L.married ? 0.1 : -0.1) + (older ? 0.1 : baby ? -0.1 : 0) + (L.livingTier() >= 3 ? 0.05 : 0) - (L.age > 45 ? 0.15 : 0), 0.1, 0.9);
+  return { ages, origin, p, cost: m * (kind === "int" ? 0.6 : 0.15) * ages.length, wait: (kind === "int" ? 2 : 1) + (baby ? 1 : 0) };
+}
+function adoptChoices(L) {
+  const out = [], add = (id, label) => {
+    const x = adoptPlan(L, id);
+    out.push({ id, label, sub: `≈ ${eur(x.cost)} de frais · attente ≈ ${x.wait} an${x.wait > 1 ? "s" : ""} · chances d’agrément ${Math.round(x.p * 100)} %${L.married ? "" : " (célibataire)"}`, disabled: L.savings < x.cost });
+  };
+  add("nat:1", "Adopter un bébé du pays");
+  add("nat:5", "Adopter un enfant de 5 ans");
+  add("nat:10", "Adopter un enfant de 10 ans");
+  add("nat:pair", "Adopter deux frères et sœurs (3 et 6 ans)");
+  if (L.calYear >= 1950 && !planned(L.code, L.calYear)) {
+    const poorer = COUNTRIES.filter(c => c.code !== L.code && c.pop > 3 && countryAt(c.code, L.calYear).gdp < L.here.gdp * 0.6).sort((a, b) => countryAt(b.code, L.calYear).births - countryAt(a.code, L.calYear).births).slice(0, 3);
+    poorer.forEach((c, i) => { const age = [2, 4, 7][i]; add(`int:${c.code}:${age}`, `Adopter à l’étranger ${inCountry(c)} (enfant de ${age} ans)`); });
+  }
+  return out;
+}
+ACTIONS.push({ id: "adopt", cat: "perso", label: "Adopter un enfant", desc: "Un dossier d’agrément, une attente, puis un enfant confié : du pays ou d’ailleurs, bébé ou plus grand.",
+  when: L => L.age < 25 ? "À partir de 25 ans." : L.age > 55 ? "Au-delà de 55 ans, c’est très rare." : L.calYear < 1920 ? "L’adoption n’est pas encore encadrée à cette époque." : (L.adoptions || []).length ? "Un dossier est déjà en cours." : L.children.filter(k => k.alive).length >= 6 ? "Votre famille est déjà nombreuse." : true,
+  choices: L => adoptChoices(L),
+  run: (L, id) => {
+    const x = adoptPlan(L, id);
+    if (L.savings < x.cost) return "Pas assez d’argent pour les frais.";
+    L.pay(x.cost);
+    const where = x.origin ? ` ${inCountry(BY_CODE[x.origin])}` : "";
+    if (rand() < x.p) {
+      const wait = x.wait + (rand() < 0.4 ? 1 : 0);
+      L.adoptions = [...(L.adoptions || []), { arrive: L.age + wait, ages: x.ages, origin: x.origin }];
+      L.say(`Dépose un dossier d’adoption${where} : l’agrément est accordé, l’attente commence.`, "family", true);
+      return `Agrément accordé · attente ≈ ${wait} an${wait > 1 ? "s" : ""}.`;
+    }
+    L.say(`Le dossier d’adoption${where} est refusé : l’agrément n’est pas accordé.`, "family", true);
+    L.bump("happy", -6);
+    return "Agrément refusé.";
+  } });
+Object.assign(Life.prototype, {
+  // L'enfant attendu arrive : c'est vous qui décidez de l'accueillir.
+  adoptionYear() {
+    const due = (this.adoptions || []).find(a => this.age >= a.arrive);
+    if (!due || this.queue.some(d => d.adopt)) return;
+    const kids = [];
+    for (const a of due.ages) {
+      const sx = drawSex();
+      let name = this.freshName(sx);
+      for (let t = 0; t < 8 && kids.some(k => k.name === name); t++) name = this.freshName(sx);
+      kids.push({ name, sex: sx, age: a });
+    }
+    const many = kids.length > 1, desc = many ? `${kids.map(k => k.name).join(" et ")}, ${kids.map(k => k.age).join(" et ")} ans` : `${kids[0].name}, ${kids[0].age} an${kids[0].age > 1 ? "s" : ""}`;
+    const done = () => { this.adoptions = (this.adoptions || []).filter(a => a !== due); };
+    this.ask(`L’adoption aboutit : ${desc}${due.origin ? `, ${many ? "nés" : "né"} ${inCountry(BY_CODE[due.origin])}` : ""}. Accueillir ${many ? "ces enfants" : "cet enfant"} ?`, [
+      { label: "Accueillir", autoWeight: 3, apply: () => {
+        done();
+        for (const k of kids) this.children.push({ name: k.name, sex: k.sex, born: this.age - k.age, alive: true, other: this.partner, code: this.code, adopted: true, origin: due.origin || this.code, adoptAge: k.age });
+        this.say(`${many ? `${kids[0].name} et ${kids[1].name} rejoignent` : `${kids[0].name} rejoint`} la famille, ${many ? "adoptés" : kids[0].sex === "m" ? "adopté" : "adoptée"}.`, "family", true);
+        this.bump("happy", 8); this.bump("rel", 5);
+      } },
+      { label: "Renoncer", sub: "Le dossier est clos.", autoWeight: 0.3, apply: () => { done(); this.say("Renonce à l’adoption.", "family"); } },
+    ]);
+    this.queue[this.queue.length - 1].adopt = true;
+  },
+});
+
 // --- Page « Dépenser et investir » (commune aux deux versions) -------------------------
 const ASSET_RETURNS = {
   cash: "rien, et l’inflation le ronge", deposit: "1 à 1,5 % par an, inflation déduite", tontine: "un peu, si chacun paie son tour", bonds: "environ 2 % en moyenne, faibles variations",
@@ -353,6 +437,11 @@ function spendHtml(L) {
       <div class="sp-pills">${Object.keys(AUTO).map(k => `<button class="sp-pill${auto[k] ? " on" : ""}" data-auto="${k}">${esc(AUTO[k].label)} <span>· ${esc(k === "kidsMoney" && L.children.some(c => isAdultKid(L, c)) ? `${autoSub(k)} · à votre enfant adulte` : k === "hobby" && hobbiesOf(L).length ? `${autoSub(k)} · ${PASSIONS[hobbiesOf(L)[0]].label.replace(/^(le |la |l’|les )/, "")}` : k === "tripHome" || k === "tripAbroad" ? `${autoSub(k)} · avec vos amis` : autoSub(k))}</span></button>`).join("")}</div>
       <p class="sp-note">Une fois activé, chaque réglage s’applique de lui-même le moment venu ; ce qui coûte de l’argent, seulement si votre épargne dépasse trois fois le coût. Appuyez de nouveau pour désactiver. Sans « Payer pour les enfants sans demander », chaque frais d’université, de mariage ou demande d’argent d’un enfant vous est posé comme une question.</p>
     </details>
+    ${(() => { const cands = willCandidates(L), w = new Set(activeWill(L)), nw = w.size, nwth = Math.max(0, L.netWorth());
+      return `<p class="sp-head">Testament</p>
+    <p class="sp-note" style="margin-top:0">À qui laisser votre héritage ? Choisissez les personnes : il est partagé à parts égales entre elles.</p>
+    <div class="sp-pills">${cands.map(c => `<button class="sp-pill${w.has(c.key) ? " on" : ""}" data-will-to="${esc(c.key)}">${esc(c.label)} <span>${esc(c.sub)}${w.has(c.key) && nw && nwth ? ` · ≈ ${eur(nwth / nw)}` : ""}</span></button>`).join("")}</div>
+    <p class="sp-note">S’applique à votre mort, et quand vous passez à la vie d’un descendant : il reçoit alors sa part de votre vivant, dans la limite de votre épargne. Sans choix, vos enfants se partagent tout (avant droits de succession).</p>`; })()}
     <p class="sp-head">Faire fructifier votre épargne</p>
     <div class="sp-pills">${assets.map(k => `<button class="sp-pill${(L.alloc[k] || 0) > 0 ? " on" : ""}" data-asset-toggle="${k}">${ASSETS[k].label} <span>· ${ASSET_RETURNS[k]}</span></button>`).join("")}</div>
     <p class="sp-note">Appuyez pour ajouter un placement à votre épargne ou l’en retirer ; la répartition se règle plus bas. Rendements réels, inflation déduite.</p>
@@ -362,6 +451,14 @@ function spendHtml(L) {
 function spendClick(L, t) {
   const bz = t.closest("[data-biz]");
   if (bz) return bizAction(L, bz.dataset.biz, bz.dataset.arg) || "Impossible pour l’instant.";
+  const wl = t.closest("[data-will-to]");
+  if (wl) {
+    const cur = new Set(activeWill(L)), k = wl.dataset.willTo;
+    if (cur.has(k)) cur.delete(k); else cur.add(k);
+    L.willTo = [...cur];
+    const names = willCandidates(L).filter(c => cur.has(c.key)).map(c => c.label);
+    return names.length ? `Testament : ${names.join(", ")}` : "Testament : personne (vos enfants hériteront)";
+  }
   const sp = t.closest("[data-sp]"), lsb = t.closest("[data-ls]"), au = t.closest("[data-auto]"), as = t.closest("[data-asset-toggle]");
   if (sp) return spendDo(L, sp.dataset.sp, sp.dataset.arg) || "Impossible pour l’instant.";
   if (lsb) { L.lifeStyle()[lsb.dataset.ls] = lsb.dataset.v; return `${LIFESTYLE[lsb.dataset.ls].label} : ${LIFESTYLE[lsb.dataset.ls].opts[lsb.dataset.v][1]}`; }

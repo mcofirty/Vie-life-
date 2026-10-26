@@ -668,7 +668,7 @@ function panelSheet(kind) {
       ${descendantsHtml(L)}`, { dismissable: true, onClose: renderLife });
     $("sheetBody").querySelectorAll("[data-play],[data-resume]").forEach(b => b.addEventListener("click", () => {
       const play = b.dataset.play != null, kid = play && L.children[+b.dataset.play];
-      if (play && !confirm(`Jouer la vie de ${kid.name} ? La vie de ${L.name} est mise en pause : vous pourrez la reprendre.`)) return;
+      if (play && !confirm(`Jouer la vie de ${kid.name} ? La vie de ${L.name} est mise en pause : vous pourrez la reprendre.${(g => g.net > 0 ? ` ${kid.name} recevra tout de suite ≈ ${eur(g.net)} de votre patrimoine.` : "")(donationFor(L, kid))}`)) return;
       haptic(15);
       setRunning(false);
       const r = play ? playDescendant(L, peers, +b.dataset.play, prefs.classroom) : resumePaused(+b.dataset.resume, L, peers);
@@ -922,7 +922,7 @@ function deathSheet(rec, mode) {
     saveRecord(rec); haptic(15); toast("Vie gardée");
     deathSheet(rec, mode === "shared" ? "shared-kept" : "review");
   });
-  on("lineageBtn", () => { keepWords(); heirSheet(rec, mode, rec.dyn.heirs[0].name, rec.dyn.will || "egal"); });
+  on("lineageBtn", () => { keepWords(); heirSheet(rec, mode); });
   on("cardBtn", () => shareCard("death", rec).then(r => r === "downloaded" && toast("Image enregistrée")));
   on("linkBtn", async () => { const r = await shareLink(rec); if (r === "copied") toast("Lien copié (sans vos réponses ni vos mots)"); });
   on("deleteBtn", () => { deleteRecord(rec.id); closeSheet(); renderLives(); toast("Vie supprimée"); });
@@ -942,13 +942,10 @@ function deathSheet(rec, mode) {
 }
 
 // ---------- Descendance ----------
-const WILLS = {
-  egal: { label: "Parts égales", note: "Chaque enfant reçoit la même part." },
-  heritier: { label: "Tout à l’enfant choisi", note: "Les autres enfants n’ont rien." },
-  oeuvres: { label: "La moitié aux œuvres", note: "Une moitié pour des associations, le reste partagé." },
-};
-function heirSheet(rec, mode, heir = rec.dyn.heirs[0].name, will = "egal", start = "now") {
-  const d = rec.dyn, opts = lineageFor(rec, heir, will);
+function heirSheet(rec, mode, heir = rec.dyn.heirs[0].name, will = null, start = "now") {
+  const d = rec.dyn, wo = heirWillOptions(d);
+  will = will || wo.sel;
+  const opts = lineageFor(rec, heir, will);
   openSheet(`<h2 class="sheet-title">Continuer la lignée</h2>
     <p class="group-footer" style="margin:-8px 4px 16px;text-align:center">${esc(rec.s.name)} laisse ${dollars(d.estate)}. Continuez avec l’enfant choisi, là où en est sa vie ou depuis sa naissance.</p>
     <p class="group-header">Avec quel enfant ?</p>
@@ -959,13 +956,14 @@ function heirSheet(rec, mode, heir = rec.dyn.heirs[0].name, will = "egal", start
       <button class="cell link choice-cell" data-start="birth"><span class="tick">${start === "birth" ? "✓" : ""}</span><span class="cell-main"><b>Revivre depuis sa naissance</b><small>Votre vie précédente mourra dans la sienne, au même âge.</small></span></button>
     </div>
     <p class="group-header">Le testament</p>
-    <div class="group">${Object.entries(WILLS).map(([k, w]) => `<button class="cell link choice-cell" data-will="${k}"><span class="tick">${k === will ? "✓" : ""}</span><span class="cell-main"><b>${w.label}</b><small>${w.note}</small></span></button>`).join("")}</div>
+    <p class="group-footer" style="margin:-4px 4px 8px">À qui laisser l’héritage ? Il est partagé à parts égales entre les personnes cochées.</p>
+    <div class="group">${wo.cands.map(c => `<button class="cell link choice-cell" data-will="${esc(c.key)}"><span class="tick">${will.includes(c.key) ? "✓" : ""}</span><span class="cell-main"><b>${esc(c.label)}</b>${c.sub ? `<small>${esc(c.sub)}</small>` : ""}</span></button>`).join("")}</div>
     <p class="group-footer">${esc(heir)} héritera d’environ ${dollars(opts.lineage.estate)} à ${opts.lineage.parent.deathAt} ans. Génération ${opts.lineage.gen}.</p>
     <button class="btn-filled" id="heirGo" style="margin-top:16px">${start === "now" ? `Reprendre la vie de ${esc(heir)}` : "Vivre sa vie"}</button>
     <button class="btn-plain" id="heirBack">Retour</button>`, { dismissable: false });
   $("sheetBody").querySelectorAll("[data-heir]").forEach(b => b.onclick = () => { haptic(); heirSheet(rec, mode, b.dataset.heir, will, start); });
   $("sheetBody").querySelectorAll("[data-start]").forEach(b => b.onclick = () => { haptic(); heirSheet(rec, mode, heir, will, b.dataset.start); });
-  $("sheetBody").querySelectorAll("[data-will]").forEach(b => b.onclick = () => { haptic(); heirSheet(rec, mode, heir, b.dataset.will, start); });
+  $("sheetBody").querySelectorAll("[data-will]").forEach(b => b.onclick = () => { haptic(); heirSheet(rec, mode, heir, will.includes(b.dataset.will) ? will.filter(k => k !== b.dataset.will) : [...will, b.dataset.will], start); });
   $("heirBack").onclick = () => deathSheet(rec, mode);
   $("heirGo").onclick = () => {
     haptic(20);
