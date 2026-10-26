@@ -176,7 +176,8 @@ Object.assign(Life.prototype, {
   lifestyleYear() {
     if (!this.alive || this.age < 18) return;
     this.propertiesYear();
-    const ls = this.lifeStyle(), m = median(this.here), poor = this.savings < m * 0.1 && this.netIncome() < m * 0.6;
+    // Sans argent devant soi (ou avec de lourdes dettes), ces dépenses de mode de vie sont suspendues.
+    const ls = this.lifeStyle(), m = median(this.here), poor = (this.savings < m * 0.1 && this.netIncome() < m * 0.6) || this.debt > Math.max(this.netIncome(), m) * 0.5;
     if (!poor) {
       if (ls.gifts === "generous") { this.pay(m * 0.04); this.bump("rel", 1); }
       else if (ls.gifts === "half") { this.pay(m * 0.02); this.bump("rel", 0.3); }
@@ -218,7 +219,7 @@ Object.assign(Life.prototype, {
       for (const [id, text, x, said, fx] of events) {
         const pay = () => { this.pay(x); this.say(said, "family"); fx(); };
         const refuse = () => { this.say(`Ne peut pas, ou ne veut pas, payer pour ${k.name} cette fois.`, "family"); if (id !== "uni") this.bump("rel", -1); };
-        if (ask) this.ask(`${text} (${eur(x)} aux prix français)`, [{ label: `Payer ${eur(x)}`, autoWeight: 2, apply: pay }, { label: "Non", autoWeight: 1, apply: refuse }]);
+        if (ask) this.ask(`${text} (${eur(x)} aux prix français)`, [{ label: `Payer ${eur(x)}`, sub: this.savings < x ? "Plus que votre épargne : le reste sera emprunté." : "", autoWeight: this.savings >= x ? 2 : 0.1, apply: pay }, { label: "Non", autoWeight: 1, apply: refuse }]);
         else if (this.savings >= x * 3) pay();
       }
     }

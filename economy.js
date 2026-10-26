@@ -625,7 +625,8 @@ Object.assign(Life.prototype, {
       else if (gain / before > 0.3) this.say(`Très bonne année pour ses placements : +${Math.round(gain / before * 100)} %.`, "money");
     }
     const debtRate = clamp(((c.lend || 12) - clamp(c.infl, -2, 60)) / 100 + 0.04, 0.03, 0.35);
-    if (this.debt > 0) this.debt *= 1 + debtRate;
+    // Pendant un plan de surendettement, les intérêts sont gelés.
+    if (this.debt > 0 && !(this.debtPlanUntil > this.age)) this.debt *= 1 + debtRate;
     if (this.house) {
       this.house.value *= 1 + housingReturn(this.code, y) - (r._pi > 0.5 ? 0.05 : 0);
       if (this.house.loan > 0) {
@@ -671,6 +672,16 @@ Object.assign(Life.prototype, {
     const free = net - housing - kids;
     let living = Math.max(free * SPEND[this.spend].rate, Math.min(free, incomeAt(c, 0.1) * 0.6));
     if (this.spend !== "large") living = Math.min(living, Math.max(free, 0));
+    // Les créanciers se font payer : avec des dettes, une part du budget part en remboursements
+    // (intérêts et un dixième du capital), sans descendre sous le minimum pour vivre.
+    if (this.debt > 0 && free > 0) {
+      const floor = Math.min(free, Math.max(free * 0.55, incomeAt(c, 0.1) * 0.5));
+      const service = this.debt * ((this.debtPlanUntil > this.age ? 0 : debtRate) + 0.1);
+      const before = living;
+      living = Math.max(floor, Math.min(living, free - service));
+      if (living < before && !this.debtServiceNoted) { this.debtServiceNoted = true; this.say("Une bonne part de chaque salaire part dans le remboursement des dettes.", "money"); }
+    }
+    if (this.debt === 0) this.debtServiceNoted = false;
     // À la retraite, on puise dans l'épargne.
     if (this.retired) living += this.savings * 0.05;
     const saved = net - housing - kids - living;
@@ -679,6 +690,19 @@ Object.assign(Life.prototype, {
     this.rebalance();
     if (this.debt > Math.max(net, m) * 3 && !this.debtWarned) { this.debtWarned = true; this.say("Les dettes s’accumulent ; chaque mois devient une lutte.", "money", true); }
     if (this.debt === 0) this.debtWarned = false;
+    // Surendettement : on peut demander un plan (effacement d'une partie des dettes, intérets gelés).
+    if (this.debt > Math.max(net, m) * 3 && !(this.debtPlanUntil > this.age) && (this.debtAskedAt == null || this.age - this.debtAskedAt >= 4) && !this.queue.some(d => d.debtPlan)) {
+      this.debtAskedAt = this.age;
+      const rich = c.gdp > 20000 && y >= 1985, cut = rich ? 0.4 : 0.25;
+      this.ask(`Les dettes atteignent ${money(this.debt)}. ${rich ? "Déposer un dossier de surendettement ?" : "Négocier avec les créanciers ?"}`, [
+        { label: rich ? "Déposer un dossier" : "Négocier", sub: `Environ ${Math.round(cut * 100)} % des dettes effacés, intérêts gelés sept ans ; plus de crédit pendant ce temps.`, autoWeight: 4, apply: () => {
+          const x = this.debt * cut; this.debt -= x; this.debtPlanUntil = this.age + 7; this.bump("happy", -3);
+          this.say(rich ? `Un plan de surendettement efface ${money(x)} de dettes et gèle les intérêts.` : `Négocie avec ses créanciers : ${money(x)} de dettes effacés, le reste à rembourser sans intérêts.`, "money", true);
+        } },
+        { label: "Continuer à rembourser seul", sub: "Les intérêts continuent de courir.", autoWeight: 1, apply: () => this.say("Choisit de rembourser ses dettes seul.", "money") },
+      ]);
+      this.queue[this.queue.length - 1].debtPlan = true;
+    }
     // Surendettement : la banque saisit le logement.
     if (this.house && this.debt > Math.max(net, m) * 4) {
       const equity = this.house.value * 0.85 - this.house.loan;
