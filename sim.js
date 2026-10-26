@@ -563,7 +563,8 @@ class Life {
 
     // Les enfants hors de l'école finissent par travailler ; les chômeurs retrouvent
     // un emploi plus ou moins vite selon le chômage du pays.
-    if (!this.schooling && !this.job && !this.business && !this.retired && !this.homemaker && !this.queue.length && a >= 12 && !(this.apprenticeUntil > a)) {
+    if (this.gapYear === a) { this.gapYear = null; this.uniTried = null; this.askHigher(); }
+    if (!this.schooling && !this.job && !this.business && !this.retired && !this.homemaker && !this.queue.length && a >= 12 && !(this.apprenticeUntil > a) && this.gapYear == null) {
       const p = a < 15 ? clamp(0.6 - Math.log10(c.gdp) / 10, 0.05, 0.4) : clamp(0.6 - c.unemp / 40, 0.15, 0.7);
       if (rand() < p) this.startWork();
     }
@@ -639,7 +640,14 @@ class Life {
         { label: "Prendre sa retraite et garder l’entreprise", sub: "Un directeur la gère ; vous touchez une part des bénéfices.", autoWeight: 2, apply: () => this.retire() },
         { label: `Vendre (≈ ${money(b.value)}) et prendre sa retraite`, autoWeight: 1, apply: () => { if (!this.business) return; this.addMoney(b.value); this.say(`Vend ${b.label.toLowerCase()} (${money(b.value)}).`, "money", true); this.business = null; this.retire(); } },
       ]);
-    } else if (this.job && !this.business && !this.retired && a >= this.retireAge() && (rand() < 0.5 || s.health < 30)) this.retire();
+    } else if (this.job && !this.business && !this.retired && a >= this.retireAge() && (this.retireAskedAt == null || a - this.retireAskedAt >= 2)) {
+      // La retraite : c'est vous qui décidez.
+      this.retireAskedAt = a;
+      this.ask(`${a} ans : l’âge de la retraite est là. Prendre sa retraite ?`, [
+        { label: "Prendre sa retraite", sub: s.health < 30 ? "La santé est fragile." : "", autoWeight: s.health < 30 ? 4 : 1.5, apply: () => this.retire() },
+        { label: "Continuer à travailler", sub: "On vous reposera la question dans deux ans.", autoWeight: 1, apply: () => this.say("Choisit de continuer à travailler.", "work") },
+      ]);
+    }
 
     // Amour et mariage
     if (!this.married && a >= 18) {
@@ -655,7 +663,15 @@ class Life {
         ]);
       }
     }
-    if (this.married && rand() < 0.012 * (1.5 - s.rel / 100) * (c.gdp > 20000 ? 1.6 : 0.8) * (this.calYear < 1970 ? 0.3 : 1)) this.divorce();
+    // Le conjoint veut partir : on peut tenter de sauver le couple, ou accepter.
+    if (this.married && !this.queue.some(d => d.split) && rand() < 0.012 * (1.5 - s.rel / 100) * (c.gdp > 20000 ? 1.6 : 0.8) * (this.calYear < 1970 ? 0.3 : 1)) {
+      const save = clamp(0.3 + s.rel / 200, 0.2, 0.75);
+      this.ask(`${this.partner} parle de divorcer. Que faire ?`, [
+        { label: "Tenter de sauver le couple", sub: `Thérapie, temps à deux… chances ≈ ${Math.round(save * 100)} %`, autoWeight: 2, apply: () => { if (!this.married) return; if (rand() < save) { this.say(`Traverse une crise avec ${this.partner}, et la surmonte.`, "family", true); this.bump("rel", 3); } else { this.say(`Malgré les efforts, ${this.partner} part.`, "family", true); this.divorce(); } } },
+        { label: "Accepter le divorce", autoWeight: 1, apply: () => { if (this.married) this.divorce(); } },
+      ]);
+      this.queue[this.queue.length - 1].split = true;
+    }
     if (this.married && a > 55 && rand() < 0.012 * (a - 50) / 10) {
       this.say(`${this.partner} meurt. ${this.g("Il", "Elle")} reste ${this.g("veuf", "veuve")}.`, "family", true);
       this.widowedAt = this.age;

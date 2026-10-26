@@ -397,19 +397,20 @@ Object.assign(Life.prototype, {
   },
 
   // Fin du lycée (18 ans) : choisir une spécialité, des études courtes ou le travail.
-  askHigher() {
+  askHigher(retry = false) {
     const c = this.here, s = this.stats, closed = universityClosed(this);
     const secShare = clamp((c.school - 3.5) / 7, 0.1, 1);
     const p = clamp((c.tert / 100) / secShare, 0.02, 0.95) * (0.6 + s.know / 125) * (0.8 + 0.04 * this.decile);
     const work = { label: "Travailler tout de suite", autoWeight: 1, apply: () => { this.say("Choisit de travailler tout de suite."); this.startWork(); } };
     if (closed) { this.say(closed, "edu", true); this.ask("Le lycée est fini, mais l’université est fermée. Que faire ?", [work]); return; }
+    const tried = retry && this.uniTried ? this.uniTried.ids : [];
     const pro = this.track === "pro", track = this.track;
     const chance = f => clamp(p * f.sel * (pro ? 0.45 : 1) * (f.pref && track && f.pref !== track && track !== "pro" ? 0.55 : 1) * (f.id === "med" && track === "sci" ? 1.4 : 1), 0.01, 0.97);
     let fields = fieldsFor(this);
-    fields = fields.sort((a, b) => (b.pref === track) - (a.pref === track) || chance(b) - chance(a)).slice(0, 8);
+    fields = fields.filter(f => !tried.includes(f.id)).sort((a, b) => (b.pref === track) - (a.pref === track) || chance(b) - chance(a)).slice(0, 8);
     const opts = [];
     const el = ELITE[this.code];
-    if (el && !pro && this.calYear >= (el.from || 1900) && el[track || "sci"]) {
+    if (el && !pro && !tried.includes("elite") && this.calYear >= (el.from || 1900) && el[track || "sci"]) {
       const f = FIELD_BY_ID[el[track || "sci"]], pe = clamp(p * 0.1 * (0.4 + s.know / 70) * (this.decile >= 8 ? 1.4 : 1), 0.01, 0.6);
       opts.push({ label: `${el.label} · ${f.short} · chances ${Math.round(pe * 100)} %`, autoWeight: pe * 3, apply: () => this.enterUni(f, pe, el.label) });
     }
@@ -417,11 +418,13 @@ Object.assign(Life.prototype, {
       const pc = chance(f);
       opts.push({ label: `${f.label} · chances ${Math.round(pc * 100)} %`, autoWeight: pc * 3 / fields.length * (f.pref === track ? 2 : 1) * (f.id === "aero" ? 0.3 : 1), apply: () => this.enterUni(f, pc) });
     }
-    if (c.tert >= 8) {
+    if (c.tert >= 8 && !tried.includes("court")) {
       const pc = clamp(p * 1.4 * (pro ? 1.2 : 1), 0.05, 0.97), f = pro && this.trade ? shortFieldFor(this.trade) : FIELD_BY_ID.eco;
       opts.push({ label: `Études courtes (${degreeName(this, "court")}, 2 ans) · chances ${Math.round(pc * 100)} %`, autoWeight: pc * (pro ? 2 : 0.4), apply: () => this.enterUni(f, pc, null, true) });
     }
+    opts.push({ label: "Réessayer l’an prochain", sub: "Une année de césure : petits boulots, révisions, et une nouvelle chance.", autoWeight: 0.3, apply: () => { this.gapYear = this.age + 1; this.say("Prend une année de césure pour retenter sa chance.", "edu"); } });
     opts.push(work);
+    if (retry) { this.ask("Pas de place cette fois. Que faire ?", opts); return; }
     this.ask(pro ? "La formation professionnelle est finie. Travailler, ou continuer les études ?" : "Le lycée est fini. Quelles études choisir ?", opts);
   },
   enterUni(f, p, elite = null, short = false) {
@@ -435,19 +438,12 @@ Object.assign(Life.prototype, {
       if (elite) this.network += 2;
       return;
     }
-    // Recalé : beaucoup se rabattent sur une filière moins sélective.
-    const fallback = FIELD_BY_ID[this.track === "sci" ? "sci" : this.track === "eco" ? "eco" : "lettres"];
-    if (!short && f.id !== fallback.id && rand() < 0.5 && this.here.tert >= 5) {
-      this.say(`${elite ? "Échoue au concours" : `N’obtient pas de place en ${f.short}`} ; s’inscrit finalement en ${fallback.short}.`, "edu", true);
-      this.schooling = "universite";
-      this.degree = { field: fallback.id, level: "licence", elite: null };
-      this.studyEnd = this.age + (inList(this.code, FOUR_YEAR_DEGREE) ? 4 : 3);
-      this.bump("happy", -2);
-      return;
-    }
-    this.say(`${elite ? "Échoue au concours" : `N’obtient pas de place en ${f.short}`}${this.job ? "" : " et commence à travailler"}.`, "edu", true);
-    this.bump("happy", -5);
-    this.startWork();
+    // Recalé : c'est vous qui choisissez la suite (autre filière, année de césure, travail).
+    if (!this.uniTried || this.uniTried.age !== this.age) this.uniTried = { age: this.age, ids: [] };
+    this.uniTried.ids.push(elite ? "elite" : short ? "court" : f.id);
+    this.say(elite ? "Échoue au concours." : `N’obtient pas de place en ${short ? "études courtes" : f.short}.`, "edu", true);
+    this.bump("happy", -3);
+    this.askHigher(true);
   },
   // Chaque année d'université : frais, fin de licence, master, doctorat.
   studiesYear() {
@@ -616,14 +612,24 @@ Object.assign(Life.prototype, {
       }
     }
     // Fin de carrière sportive.
-    if (M.kind === "sport" && M.end && a >= M.end - 2 + Math.round(P.skill / 50) && (P.stage >= 1 || a >= M.end + 6) && !P.ended) return this.endSportCareer();
+    if (M.kind === "sport" && M.end && a >= M.end - 2 + Math.round(P.skill / 50) && (P.stage >= 1 || a >= M.end + 6) && !P.ended && P.endAskedAt !== a) {
+      P.endAskedAt = a;
+      this.ask(`À ${a} ans, le corps fatigue (${M.label}). Mettre fin à la carrière ?`, [
+        { label: "Arrêter", autoWeight: 2, apply: () => { if (this.passion === P) this.endSportCareer(); } },
+        { label: "Continuer encore une saison", sub: "Le niveau baisse, les blessures guettent.", autoWeight: 1, apply: () => { P.skill = clamp(P.skill - 4, 0, 100); this.say("Repart pour une saison de plus.", "work"); } },
+      ]);
+      return;
+    }
     if (M.look && a >= M.end && P.stage >= 1 && !P.ended) { P.ended = true; this.say("Les agences cherchent des visages plus jeunes : fin du mannequinat.", "work", true); if (this.isCareer()) this.loseJob("Doit trouver un autre métier."); this.passion = null; return; }
     // La célébrité de télé-réalité s'éteint vite.
     if (P.id === "tele" && P.fame < 12) {
       this.say("Plus personne ne l’invite sur les plateaux ; la célébrité est passée.", "work", true);
       if (this.isCareer()) this.loseJob("Il faut retrouver un métier.");
-      if (c.net >= 40 && this.calYear >= 2010) { this.passion = { id: "video", skill: 40, fame: 10, stage: 1, since: a, school: null, years: 0 }; this.say("Continue sur les réseaux sociaux, avec ceux qui la suivent encore.".replace("la suivent", this.g("le suivent", "la suivent")), "work"); }
-      else this.passion = null;
+      this.passion = null;
+      if (c.net >= 40 && this.calYear >= 2010) this.ask("Continuer sur les réseaux sociaux, avec ceux qui vous suivent encore ?", [
+        { label: "Oui, devenir créateur de contenu".replace("créateur", this.g("créateur", "créatrice")), autoWeight: 1, apply: () => { this.passion = { id: "video", skill: 40, fame: 10, stage: 1, since: a, school: null, years: 0 }; this.say("Continue sur les réseaux sociaux.", "work"); } },
+        { label: "Non, tourner la page", autoWeight: 1, apply: () => this.say("Tourne la page de la télévision.", "work") },
+      ]);
       return;
     }
     // Vivre de peu, longtemps : faut-il continuer à y croire ?

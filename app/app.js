@@ -683,6 +683,7 @@ function panelSheet(kind) {
       <div class="group">${rowsHtml(moneyRows(L).map(([k, v]) => [k, v.split(" · ")[0], v.split(" · ")[1]]))}</div>
       ${L.age < 16 && !L.job ? `<p class="group-footer">Encore enfant : ces choix compteront dès le premier revenu.</p>` : ""}
       ${budget.length ? `<p class="group-header">Budget de l’année</p><div class="group">${rowsHtml(budget)}</div>` : ""}
+      ${L.alive && L.business ? businessHtml(L) : ""}
       ${L.alive && L.age >= 6 ? spendHtml(L) : ""}
       <p class="group-header">Train de vie</p>${choice("spend", SPEND, L.spend)}
       <p class="group-header">Placements · répartition visée</p>
@@ -704,8 +705,7 @@ function panelSheet(kind) {
     }));
   }
   // Dépenses, mode de vie, « sans demander » (spending.js).
-  const sp = $("sheetBody").querySelector(".sp");
-  if (sp) sp.addEventListener("click", e => {
+  $("sheetBody").querySelectorAll(".sp").forEach(sp => sp.addEventListener("click", e => {
     const msg = spendClick(L, e.target);
     if (!msg) return;
     haptic(12); saveCurrent(L); toast(msg);
@@ -715,7 +715,7 @@ function panelSheet(kind) {
     panelSheet(kind);
     $("sheetBody").querySelectorAll("details").forEach((d, i) => { if (open[i]) d.open = true; });
     scroller.scrollTop = top;
-  });
+  }));
   $("sheetBody").querySelectorAll("[data-choice]").forEach(b => b.addEventListener("click", () => {
     const v = b.dataset.v, name = b.dataset.choice;
     if (name === "kids") L.wantKids = v;

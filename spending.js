@@ -25,7 +25,7 @@ const AUTO = {
   tripAbroad: { label: "Voyage à l’étranger", every: 2 },
   donate: { label: "Faire un don", every: 1 },
   hobby: { label: "Équipement et cours de loisirs", every: 1 },
-  kidsDecide: { label: "Décider pour chaque enfant", sub: "frais d’université · frais de mariage · demandes d’argent" },
+  kidsPay: { label: "Payer pour les enfants sans demander", sub: "frais d’université · frais de mariage · demandes d’argent" },
 };
 
 const isAdultKid = (L, k) => k.alive && L.age - k.born >= 18;
@@ -207,7 +207,7 @@ Object.assign(Life.prototype, {
   rawCareCost() { return median(this.here) * this.here.oop / 100; },
   // Les grandes dépenses des enfants : université, mariage, demandes d'argent.
   kidsYear() {
-    const m = median(this.here), ask = this.autoSpend && this.autoSpend.kidsDecide;
+    const m = median(this.here), ask = !(this.autoSpend && this.autoSpend.kidsPay);
     for (const k of this.children) {
       if (!k.alive) continue;
       const age = this.age - k.born;
@@ -350,7 +350,7 @@ function spendHtml(L) {
       ${Object.entries(LIFESTYLE).map(([k, g]) => `<p class="sp-head">${g.label}</p><div class="sp-pills">${Object.entries(g.opts).map(([v, [label]]) => `<button class="sp-pill${ls[k] === v ? " on" : ""}" data-ls="${k}" data-v="${v}">${esc(label)}</button>`).join("")}</div><p class="sp-note">${g.note}</p>`).join("")}
       <p class="sp-head">Sans demander</p>
       <div class="sp-pills">${Object.keys(AUTO).map(k => `<button class="sp-pill${auto[k] ? " on" : ""}" data-auto="${k}">${esc(AUTO[k].label)} <span>· ${esc(k === "kidsMoney" && L.children.some(c => isAdultKid(L, c)) ? `${autoSub(k)} · à votre enfant adulte` : k === "hobby" && hobbiesOf(L).length ? `${autoSub(k)} · ${PASSIONS[hobbiesOf(L)[0]].label.replace(/^(le |la |l’|les )/, "")}` : k === "tripHome" || k === "tripAbroad" ? `${autoSub(k)} · avec vos amis` : autoSub(k))}</span></button>`).join("")}</div>
-      <p class="sp-note">Une fois activé, chaque réglage s’applique de lui-même le moment venu ; ce qui coûte de l’argent, seulement si votre épargne dépasse trois fois le coût. Appuyez de nouveau pour désactiver. Sans « Décider pour chaque enfant », les frais d’université, de mariage et les demandes d’argent des enfants sont payés d’eux-mêmes quand l’épargne le permet.</p>
+      <p class="sp-note">Une fois activé, chaque réglage s’applique de lui-même le moment venu ; ce qui coûte de l’argent, seulement si votre épargne dépasse trois fois le coût. Appuyez de nouveau pour désactiver. Sans « Payer pour les enfants sans demander », chaque frais d’université, de mariage ou demande d’argent d’un enfant vous est posé comme une question.</p>
     </details>
     <p class="sp-head">Faire fructifier votre épargne</p>
     <div class="sp-pills">${assets.map(k => `<button class="sp-pill${(L.alloc[k] || 0) > 0 ? " on" : ""}" data-asset-toggle="${k}">${ASSETS[k].label} <span>· ${ASSET_RETURNS[k]}</span></button>`).join("")}</div>
@@ -359,6 +359,8 @@ function spendHtml(L) {
 }
 // Un clic dans la page : renvoie un message court, ou null.
 function spendClick(L, t) {
+  const bz = t.closest("[data-biz]");
+  if (bz) return bizAction(L, bz.dataset.biz, bz.dataset.arg) || "Impossible pour l’instant.";
   const sp = t.closest("[data-sp]"), lsb = t.closest("[data-ls]"), au = t.closest("[data-auto]"), as = t.closest("[data-asset-toggle]");
   if (sp) return spendDo(L, sp.dataset.sp, sp.dataset.arg) || "Impossible pour l’instant.";
   if (lsb) { L.lifeStyle()[lsb.dataset.ls] = lsb.dataset.v; return `${LIFESTYLE[lsb.dataset.ls].label} : ${LIFESTYLE[lsb.dataset.ls].opts[lsb.dataset.v][1]}`; }
