@@ -6,6 +6,12 @@ Simulation de vie en français, inspirée du concept de [1in8b.life](https://1in
 
 Vous naissez au hasard parmi les bébés de l’année (ou parmi les 8 milliards d’humains), puis vous vivez une vie entière, année après année, guidée par les statistiques réelles de tous les pays et territoires du monde (216), de 1900 à 2100.
 
+## Nouveautés (version 7) : adoption, testament, héritage de son vivant
+
+- **Adopter un enfant** (action « Adopter un enfant ») : un bébé, un enfant de 5 ou 10 ans, deux frères et sœurs, ou un enfant d’un autre pays ; frais, délai d’attente et chances d’agrément affichés (moins élevées pour un célibataire ou après 45 ans). Quand l’enfant est confié, c’est à vous de l’accueillir ou d’y renoncer. Il compte comme n’importe quel autre enfant : héritier, personnage jouable, lignée.
+- **Testament à bénéficiaires** : dans « Dépenser et investir », vous cochez les personnes à qui laisser votre héritage (enfants, conjoint, frères et sœurs, parents, petits-enfants, amis, associations) ; il est partagé à parts égales entre elles, avec la part estimée en regard. À la mort, l’écran de la lignée permet de le revoir avant de continuer avec un enfant.
+- **Changer de vie, c’est hériter tout de suite** : quand vous jouez un descendant sans que son aïeul soit mort, il reçoit sa part du testament de son vivant (dans la limite de l’épargne de l’aïeul, après droits), et l’aïeul, en pause, en est d’autant plus pauvre. Un enfant absent du testament ne reçoit rien.
+
 ## Nouveautés (version 6) : entreprises, descendants, immobilier
 
 - **Rien sans votre accord** : aucune entreprise n’est vendue sans que vous le décidiez (offres de rachat à accepter ou refuser ; à la retraite, continuer, garder l’entreprise avec un directeur, ou la vendre ; en émigrant, on la garde). Aucun enfant ne naît sans votre accord : chaque grossesse possible est une question, sauf si vous avez choisi « En vouloir (sans me demander) ».

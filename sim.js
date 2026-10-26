@@ -484,7 +484,8 @@ class Life {
       if (!p.alive) continue;
       p.age += 1;
       // Le parent dont on a joué la vie meurt exactement comme dans cette vie-là.
-      const dies = p.previous ? a >= p.deathAt : rand() < lifeTable(this.home, p.sex, this.calYear).qx[Math.min(p.age, MAX_AGE)];
+      // Un parent dont la vie est en pause ne meurt pas avant l'âge où l'on a repris la vie de l'enfant.
+      const dies = p.previous ? a >= p.deathAt : p.paused && a <= (this.protectUntil || 0) ? false : rand() < lifeTable(this.home, p.sex, this.calYear).qx[Math.min(p.age, MAX_AGE)];
       if (dies) {
         p.alive = false;
         const young = a < 18;
