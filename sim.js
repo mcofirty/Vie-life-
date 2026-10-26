@@ -532,34 +532,26 @@ class Life {
       if (rand() < p) { this.schooling = "secondaire"; this.say("Entre au collège.", "edu"); }
       else { this.schooling = null; this.say("Quitte l’école après le primaire.", "edu", true); }
     }
-    if (a === 15 && this.schooling === "secondaire") {
-      const poor = this.decile <= 3 && c.gdp < 15000;
-      this.ask(poor ? "La famille a besoin d’argent. Continuer l’école ou commencer à travailler ?" : "Fin du collège. Que faire ensuite ?", [
-        { label: "Continuer au lycée", autoWeight: poor ? 1 : 4, apply: () => { this.say("Choisit de continuer au lycée.", "edu"); if (poor) this.bump("rel", -4); } },
-        { label: "Commencer à travailler", autoWeight: poor ? 2 : 0.5, apply: () => { this.schooling = null; this.say("Quitte l’école pour travailler.", "edu", true); this.startWork(); } },
-      ]);
-    }
+    // Fin du collège : filière générale, voie professionnelle, sport-études (careers.js).
+    if (a === 15 && this.schooling === "secondaire") this.askHighSchool();
     if (a === 18 && this.schooling === "secondaire") {
       this.edu = "secondaire";
       this.schooling = null;
-      this.say("Termine le lycée.", "edu", true);
-      const secShare = clamp((c.school - 3.5) / 7, 0.1, 1);
-      const p = clamp((c.tert / 100) / secShare, 0.02, 0.95) * (0.6 + s.know / 125) * (0.8 + 0.04 * this.decile);
-      this.ask("Le lycée est fini. Tenter l’université ?", [
-        { label: "Tenter l’université", autoWeight: p * 3, apply: () => {
-          if (rand() < clamp(p, 0.02, 0.97)) { this.schooling = "universite"; this.say("Est " + this.g("admis", "admise") + " à l’université.", "edu", true); this.bump("happy", 5); }
-          else { this.say("N’obtient pas de place à l’université et commence à travailler.", "edu", true); this.bump("happy", -5); this.startWork(); }
-        } },
-        { label: "Travailler tout de suite", autoWeight: 1, apply: () => { this.say("Choisit de travailler tout de suite."); this.startWork(); } },
-      ]);
+      const t = this.track === "pro" && TRADE_BY_ID[this.trade];
+      this.say(t ? `Obtient son diplôme professionnel (${this.vocShort || "voie pro"}, ${t.label.toLowerCase()}).` : "Termine le lycée.", "edu", true);
+      this.askHigher();
     }
+    // Apprentissage chez un artisan pour les enfants qui ont quitté l'école.
+    if (a >= 12 && a <= 15 && !this.schooling && !this.job && !this.trade && !this.apprenticeOffered && c.gdp < 20000 && rand() < 0.3) { this.apprenticeOffered = true; this.offerApprenticeship(); }
+    this.apprenticeYear();
     // Études reprises à l'âge adulte.
     if (this.adultStudy && a >= this.adultStudy && this.schooling === "universite") {
       this.edu = "universite"; this.schooling = null; this.adultStudy = null;
       this.say("Obtient son diplôme universitaire, des années après le lycée.", "edu", true);
       this.bump("happy", 6); this.bump("know", 4);
     }
-    if (a === 22 && this.schooling === "universite" && !this.adultStudy) {
+    this.studiesYear();
+    if (a === 22 && this.schooling === "universite" && !this.adultStudy && !this.degree) {
       this.edu = "universite";
       this.schooling = null;
       this.say("Obtient son diplôme universitaire.", "edu", true);
@@ -570,7 +562,7 @@ class Life {
 
     // Les enfants hors de l'école finissent par travailler ; les chômeurs retrouvent
     // un emploi plus ou moins vite selon le chômage du pays.
-    if (!this.schooling && !this.job && !this.business && !this.retired && !this.homemaker && !this.queue.length && a >= 12) {
+    if (!this.schooling && !this.job && !this.business && !this.retired && !this.homemaker && !this.queue.length && a >= 12 && !(this.apprenticeUntil > a)) {
       const p = a < 15 ? clamp(0.6 - Math.log10(c.gdp) / 10, 0.05, 0.4) : clamp(0.6 - c.unemp / 40, 0.15, 0.7);
       if (rand() < p) this.startWork();
     }
@@ -609,8 +601,9 @@ class Life {
       this.bump("happy", -10);
     }
 
-    // Travail
-    if (this.job && !this.retired && !this.business) {
+    // Travail (les carrières d'artiste ou de sportif suivent leurs propres règles : careers.js)
+    const career = !!(this.jobInfo && this.jobInfo.career);
+    if (this.job && !this.retired && !this.business && !career) {
       const self = this.jobInfo && this.jobInfo.self;
       if (rand() < (self ? 0.03 : 0.02 + c.unemp / 250) + (c.gdp < 10000 ? 0.02 : 0)) {
         if (self) { this.say("Une mauvaise saison ruine le travail de l’année.", "work", true); this.incomePct = clamp(this.incomePct - 0.08, 0.01, 0.99); }
@@ -620,7 +613,7 @@ class Life {
       else if (rand() < 0.04 + s.know / 1000) { this.say(pick(["Obtient une promotion.", "Prend du galon.", "Son activité se développe."]), "work", true); this.incomePct = clamp(this.incomePct + 0.06, 0.01, 0.99); this.bump("happy", 5); }
       if (this.priority === "travail" && this.job) this.incomePct = clamp(this.incomePct + 0.01, 0.01, 0.99);
     }
-    if (this.job && !this.retired && !this.business) {
+    if (this.job && !this.retired && !this.business && !career) {
       if (a >= 22 && a <= 55 && rand() < 0.03) {
         this.ask("On lui propose un poste mieux payé, loin de ses proches. Accepter ?", [
           { label: "Accepter le poste", autoWeight: 1.5, apply: () => { this.incomePct = clamp(this.incomePct + 0.12, 0.01, 0.99); this.income = incomeAt(this.here, this.incomePct) * this.econ; this.say("Accepte un poste mieux payé dans une autre ville.", "work", true); this.bump("rel", -6); this.bump("happy", 2); } },
@@ -628,6 +621,10 @@ class Life {
         ]);
       }
     }
+    // Passions : talent repéré, centre de formation, percées, notoriété.
+    this.childhoodPassion();
+    this.academyOffer();
+    this.passionYear();
     this.computeIncome();
     if ((this.job || this.business) && !this.retired && a >= this.retireAge() && (rand() < 0.5 || s.health < 30)) this.retire();
 
@@ -735,7 +732,7 @@ class Life {
     const living = this.children.filter(k => k.alive).length;
     return {
       name: this.name, sex: this.sex, home: this.home, code: this.code, age: this.age, year: this.year, alive: this.alive, cause: this.cause,
-      edu: this.edu, job: this.job, income: Math.round(this.income), incomePct: this.incomePct,
+      edu: this.edu, eduText: eduText(this), passion: this.passion ? this.passionLabel() : null, job: this.job, income: Math.round(this.income), incomePct: this.incomePct,
       marriedEver: this.marriedEver, children: this.children.length, childrenAlive: living, grandkids: this.grandkids,
       wealth: Math.round(this.netWorth()), house: !!this.house, business: this.business ? this.business.label : null,
       gen: this.lineage ? this.lineage.gen : 1,
