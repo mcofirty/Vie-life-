@@ -225,6 +225,8 @@ select, textarea, input[type="text"], .name-field input {
 @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
 .options { display: grid; gap: 10px; margin-top: 16px; }
 .options .btn { justify-content: center; }
+.options .btn.has-sub { flex-direction: column; align-items: flex-start; text-align: left; border-radius: 16px; gap: .2em; }
+.options .btn.has-sub small { font-weight: 400; font-size: .8rem; opacity: .85; line-height: 1.35; }
 .certificate.death h2 { margin-top: 4px; }
 .certificate h3 { margin-top: 20px; }
 .lead-sm { color: var(--ink-2); }

@@ -146,6 +146,8 @@ a { color: var(--tint); text-decoration: none; }
 .btn-plain { display: block; width: 100%; color: var(--tint); font-weight: 600; padding: 14px; }
 .btn-gray { display: block; width: 100%; background: var(--fill); font-weight: 600; padding: 16px; border-radius: 999px; }
 .btn-filled + *, .btn-gray + * { margin-top: 10px; }
+.btn-filled.has-sub, .btn-gray.has-sub { text-align: left; border-radius: 20px; }
+.has-sub small { display: block; font-weight: 400; font-size: 13px; opacity: .85; line-height: 1.35; margin-top: 4px; }
 
 /* ---------- Carte d'accueil : un billet corail ---------- */
 .hero-card {

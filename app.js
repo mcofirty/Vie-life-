@@ -673,7 +673,7 @@ function showDecision() {
   const box = $("decOptions");
   box.innerHTML = "";
   d.options.forEach((o, i) => {
-    const b = el("button", { className: `btn ${i === 0 ? "primary" : "ghost"}`, textContent: o.label });
+    const b = el("button", { className: `btn ${i === 0 ? "primary" : "ghost"}${o.sub ? " has-sub" : ""}` }, `${esc(o.label)}${o.sub ? `<small>${esc(o.sub)}</small>` : ""}`);
     b.addEventListener("click", () => {
       $("decisionModal").hidden = true;
       life.resolve(i);

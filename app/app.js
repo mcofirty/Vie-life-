@@ -785,7 +785,7 @@ function decisionSheet() {
   const d = life.queue[0];
   if (!d) return;
   openSheet(`<p class="sheet-kicker">Une décision · ${ans(life.age)} · ${life.calYear}</p><h2 class="sheet-title">${esc(d.text)}</h2>
-    ${d.options.map((o, i) => `<button class="${i === 0 ? "btn-filled" : "btn-gray"}" data-i="${i}">${esc(o.label)}</button>`).join("")}
+    ${d.options.map((o, i) => `<button class="${i === 0 ? "btn-filled" : "btn-gray"}${o.sub ? " has-sub" : ""}" data-i="${i}">${esc(o.label)}${o.sub ? `<small>${esc(o.sub)}</small>` : ""}</button>`).join("")}
     <button class="btn-plain" id="decLater">Plus tard</button>`, { onClose: renderLife });
   $("pendingBtn").hidden = true;
   $("sheetBody").querySelectorAll("[data-i]").forEach(b => b.addEventListener("click", () => {
