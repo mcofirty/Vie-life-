@@ -507,7 +507,21 @@ function showResume() {
   const cur = life && life.alive ? { life } : loadCurrent();
   $("resumeGroup").hidden = !cur;
   if (cur) $("resumeSub").textContent = `${cur.life.country.flag} ${cur.life.name}, ${ans(cur.life.age)} · ${cur.life.calYear}`;
+  const paused = pausedLives().filter(p => !cur || p.id !== cur.life.born.getTime());
+  $("pausedGroup").hidden = !paused.length;
+  $("pausedGroup").innerHTML = `<p class="group-header">Vies en pause</p><div class="group">${paused.map(p => `<button class="cell link" data-resume-home="${p.id}"><span class="flag-cell">${p.flag}</span><span class="cell-main"><b>${esc(p.name)}</b><small>${ans(p.age)} · ${p.year}</small></span><span class="chev"></span></button>`).join("")}</div>`;
 }
+$("pausedGroup").addEventListener("click", e => {
+  const b = e.target.closest("[data-resume-home]"); if (!b) return;
+  haptic();
+  if (!life || !life.alive) { const cur = loadCurrent(); if (cur) { life = cur.life; peers = cur.peers; } }
+  const r = resumePaused(+b.dataset.resumeHome, life, peers);
+  if (!r) { showResume(); return; }
+  life = r.life; peers = r.peers;
+  saveCurrent(life, peers);
+  $("lifeView").hidden = true;
+  beginLife(true);
+});
 $("resumeBtn").addEventListener("click", () => {
   if (!life || !life.alive) {
     const cur = loadCurrent();
@@ -650,7 +664,19 @@ function panelSheet(kind) {
         <button class="btn-gray" data-do="visit" ${L.visitedAt === L.age ? "disabled" : ""}>Voir la famille</button>
         <button class="btn-gray" data-do="help" ${L.helpedAt === L.age || L.savings < 1 ? "disabled" : ""}>Aider financièrement</button>
       </div>
-      <p class="group-footer">Une fois par an. Les liens comptent pour le mariage, les enfants et la solitude du grand âge.</p>`, { dismissable: true, onClose: renderLife });
+      <p class="group-footer">Une fois par an. Les liens comptent pour le mariage, les enfants et la solitude du grand âge.</p>
+      ${descendantsHtml(L)}`, { dismissable: true, onClose: renderLife });
+    $("sheetBody").querySelectorAll("[data-play],[data-resume]").forEach(b => b.addEventListener("click", () => {
+      const play = b.dataset.play != null, kid = play && L.children[+b.dataset.play];
+      if (play && !confirm(`Jouer la vie de ${kid.name} ? La vie de ${L.name} est mise en pause : vous pourrez la reprendre.`)) return;
+      haptic(15);
+      setRunning(false);
+      const r = play ? playDescendant(L, peers, +b.dataset.play, prefs.classroom) : resumePaused(+b.dataset.resume, L, peers);
+      if (!r) return;
+      life = r.life; peers = r.peers;
+      closeSheet();
+      setTimeout(() => { if (play) beginLife(); else { saveCurrent(life, peers); beginLife(true); } toast(play ? `Vous jouez désormais ${life.name}` : `Retour à la vie de ${life.name}`); }, 320);
+    }));
   } else {
     const d = L.houseDeal(), port = portfolioRows(L), alloc = L.validAlloc(), budget = budgetRows(L);
     openSheet(`<h2 class="sheet-title">Dépenser et investir</h2>

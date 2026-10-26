@@ -128,6 +128,7 @@ function moneyRows(L) {
   rows.push(["Épargne et placements", dollars(L.savings)]);
   if (L.house) rows.push(["Logement", `${dollars(L.house.value)}${L.house.loan > 0 ? ` · reste ${dollars(L.house.loan)} à rembourser` : ""}`]);
   else rows.push(["Logement", L.urban ? "locataire, en ville" : "locataire ou chez la famille, à la campagne"]);
+  if ((L.props || []).length) rows.push(["Biens immobiliers", `${L.props.length} · valeur ${dollars(L.props.reduce((x, p) => x + p.value, 0))}${L.props.some(p => p.loan > 0) ? ` · reste ${dollars(L.props.reduce((x, p) => x + p.loan, 0))} à rembourser` : ""}`]);
   if (L.business) rows.push(["Entreprise", `${L.business.label} · valeur ≈ ${dollars(L.business.value)}`]);
   rows.push(["Dettes", L.debt > 0 ? dollars(L.debt) : "aucune"]);
   rows.push(["Patrimoine net", `${dollars(L.netWorth())} · plus riche que ${Math.round(L.wealthPct() * 100)} % du pays`]);
@@ -520,3 +521,40 @@ function loadCurrent() {
   try { return { life: reviveLife(o.life), peers: p.map(reviveLife) }; } catch { return null; }
 }
 function clearCurrent() { store.del(CURRENT_KEY); store.del(PEERS_KEY); }
+// Vies en pause : on joue un descendant, puis on peut revenir à n'importe laquelle.
+const PAUSED_KEY = "vie.paused";
+function pausedLives() { return store.get(PAUSED_KEY, []).filter(x => x && x.life); }
+function pauseLife(L, peers) {
+  if (!L || !L.alive) return;
+  const list = pausedLives().filter(x => x.id !== L.born.getTime());
+  list.unshift({ id: L.born.getTime(), name: L.name, flag: countryAt(L.code, L.calYear).flag, age: L.age, year: L.calYear, life: serializeLife(L), peers: (peers || []).map(serializeLife), saved: Date.now() });
+  store.set(PAUSED_KEY, list.slice(0, 6));
+}
+// Reprend une vie en pause ; la vie en cours (s'il y en a une) est mise en pause à son tour.
+function resumePaused(id, current, currentPeers) {
+  const list = pausedLives(), item = list.find(x => x.id === id);
+  if (!item) return null;
+  store.set(PAUSED_KEY, list.filter(x => x.id !== id));
+  if (current && current.alive && current.born.getTime() !== id) pauseLife(current, currentPeers);
+  try { return { life: reviveLife(item.life), peers: (item.peers || []).map(reviveLife) }; } catch { return null; }
+}
+// Les enfants qu'on peut jouer, et les vies en pause (pour les panneaux Famille).
+function descendantsHtml(L) {
+  const kids = L.children.map((k, i) => ({ k, i })).filter(x => x.k.alive);
+  const paused = pausedLives().filter(x => x.id !== L.born.getTime());
+  if (!kids.length && !paused.length) return "";
+  return `<div class="sp"><p class="sp-head">Jouer un descendant</p>
+    ${kids.map(({ k, i }) => `<div class="sp-card"><div class="sp-main"><b>${esc(k.name)}</b><small>${k.sex === "m" ? "Fils" : "Fille"} · ${ans(L.age - k.born)} · ${countryAt(k.code || L.home, L.calYear).flag} ${countryAt(k.code || L.home, L.calYear).name}</small></div><button class="sp-buy" data-play="${i}">Jouer sa vie</button></div>`).join("") || `<p class="sp-note">Pas encore d’enfant.</p>`}
+    <p class="sp-note">La vie de ${esc(L.name)} est mise en pause, sans mourir : vous pourrez la reprendre depuis l’accueil ou ici.</p>
+    ${paused.length ? `<p class="sp-head">Vies en pause</p>${paused.map(p => `<div class="sp-card"><div class="sp-main"><b>${p.flag} ${esc(p.name)}</b><small>${ans(p.age)} · ${p.year}</small></div><button class="sp-buy" data-resume="${p.id}">Reprendre</button></div>`).join("")}` : ""}
+  </div>`;
+}
+// Jouer un enfant : la vie en cours est mise en pause.
+function playDescendant(L, peers, kidIndex, classroom) {
+  const kid = L.children[kidIndex];
+  if (!kid || !kid.alive) return null;
+  pauseLife(L, peers);
+  const K = descendantLife(L, kid, classroom);
+  const year = K.year;
+  return { life: K, peers: Array.from({ length: 4 }, () => simulateWhole({ mode: "births", year, classroom })) };
+}

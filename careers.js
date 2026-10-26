@@ -885,3 +885,41 @@ JOBS_LIST.push(
 );
 JOB_BY_ID.coach = JOBS_LIST[JOBS_LIST.length - 2];
 JOB_BY_ID.artteacher = JOBS_LIST[JOBS_LIST.length - 1];
+
+// --- Entreprises dans sa spécialité (études ou métier appris) -------------------------
+Object.assign(BUSINESSES, {
+  clinic: { label: "Cabinet médical, puis clinique privée", cost: 2.5, mult: 2.4, sd: 0.4, risk: 0.6, field: ["med"] },
+  nursing: { label: "Cabinet infirmier, maison de retraite", cost: 1.2, mult: 1.4, sd: 0.4, risk: 0.7, field: ["sante"] },
+  lawfirm: { label: "Cabinet d’avocats", cost: 1.0, mult: 2.0, sd: 0.5, risk: 0.7, field: ["droit"] },
+  consulting: { label: "Cabinet de conseil", cost: 0.8, mult: 1.8, sd: 0.6, risk: 0.9, field: ["eco"] },
+  engineering: { label: "Bureau d’études et d’ingénierie", cost: 1.5, mult: 1.9, sd: 0.5, risk: 0.8, field: ["inge", "sci"] },
+  software: { label: "Éditeur de logiciels", cost: 1.0, mult: 1.2, sd: 1.1, risk: 1.4, field: ["info"], from: 1975 },
+  biotech: { label: "Laboratoire, biotechnologies", cost: 3.0, mult: 1.0, sd: 1.2, risk: 1.6, field: ["sci", "med"], from: 1980 },
+  archi: { label: "Agence d’architecture", cost: 0.8, mult: 1.6, sd: 0.5, risk: 0.9, field: ["archi"] },
+  media: { label: "Agence de communication, média", cost: 0.8, mult: 1.3, sd: 0.8, risk: 1.2, field: ["journ"] },
+  studio: { label: "Studio de création (design, musique, cinéma)", cost: 0.7, mult: 1.0, sd: 0.9, risk: 1.3, field: ["arts"] },
+  school: { label: "École privée, soutien scolaire", cost: 1.0, mult: 1.3, sd: 0.4, risk: 0.8, field: ["enseign", "lettres"] },
+  publishing: { label: "Maison d’édition, école de langues", cost: 0.7, mult: 1.1, sd: 0.6, risk: 1.0, field: ["lettres"] },
+  gym: { label: "Salle de sport", cost: 1.0, mult: 1.2, sd: 0.5, risk: 1.0, field: ["sport"] },
+  agrobiz: { label: "Entreprise agroalimentaire", cost: 2.0, mult: 1.5, sd: 0.6, risk: 1.0, field: ["agro"] },
+  airline: { label: "Compagnie aérienne régionale", cost: 8.0, mult: 3.0, sd: 0.9, risk: 1.6, field: ["aero"], from: 1950 },
+  electric: { label: "Entreprise d’électricité", cost: 0.5, mult: 1.3, sd: 0.4, risk: 0.8, trade: ["elec"] },
+  garage: { label: "Garage automobile", cost: 0.7, mult: 1.3, sd: 0.4, risk: 0.9, trade: ["meca", "soud"] },
+  salon: { label: "Salon de coiffure et d’esthétique", cost: 0.5, mult: 1.1, sd: 0.4, risk: 0.9, trade: ["coif"] },
+  bistro: { label: "Restaurant, traiteur", cost: 1.0, mult: 1.3, sd: 0.6, risk: 1.2, trade: ["cuis"] },
+  couture: { label: "Atelier de couture, marque de vêtements", cost: 0.4, mult: 1.0, sd: 0.6, risk: 1.0, trade: ["cout"] },
+  itshop: { label: "Société de services informatiques", cost: 0.6, mult: 1.3, sd: 0.6, risk: 1.0, trade: ["num", "phone"], from: 1985 },
+  carehome: { label: "Service d’aide à domicile", cost: 0.5, mult: 1.1, sd: 0.4, risk: 0.8, trade: ["soin"] },
+  logistics: { label: "Entreprise de transport et de livraison", cost: 1.0, mult: 1.2, sd: 0.5, risk: 1.1, trade: ["trans"] },
+  security: { label: "Société de sécurité", cost: 0.6, mult: 1.2, sd: 0.4, risk: 0.9, trade: ["secu"] },
+  shop2: { label: "Commerce de détail", cost: 0.6, mult: 1.1, sd: 0.5, risk: 1.0, trade: ["comm", "secr"] },
+  builder2: { label: "Entreprise de bâtiment", cost: 1.0, mult: 1.4, sd: 0.6, risk: 1.1, trade: ["bat"] },
+  farm2: { label: "Exploitation agricole et élevage", cost: 0.8, mult: 1.0, sd: 0.5, risk: 1.0, trade: ["agri"] },
+});
+// Une entreprise de sa spécialité : selon le diplôme ou le métier appris.
+function specialtyBusiness(L, b) {
+  return (b.field && L.degree && L.edu === "universite" && b.field.includes(L.degree.field)) || (b.trade && L.trade && b.trade.includes(L.trade));
+}
+ACTIONS.push({ id: "growbiz", cat: "pro", label: "Développer l’entreprise", desc: L => { const o = L.business && L.growthOption(); return o ? `Devenir une ${o.next.label} : investir ≈ ${money(o.cost)}, chances ${Math.round(o.p * 100)} %.` : "Faire grandir son entreprise, jusqu’à la multinationale."; },
+  when: L => !L.business ? "Pas d’entreprise." : (L.business.size || 0) >= 3 ? "C’est déjà une multinationale." : L.business.grewAt === L.age ? "Déjà tenté cette année." : !L.growthOption().can ? "Pas assez d’argent pour investir." : true,
+  run: L => { L.business.grewAt = L.age; return L.growBusiness(); } });
