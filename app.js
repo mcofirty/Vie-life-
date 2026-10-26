@@ -619,7 +619,7 @@ function openPanel(kind) {
     const d = L.houseDeal(), port = portfolioRows(L), alloc = L.validAlloc(), budget = budgetRows(L);
     $("panelTitle").textContent = "Dépenser et investir";
     $("panelBody").innerHTML = rows(moneyRows(L)) + (L.age < 16 && !L.job ? `<p class="notice">Encore enfant : l’argent de la famille n’est pas le vôtre. Ces choix compteront dès le premier revenu.</p>` : "")
-      + (budget.length ? `<h3>Budget de l’année</h3>${rows(budget)}` : "") + (L.alive && L.passion ? careerHtml(L) : "") + (L.alive && L.business ? businessHtml(L) : "") + (L.alive && L.age >= 6 ? spendHtml(L) : "") + `
+      + (budget.length ? `<h3>Budget de l’année</h3>${rows(budget)}` : "") + (L.alive && L.passion ? careerHtml(L) : "") + (L.alive ? politicsHtml(L) : "") + (L.alive && L.business ? businessHtml(L) : "") + (L.alive && L.age >= 6 ? spendHtml(L) : "") + `
       <h3>Train de vie</h3>${radios("spend", SPEND, L.spend)}
       <h3>Placements <small>répartition visée, rééquilibrée chaque année</small></h3>
       <div class="alloc">${port.map(r => `<div class="alloc-row${r.available ? "" : " off"}">

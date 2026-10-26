@@ -604,8 +604,8 @@ class Life {
       this.bump("happy", -10);
     }
 
-    // Travail (les carrières d'artiste ou de sportif suivent leurs propres règles : careers.js)
-    const career = !!(this.jobInfo && this.jobInfo.career);
+    // Travail (les carrières d'artiste ou de sportif, et les mandats politiques, suivent leurs propres règles : careers.js, politics.js)
+    const career = !!(this.jobInfo && (this.jobInfo.career || this.jobInfo.politics));
     if (this.job && !this.retired && !this.business && !career) {
       const self = this.jobInfo && this.jobInfo.self;
       const pub = this.jobInfo && this.jobInfo.sector === "pub";
