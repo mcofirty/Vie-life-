@@ -260,7 +260,7 @@ class Life {
     this.marriedEver = false;
     this.children = [];
     this.grandkids = 0;
-    this.wantKids = "oui";
+    this.wantKids = "demander";
     // Famille d'origine (ou, pour un descendant, la famille de la vie précédente)
     if (opts.lineage) this.initLineage(opts.lineage);
     else this.initParents(c);
@@ -563,7 +563,8 @@ class Life {
 
     // Les enfants hors de l'école finissent par travailler ; les chômeurs retrouvent
     // un emploi plus ou moins vite selon le chômage du pays.
-    if (!this.schooling && !this.job && !this.business && !this.retired && !this.homemaker && !this.queue.length && a >= 12 && !(this.apprenticeUntil > a)) {
+    if (this.gapYear === a) { this.gapYear = null; this.uniTried = null; this.askHigher(); }
+    if (!this.schooling && !this.job && !this.business && !this.retired && !this.homemaker && !this.queue.length && a >= 12 && !(this.apprenticeUntil > a) && this.gapYear == null) {
       const p = a < 15 ? clamp(0.6 - Math.log10(c.gdp) / 10, 0.05, 0.4) : clamp(0.6 - c.unemp / 40, 0.15, 0.7);
       if (rand() < p) this.startWork();
     }
@@ -630,7 +631,23 @@ class Life {
     this.academyOffer();
     this.passionYear();
     this.computeIncome();
-    if ((this.job || this.business) && !this.retired && a >= this.retireAge() && (rand() < 0.5 || s.health < 30)) this.retire();
+    if (this.business && !this.retired && a >= this.retireAge() && (this.bizRetireAt == null || a - this.bizRetireAt >= 3)) {
+      // Chef d'entreprise : c'est vous qui décidez de la retraite et du sort de l'entreprise.
+      this.bizRetireAt = a;
+      const b = this.business;
+      this.ask(`Âge de la retraite. Que faire de ${b.label.toLowerCase()} ?`, [
+        { label: "Continuer à diriger", autoWeight: 1, apply: () => this.say("Continue à diriger son entreprise.", "work") },
+        { label: "Prendre sa retraite et garder l’entreprise", sub: "Un directeur la gère ; vous touchez une part des bénéfices.", autoWeight: 2, apply: () => this.retire() },
+        { label: `Vendre (≈ ${money(b.value)}) et prendre sa retraite`, autoWeight: 1, apply: () => { if (!this.business) return; this.addMoney(b.value); this.say(`Vend ${b.label.toLowerCase()} (${money(b.value)}).`, "money", true); this.business = null; this.retire(); } },
+      ]);
+    } else if (this.job && !this.business && !this.retired && a >= this.retireAge() && (this.retireAskedAt == null || a - this.retireAskedAt >= 2)) {
+      // La retraite : c'est vous qui décidez.
+      this.retireAskedAt = a;
+      this.ask(`${a} ans : l’âge de la retraite est là. Prendre sa retraite ?`, [
+        { label: "Prendre sa retraite", sub: s.health < 30 ? "La santé est fragile." : "", autoWeight: s.health < 30 ? 4 : 1.5, apply: () => this.retire() },
+        { label: "Continuer à travailler", sub: "On vous reposera la question dans deux ans.", autoWeight: 1, apply: () => this.say("Choisit de continuer à travailler.", "work") },
+      ]);
+    }
 
     // Amour et mariage
     if (!this.married && a >= 18) {
@@ -646,7 +663,15 @@ class Life {
         ]);
       }
     }
-    if (this.married && rand() < 0.012 * (1.5 - s.rel / 100) * (c.gdp > 20000 ? 1.6 : 0.8) * (this.calYear < 1970 ? 0.3 : 1)) this.divorce();
+    // Le conjoint veut partir : on peut tenter de sauver le couple, ou accepter.
+    if (this.married && !this.queue.some(d => d.split) && rand() < 0.012 * (1.5 - s.rel / 100) * (c.gdp > 20000 ? 1.6 : 0.8) * (this.calYear < 1970 ? 0.3 : 1)) {
+      const save = clamp(0.3 + s.rel / 200, 0.2, 0.75);
+      this.ask(`${this.partner} parle de divorcer. Que faire ?`, [
+        { label: "Tenter de sauver le couple", sub: `Thérapie, temps à deux… chances ≈ ${Math.round(save * 100)} %`, autoWeight: 2, apply: () => { if (!this.married) return; if (rand() < save) { this.say(`Traverse une crise avec ${this.partner}, et la surmonte.`, "family", true); this.bump("rel", 3); } else { this.say(`Malgré les efforts, ${this.partner} part.`, "family", true); this.divorce(); } } },
+        { label: "Accepter le divorce", autoWeight: 1, apply: () => { if (this.married) this.divorce(); } },
+      ]);
+      this.queue[this.queue.length - 1].split = true;
+    }
     if (this.married && a > 55 && rand() < 0.012 * (a - 50) / 10) {
       this.say(`${this.partner} meurt. ${this.g("Il", "Elle")} reste ${this.g("veuf", "veuve")}.`, "family", true);
       this.widowedAt = this.age;
@@ -654,10 +679,21 @@ class Life {
     }
 
     // Enfants
-    if (this.married && a >= 16 && a <= 44) {
-      const plan = this.wantKids === "oui" ? 1 : this.wantKids === "plusTard" ? 0.25 : clamp(0.05 + (c.tfr - 1.5) * 0.08, 0.05, 0.5);
-      const p = clamp(c.tfr / 16, 0.03, 0.45) * (this.children.length >= Math.round(c.tfr + 1) ? 0.3 : 1) * plan;
-      if (rand() < p) this.haveChild();
+    // Aucun enfant sans votre accord : « Me demander » pose la question, « En vouloir » vaut accord.
+    if (this.married && a >= 16 && a <= 44 && (this.wantKids === "oui" || this.wantKids === "demander") && !this.queue.some(d => d.baby)) {
+      const p = clamp(c.tfr / 16, 0.03, 0.45) * (this.children.length >= Math.round(c.tfr + 1) ? 0.3 : 1);
+      if (rand() < p) {
+        if (this.wantKids === "oui") this.haveChild();
+        else {
+          const n = this.children.filter(k => k.alive).length;
+          this.ask(`Avec ${this.partner}, un ${n ? "nouvel " : ""}enfant pourrait arriver cette année. Le souhaitez-vous ?`, [
+            { label: n ? "Oui, un enfant de plus" : "Oui, avoir un enfant", autoWeight: clamp(c.tfr / 2, 0.3, 3) / (1 + n * 0.4), apply: () => this.haveChild() },
+            { label: "Pas cette année", autoWeight: 1, apply: () => this.say("Choisit d’attendre pour avoir un enfant.", "family") },
+            { label: "Ne plus vouloir d’enfant", autoWeight: n >= 2 ? 0.6 : 0.1, apply: () => { this.wantKids = "non"; this.say(n ? "Décide de ne plus avoir d’enfant." : "Décide de ne pas avoir d’enfant.", "family"); } },
+          ]);
+          this.queue[this.queue.length - 1].baby = true;
+        }
+      }
     }
 
     // Émigration

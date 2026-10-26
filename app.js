@@ -377,7 +377,18 @@ function showResume() {
   const cur = life && life.alive ? { life } : loadCurrent();
   $("resumeBtn").hidden = !cur;
   if (cur) $("resumeBtn").textContent = `Reprendre : ${cur.life.country.flag} ${cur.life.name}, ${ans(cur.life.age)}`;
+  const paused = pausedLives().filter(p => !cur || p.id !== cur.life.born.getTime());
+  $("pausedList").innerHTML = paused.length ? `<p class="tiny muted">Vies en pause</p>${paused.map(p => `<button class="btn ghost small" data-resume-home="${p.id}">${p.flag} ${esc(p.name)}, ${ans(p.age)} · ${p.year}</button>`).join("")}` : "";
 }
+$("pausedList").addEventListener("click", e => {
+  const b = e.target.closest("[data-resume-home]"); if (!b) return;
+  if (!life || !life.alive) { const cur = loadCurrent(); if (cur) { life = cur.life; peers = cur.peers; } }
+  const r = resumePaused(+b.dataset.resumeHome, life, peers);
+  if (!r) { showResume(); return; }
+  life = r.life; peers = r.peers;
+  saveCurrent(life, peers);
+  beginLife(true);
+});
 $("resumeBtn").addEventListener("click", () => {
   if (!life || !life.alive) {
     const cur = loadCurrent();
@@ -603,12 +614,12 @@ function openPanel(kind) {
         <button class="btn small" data-do="visit" ${L.visitedAt === L.age || !L.alive ? "disabled" : ""}>Passer du temps en famille</button>
         <button class="btn small" data-do="help" ${L.helpedAt === L.age || L.savings < 1 || !L.alive ? "disabled" : ""}>Aider la famille financièrement</button>
       </div>
-      <p class="tiny muted">Une fois par an. Les liens familiaux comptent pour le mariage, les enfants et la solitude du grand âge.</p>`;
+      <p class="tiny muted">Une fois par an. Les liens familiaux comptent pour le mariage, les enfants et la solitude du grand âge.</p>` + (L.alive ? descendantsHtml(L) : "");
   } else if (kind === "money") {
     const d = L.houseDeal(), port = portfolioRows(L), alloc = L.validAlloc(), budget = budgetRows(L);
     $("panelTitle").textContent = "Dépenser et investir";
     $("panelBody").innerHTML = rows(moneyRows(L)) + (L.age < 16 && !L.job ? `<p class="notice">Encore enfant : l’argent de la famille n’est pas le vôtre. Ces choix compteront dès le premier revenu.</p>` : "")
-      + (budget.length ? `<h3>Budget de l’année</h3>${rows(budget)}` : "") + (L.alive && L.age >= 6 ? spendHtml(L) : "") + `
+      + (budget.length ? `<h3>Budget de l’année</h3>${rows(budget)}` : "") + (L.alive && L.business ? businessHtml(L) : "") + (L.alive && L.age >= 6 ? spendHtml(L) : "") + `
       <h3>Train de vie</h3>${radios("spend", SPEND, L.spend)}
       <h3>Placements <small>répartition visée, rééquilibrée chaque année</small></h3>
       <div class="alloc">${port.map(r => `<div class="alloc-row${r.available ? "" : " off"}">
@@ -646,6 +657,20 @@ $("panelBody").addEventListener("input", e => {
   saveCurrent(life);
 });
 $("panelBody").addEventListener("click", e => {
+  // Jouer un descendant, ou reprendre une vie en pause.
+  const play = e.target.closest("[data-play]"), res = e.target.closest("[data-resume]");
+  if ((play || res) && life) {
+    const kid = play && life.children[+play.dataset.play];
+    if (play && !confirm(`Jouer la vie de ${kid.name} ? La vie de ${life.name} est mise en pause : vous pourrez la reprendre.`)) return;
+    setRunning(false);
+    const r = play ? playDescendant(life, peers, +play.dataset.play, prefs.classroom) : resumePaused(+res.dataset.resume, life, peers);
+    if (!r) return;
+    $("panelModal").hidden = true;
+    life = r.life; peers = r.peers;
+    if (play) beginLife(); else { saveCurrent(life, peers); beginLife(true); }
+    toast(play ? `Vous jouez désormais ${life.name}` : `Retour à la vie de ${life.name}`);
+    return;
+  }
   // Dépenses, mode de vie, « sans demander » (spending.js).
   const msg = life && e.target.closest(".sp") ? spendClick(life, e.target) : null;
   if (msg) {

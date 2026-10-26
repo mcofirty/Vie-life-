@@ -6,6 +6,17 @@ Simulation de vie en français, inspirée du concept de [1in8b.life](https://1in
 
 Vous naissez au hasard parmi les bébés de l’année (ou parmi les 8 milliards d’humains), puis vous vivez une vie entière, année après année, guidée par les statistiques réelles de tous les pays et territoires du monde (216), de 1900 à 2100.
 
+## Nouveautés (version 6) : entreprises, descendants, immobilier
+
+- **Rien sans votre accord** : aucune entreprise n’est vendue sans que vous le décidiez (offres de rachat à accepter ou refuser ; à la retraite, continuer, garder l’entreprise avec un directeur, ou la vendre ; en émigrant, on la garde). Aucun enfant ne naît sans votre accord : chaque grossesse possible est une question, sauf si vous avez choisi « En vouloir (sans me demander) ».
+- **Entreprise à côté d’un emploi** : on peut créer son entreprise en gardant son travail, ou accepter un emploi en gardant son entreprise ; deux fois plus de travail (santé, proches et bonheur en pâtissent), ou un gérant à qui la confier.
+- **Gérer son entreprise** : salariés (embaucher, réduire les effectifs, augmenter les salaires) et climat social, grèves ; bénéfices versés ou réinvestis ; gérant, directeur ou directeur général selon la taille, à recruter, remplacer ou congédier ; conseil d’administration pour les grandes entreprises, dont vous votez les propositions ; parts cédées en grandissant ; entrée en Bourse.
+- **Le jeu ne décide jamais à votre place** : retraite, refus à l’université (autre filière, année de césure ou travail), divorce demandé par le conjoint, rester au foyer, fin de carrière sportive, construction de la maison, frais des enfants : tout devient une question.
+- **Des entreprises qui grandissent** : petite entreprise, PME, grande entreprise, puis multinationale, en investissant quand l’activité le permet (« Développer l’entreprise », ou quand l’occasion se présente). Plus elle est grande, moins elle risque la faillite et plus elle vaut cher.
+- **Créer son entreprise dans sa spécialité** : cabinet médical, cabinet d’avocats, bureau d’études, éditeur de logiciels, agence d’architecture, salon de coiffure, garage… selon le diplôme ou le métier appris ; proposé aussi parmi les offres d’emploi à la sortie des études.
+- **Jouer un descendant à tout moment** : depuis le panneau Famille, « Jouer sa vie » sur n’importe quel enfant vivant ; la vie en cours est mise en pause, sans mourir, et se reprend depuis l’accueil ou le panneau Famille.
+- **Investir dans l’immobilier** : quatre biens à vendre au choix (studio, appartement, maison, maison de campagne, bord de mer, chalet, petit immeuble, villa), avec apport, emprunt sur 25 ans et frais ; pour y vivre, le louer ou en faire une résidence secondaire. Loyers, entretien, emprunts et valeur des biens suivent chaque année ; on peut revendre chaque bien.
+
 ## Nouveautés (version 5) : études, spécialités et passions
 
 - **Filières du lycée** selon le pays et l’époque : séries A/B/C puis bac S/ES/L puis spécialités en France, streams Science/Commerce/Arts en Inde, lǐkē/wénkē en Chine, A-levels, Abitur, liceo…

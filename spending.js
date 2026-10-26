@@ -25,7 +25,7 @@ const AUTO = {
   tripAbroad: { label: "Voyage à l’étranger", every: 2 },
   donate: { label: "Faire un don", every: 1 },
   hobby: { label: "Équipement et cours de loisirs", every: 1 },
-  kidsDecide: { label: "Décider pour chaque enfant", sub: "frais d’université · frais de mariage · demandes d’argent" },
+  kidsPay: { label: "Payer pour les enfants sans demander", sub: "frais d’université · frais de mariage · demandes d’argent" },
 };
 
 const isAdultKid = (L, k) => k.alive && L.age - k.born >= 18;
@@ -37,6 +37,13 @@ const SPENDS = [
   { id: "resto", label: "Restaurant et cadeaux avec vos proches et vos amis", fx: "Relations +4 · Bonheur +2", cost: L => median(L.here) * 0.03,
     when: L => L.age < 16 ? "À partir de 16 ans." : true,
     run: L => { L.bump("rel", 4); L.bump("happy", 2); L.say(pick(["Invite les siens au restaurant et offre des cadeaux à chacun.", "Un grand repas avec la famille et les amis, à ses frais."]), "family"); } },
+  { id: "realestate", label: "Investir dans l’immobilier", fx: "Choisir un bien parmi ceux à vendre, puis y vivre, le louer ou en faire une résidence secondaire · prêt possible selon le pays", cost: () => 0,
+    when: L => L.age < 18 ? "À partir de 18 ans." : planned(L.code, L.calYear) ? "Interdit dans une économie planifiée." : L.estateAskedAt === L.age ? "Déjà regardé cette année." : (L.props || []).length >= 8 ? "Déjà huit biens." : !propertyOffers(L, true).length ? `Pas assez pour un apport (il faut au moins ${eur(Math.min(...propertyOffers(L, false).map(o => o.down)))}).` : true,
+    run: L => { L.estateAskedAt = L.age; L.askProperty(); return "Des biens sont à vendre"; } },
+  { id: "props", label: "Vos biens immobiliers", fx: L => (L.props || []).map(p => `${p.label} (${p.use === "rent" ? `loué ${eur(p.value * p.yield)} par an` : "résidence secondaire"}) : ${eur(p.value)}${p.loan > 0 ? `, reste ${eur(p.loan)}` : ""}`).join(" · ") + " · Vendre entraîne des frais d’environ 6 %",
+    when: L => !(L.props || []).length ? "Pas de bien." : true,
+    args: L => (L.props || []).map((p, i) => [String(i), `Vendre : ${p.label.toLowerCase()}`, -Math.max(0, p.value * 0.94 - p.loan)]),
+    run: (L, arg) => { const p = L.props[+arg]; const net = Math.max(0, p.value * 0.94 - p.loan); L.props.splice(+arg, 1); L.addMoney(net); L.say(`Vend ${p.label.toLowerCase()} (${money(net)} après remboursement de l’emprunt).`, "money", true); } },
   { id: "kidsMoney", label: "Argent pour les enfants et petits-enfants", fx: "Relations +2 · Bonheur +1", note: "Choisissez qui le reçoit",
     when: L => !L.children.some(k => isAdultKid(L, k)) && !L.grandkids ? "Pas d’enfant adulte ni de petit-enfant." : true,
     args: L => [
@@ -118,13 +125,6 @@ const SPENDS = [
   { id: "smaller", label: "Passer à un logement plus petit", fx: L => `Vendre le logement pour un plus petit · garder la différence · frais d’achat et de vente d’environ ${eur(L.house ? L.house.value * 0.06 : 0)}`, gain: L => L.house ? L.house.value * 0.34 : 0,
     when: L => !L.house ? "Il faut être propriétaire." : L.house.value < median(L.here) ? "Déjà un petit logement." : true,
     run: (L, arg, x) => { L.house.value *= 0.6; L.house.loan = Math.min(L.house.loan, L.house.value); L.addMoney(x); L.bump("happy", -2); L.say(`Passe à un logement plus petit et garde ${money(x)}.`, "money", true); } },
-  { id: "rental", label: "Logements à louer", fx: L => `${(L.assets.rental || 0) > 0 ? `Valeur ${eur(L.assets.rental)} · ` : ""}Loyers et valeur du bien · acheter et vendre entraîne taxes et frais ; il y a aussi des mois sans locataire et l’entretien`,
-    when: L => !L.bank ? "Il faut un compte en banque." : planned(L.code, L.calYear) ? "Interdit dans une économie planifiée." : L.age < 21 ? "À partir de 21 ans." : true,
-    args: L => [["buy", "En acheter un", L.housePrice() * 0.8], ...((L.assets.rental || 0) > 0 ? [["sell", "En vendre un", -Math.min(L.assets.rental, L.housePrice() * 0.8) * 0.94]] : [])],
-    run: (L, arg, x) => {
-      if (arg === "sell") { const v = Math.min(L.assets.rental, L.housePrice() * 0.8); L.assets.rental -= v; L.assets.cash = (L.assets.cash || 0) + v * 0.94; L.say(`Vend un logement qu’il louait (${money(v * 0.94)}).`.replace("qu’il", L.g("qu’il", "qu’elle")), "money"); return; }
-      L.assets.rental = (L.assets.rental || 0) + x; L.alloc.rental = Math.max(L.alloc.rental || 0, 10); L.say(`Achète un logement à louer (${money(x)}).`, "money", true);
-    } },
   { id: "sellHome", label: "Vendre le logement où vous vivez", fx: L => `Vous gardez le prix moins les frais et l’emprunt · Vous serez ensuite locataire`, gain: L => L.house ? Math.max(0, L.house.value * 0.94 - L.house.loan) : 0,
     when: L => !L.house ? "Pas de logement à vendre." : true,
     run: L => { L.sellHouse(); } },
@@ -141,7 +141,7 @@ const val = (f, L) => typeof f === "function" ? f(L) : f;
 function spendOptions(L) {
   return SPENDS.map(s => {
     let why = s.when(L);
-    if (why === true && (L.spentAt || {})[s.id] === L.age && s.id !== "rental") why = "Déjà fait cette année.";
+    if (why === true && (L.spentAt || {})[s.id] === L.age && s.id !== "props") why = "Déjà fait cette année.";
     const args = s.args ? s.args(L) : null;
     const cost = s.cost ? s.cost(L) : 0, gain = s.gain ? s.gain(L) : 0;
     const afford = x => x <= 0 || L.savings >= x;
@@ -156,7 +156,7 @@ function spendDo(L, id, arg) {
   const s = SPEND_BY_ID[id];
   if (!s || !L.alive || s.when(L) !== true) return null;
   L.spentAt = L.spentAt || {};
-  if (L.spentAt[id] === L.age && id !== "rental") return null;
+  if (L.spentAt[id] === L.age && id !== "props") return null;
   let x = s.cost ? s.cost(L) : 0;
   if (s.args) { const a = s.args(L).find(a => a[0] === arg); if (!a) return null; x = a[2]; }
   if (s.gain) x = s.gain(L);
@@ -175,6 +175,7 @@ Object.assign(Life.prototype, {
   // Chaque année : coûts et effets du mode de vie, voiture, loisirs, enfants, dépenses automatiques.
   lifestyleYear() {
     if (!this.alive || this.age < 18) return;
+    this.propertiesYear();
     const ls = this.lifeStyle(), m = median(this.here), poor = this.savings < m * 0.1 && this.netIncome() < m * 0.6;
     if (!poor) {
       if (ls.gifts === "generous") { this.pay(m * 0.04); this.bump("rel", 1); }
@@ -206,7 +207,7 @@ Object.assign(Life.prototype, {
   rawCareCost() { return median(this.here) * this.here.oop / 100; },
   // Les grandes dépenses des enfants : université, mariage, demandes d'argent.
   kidsYear() {
-    const m = median(this.here), ask = this.autoSpend && this.autoSpend.kidsDecide;
+    const m = median(this.here), ask = !(this.autoSpend && this.autoSpend.kidsPay);
     for (const k of this.children) {
       if (!k.alive) continue;
       const age = this.age - k.born;
@@ -239,6 +240,88 @@ Object.assign(Life.prototype, {
   Life.prototype.hazard = function () { return hazard.call(this) * (this.screenedAt != null && this.age - this.screenedAt <= 1 ? 0.93 : 1); };
 }
 
+// --- Immobilier : biens à vendre, pour y vivre, les louer ou en résidence secondaire ----
+// size : prix en part d'un logement moyen ; yield : loyer brut par an ; happy : bonheur d'une résidence secondaire.
+const PROPERTY_TYPES = [
+  { id: "studio", label: "Studio en centre-ville", size: 0.45, yield: 0.055, happy: 1, urban: true },
+  { id: "appart", label: "Appartement familial", size: 0.9, yield: 0.045, happy: 2 },
+  { id: "maison", label: "Maison avec jardin", size: 1.2, yield: 0.04, happy: 3 },
+  { id: "campagne", label: "Maison de campagne", size: 0.7, yield: 0.03, happy: 3 },
+  { id: "mer", label: "Maison au bord de la mer", size: 1.6, yield: 0.035, happy: 4 },
+  { id: "montagne", label: "Chalet à la montagne", size: 1.3, yield: 0.035, happy: 4, minGdp: 15000 },
+  { id: "immeuble", label: "Petit immeuble de rapport (4 logements)", size: 3.2, yield: 0.06, happy: 0, rentOnly: true },
+  { id: "villa", label: "Villa de standing", size: 4.5, yield: 0.03, happy: 5, minTier: 4 },
+];
+function propertyOffers(L, affordableOnly) {
+  const c = L.here, base = L.housePrice() / (L.urban ? 1.2 : 0.75), d = L.houseDeal();
+  if (!L.estateOffers || L.estateOffers.age !== L.age) {
+    const pool = PROPERTY_TYPES.filter(t => (!t.minGdp || c.gdp >= t.minGdp) && (!t.minTier || L.livingTier() >= t.minTier));
+    const picked = [];
+    while (picked.length < 4 && pool.length) picked.push(pool.splice(Math.floor(rand() * pool.length), 1)[0]);
+    L.estateOffers = { age: L.age, list: picked.map(t => ({ type: t.id, noise: 0.85 + rand() * 0.3 })) };
+  }
+  const rich = c.gdp > 25000, canBorrow = d.canBorrow, rate = L.mortgageRate();
+  return L.estateOffers.list.map(o => {
+    const t = PROPERTY_TYPES.find(x => x.id === o.type), price = base * t.size * o.noise;
+    const down = canBorrow ? price * (rich ? 0.2 : 0.3) : price, loan = price - down;
+    const payment = loan ? loan * rate / (1 - (1 + rate) ** -25) : 0;
+    return { ...t, price, down, loan, rate, payment, ok: L.savings >= down + price * 0.04 };
+  }).filter(o => !affordableOnly || o.ok);
+}
+Object.assign(Life.prototype, {
+  askProperty() {
+    const offers = propertyOffers(this, true);
+    if (!offers.length) return;
+    this.ask("Des biens sont à vendre. Lequel acheter ?", [
+      ...offers.map(o => ({
+        label: `${o.label} · ${money(o.price)}`,
+        sub: `≈ ${eur(o.price)} aux prix français · ${o.loan ? `apport ${eur(o.down)}, emprunt ${eur(o.loan)} sur 25 ans (${eur(o.payment)} par an)` : "payé comptant"} · frais de notaire ≈ ${eur(o.price * 0.04)} · loyer possible ≈ ${eur(o.price * o.yield)} par an`,
+        autoWeight: 1, apply: () => this.askUse(o),
+      })),
+      { label: "Rien pour l’instant", autoWeight: 1, apply: () => this.say("Visite des biens à vendre, sans acheter.", "money") },
+    ]);
+  },
+  askUse(o) {
+    const opts = [];
+    if (!o.rentOnly) opts.push({ label: "Y vivre", sub: this.house ? "Votre logement actuel sera mis en location." : "Vous devenez propriétaire de votre logement.", autoWeight: this.house ? 0.5 : 3, apply: () => this.buyProperty(o, "live") });
+    opts.push({ label: "Le louer", sub: `≈ ${eur(o.price * o.yield)} de loyer par an, moins l’entretien, les impôts et les mois sans locataire`, autoWeight: 2, apply: () => this.buyProperty(o, "rent") });
+    if (!o.rentOnly) opts.push({ label: "En faire une résidence secondaire", sub: `Bonheur +${o.happy} chaque année · entretien ≈ ${eur(o.price * 0.015)} par an`, autoWeight: 1, apply: () => this.buyProperty(o, "second") });
+    this.ask(`${o.label} : qu’en faire ?`, opts);
+  },
+  buyProperty(o, use) {
+    if (this.savings < o.down + o.price * 0.04) { this.say("L’achat tombe à l’eau : pas assez d’apport.", "money"); return; }
+    this.withdraw(o.down + o.price * 0.04);
+    const asset = { type: o.id, label: o.label, value: o.price, loan: o.loan, rate: o.rate, payment: o.payment, yield: o.yield, happy: o.happy };
+    this.props = this.props || [];
+    if (use === "live") {
+      if (this.house) this.props.push({ type: "ancien", label: "Ancien logement", value: this.house.value, loan: this.house.loan, rate: this.house.rate, payment: this.house.payment, yield: 0.045, happy: 0, use: "rent" });
+      this.house = { value: o.price, loan: o.loan, rate: o.rate, payment: o.payment };
+      this.say(`Achète ${o.label.toLowerCase()} pour y vivre (${money(o.price)}).`, "money", true);
+      this.bump("happy", 5);
+    } else {
+      this.props.push({ ...asset, use });
+      this.say(use === "rent" ? `Achète ${o.label.toLowerCase()} pour le louer (${money(o.price)}).` : `Achète ${o.label.toLowerCase()} comme résidence secondaire (${money(o.price)}).`, "money", true);
+      this.bump("happy", use === "second" ? 4 : 2);
+    }
+  },
+  // Chaque année : valeur des biens, emprunts, loyers, entretien.
+  propertiesYear() {
+    if (!this.props || !this.props.length) return;
+    let cash = 0;
+    for (const p of this.props) {
+      p.value *= 1 + housingReturn(this.code, this.calYear);
+      if (p.loan > 0) { p.loan = Math.max(0, p.loan * (1 + p.rate) - p.payment); cash -= p.payment; }
+      if (p.use === "rent") cash += p.value * p.yield * (rand() < 0.12 ? 0.6 : 1) * 0.8 - p.value * 0.01;
+      else { cash -= p.value * 0.015; this.bump("happy", p.happy / 2); }
+    }
+    this.addMoney(cash);
+  },
+});
+{
+  const netWorth = Life.prototype.netWorth;
+  Life.prototype.netWorth = function () { return netWorth.call(this) + (this.props || []).reduce((s, p) => s + p.value - p.loan, 0); };
+}
+
 // --- Page « Dépenser et investir » (commune aux deux versions) -------------------------
 const ASSET_RETURNS = {
   cash: "rien, et l’inflation le ronge", deposit: "1 à 1,5 % par an, inflation déduite", tontine: "un peu, si chacun paie son tour", bonds: "environ 2 % en moyenne, faibles variations",
@@ -267,7 +350,7 @@ function spendHtml(L) {
       ${Object.entries(LIFESTYLE).map(([k, g]) => `<p class="sp-head">${g.label}</p><div class="sp-pills">${Object.entries(g.opts).map(([v, [label]]) => `<button class="sp-pill${ls[k] === v ? " on" : ""}" data-ls="${k}" data-v="${v}">${esc(label)}</button>`).join("")}</div><p class="sp-note">${g.note}</p>`).join("")}
       <p class="sp-head">Sans demander</p>
       <div class="sp-pills">${Object.keys(AUTO).map(k => `<button class="sp-pill${auto[k] ? " on" : ""}" data-auto="${k}">${esc(AUTO[k].label)} <span>· ${esc(k === "kidsMoney" && L.children.some(c => isAdultKid(L, c)) ? `${autoSub(k)} · à votre enfant adulte` : k === "hobby" && hobbiesOf(L).length ? `${autoSub(k)} · ${PASSIONS[hobbiesOf(L)[0]].label.replace(/^(le |la |l’|les )/, "")}` : k === "tripHome" || k === "tripAbroad" ? `${autoSub(k)} · avec vos amis` : autoSub(k))}</span></button>`).join("")}</div>
-      <p class="sp-note">Une fois activé, chaque réglage s’applique de lui-même le moment venu ; ce qui coûte de l’argent, seulement si votre épargne dépasse trois fois le coût. Appuyez de nouveau pour désactiver. Sans « Décider pour chaque enfant », les frais d’université, de mariage et les demandes d’argent des enfants sont payés d’eux-mêmes quand l’épargne le permet.</p>
+      <p class="sp-note">Une fois activé, chaque réglage s’applique de lui-même le moment venu ; ce qui coûte de l’argent, seulement si votre épargne dépasse trois fois le coût. Appuyez de nouveau pour désactiver. Sans « Payer pour les enfants sans demander », chaque frais d’université, de mariage ou demande d’argent d’un enfant vous est posé comme une question.</p>
     </details>
     <p class="sp-head">Faire fructifier votre épargne</p>
     <div class="sp-pills">${assets.map(k => `<button class="sp-pill${(L.alloc[k] || 0) > 0 ? " on" : ""}" data-asset-toggle="${k}">${ASSETS[k].label} <span>· ${ASSET_RETURNS[k]}</span></button>`).join("")}</div>
@@ -276,6 +359,8 @@ function spendHtml(L) {
 }
 // Un clic dans la page : renvoie un message court, ou null.
 function spendClick(L, t) {
+  const bz = t.closest("[data-biz]");
+  if (bz) return bizAction(L, bz.dataset.biz, bz.dataset.arg) || "Impossible pour l’instant.";
   const sp = t.closest("[data-sp]"), lsb = t.closest("[data-ls]"), au = t.closest("[data-auto]"), as = t.closest("[data-asset-toggle]");
   if (sp) return spendDo(L, sp.dataset.sp, sp.dataset.arg) || "Impossible pour l’instant.";
   if (lsb) { L.lifeStyle()[lsb.dataset.ls] = lsb.dataset.v; return `${LIFESTYLE[lsb.dataset.ls].label} : ${LIFESTYLE[lsb.dataset.ls].opts[lsb.dataset.v][1]}`; }
