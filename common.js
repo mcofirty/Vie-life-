@@ -563,13 +563,9 @@ function playDescendant(L, peers, kidIndex, classroom) {
   const kid = L.children[kidIndex];
   if (!kid || !kid.alive) return null;
   // Le patrimoine de l'aïeul passe à l'enfant tout de suite : sa part du testament, de son vivant.
-  const gift = donationFor(L, kid);
-  if (gift.gross > 0) {
-    L.withdraw(gift.gross);
-    L.say(`Transmet ${money(gift.gross)} à ${kid.name} de son vivant (${money(gift.tax)} de droits).`, "money", true);
-  }
+  const K = descendantLife(L, kid, classroom);
+  giveToHeir(L, K, kid);
   pauseLife(L, peers);
-  const K = descendantLife(L, kid, classroom, gift);
   const year = K.year;
   return { life: K, peers: Array.from({ length: 4 }, () => simulateWhole({ mode: "births", year, classroom })) };
 }

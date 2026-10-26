@@ -1009,11 +1009,6 @@ function descendantLife(L, kid, classroom = false, gift = null) {
     let i = K.log.findIndex(x => x.age > at); if (i < 0) i = K.log.length;
     K.log.splice(i, 0, e);
   }
-  // Le patrimoine de l'aïeul, de son vivant : sa part du testament, après droits.
-  if (gift) {
-    if (gift.net > 0) { K.addMoney(gift.net); K.say(`Reçoit ${money(gift.net)} du patrimoine de ${L.name}, qui vous le transmet de son vivant${gift.capped ? " (dans la limite de son épargne)" : ""}.`, "money", true); K.bump("happy", 3); }
-    else if (!gift.inWill) K.say(`${L.name} ne vous a pas prévu dans son testament : pas de patrimoine à recevoir.`, "money");
-  }
   return K;
 }
 

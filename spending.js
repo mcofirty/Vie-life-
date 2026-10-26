@@ -40,7 +40,7 @@ const SPENDS = [
   { id: "realestate", label: "Investir dans l’immobilier", fx: "Choisir un bien parmi ceux à vendre, puis y vivre, le louer ou en faire une résidence secondaire · prêt possible selon le pays", cost: () => 0,
     when: L => L.age < 18 ? "À partir de 18 ans." : planned(L.code, L.calYear) ? "Interdit dans une économie planifiée." : L.estateAskedAt === L.age ? "Déjà regardé cette année." : (L.props || []).length >= 8 ? "Déjà huit biens." : !propertyOffers(L, true).length ? `Pas assez pour un apport (il faut au moins ${eur(Math.min(...propertyOffers(L, false).map(o => o.down)))}).` : true,
     run: L => { L.estateAskedAt = L.age; L.askProperty(); return "Des biens sont à vendre"; } },
-  { id: "props", label: "Vos biens immobiliers", fx: L => (L.props || []).map(p => `${p.label} (${p.use === "rent" ? `loué ${eur(p.value * p.yield)} par an` : "résidence secondaire"}) : ${eur(p.value)}${p.loan > 0 ? `, reste ${eur(p.loan)}` : ""}`).join(" · ") + " · Vendre entraîne des frais d’environ 6 %",
+  { id: "props", label: "Vos biens immobiliers", fx: L => (L.props || []).map(p => `${p.label} (${p.use === "rent" ? `loué ${eur(p.value * p.yield)} par an` : p.use === "share" ? "part de propriété" : "résidence secondaire"}) : ${eur(p.value)}${p.loan > 0 ? `, reste ${eur(p.loan)}` : ""}`).join(" · ") + " · Vendre entraîne des frais d’environ 6 %",
     when: L => !(L.props || []).length ? "Pas de bien." : true,
     args: L => (L.props || []).map((p, i) => [String(i), `Vendre : ${p.label.toLowerCase()}`, -Math.max(0, p.value * 0.94 - p.loan)]),
     run: (L, arg) => { const p = L.props[+arg]; const net = Math.max(0, p.value * 0.94 - p.loan); L.props.splice(+arg, 1); L.addMoney(net); L.say(`Vend ${p.label.toLowerCase()} (${money(net)} après remboursement de l’emprunt).`, "money", true); } },
@@ -302,6 +302,7 @@ Object.assign(Life.prototype, {
     for (const p of this.props) {
       p.value *= 1 + housingReturn(this.code, this.calYear);
       if (p.loan > 0) { p.loan = Math.max(0, p.loan * (1 + p.rate) - p.payment); cash -= p.payment; }
+      if (p.use === "share") continue; // une part de la maison familiale : elle prend de la valeur, sans loyer ni entretien
       if (p.use === "rent") cash += p.value * p.yield * (rand() < 0.12 ? 0.6 : 1) * 0.8 - p.value * 0.01;
       else { cash -= p.value * 0.015; this.bump("happy", p.happy / 2); }
     }
@@ -330,13 +331,54 @@ function activeWill(L) {
   const ok = new Set(willCandidates(L).map(c => c.key));
   return (L.willTo ?? willDefault(L)).filter(k => ok.has(k));
 }
-// Don fait de son vivant à un enfant dont on joue la vie : sa part du testament, dans la limite de l'épargne.
+// Don fait de son vivant à un enfant dont on joue la vie : sa part du testament, prise sur tout
+// le patrimoine (épargne, maison, biens immobiliers, parts des entreprises), après droits. Les dettes
+// restent à l'aïeul : on ne transmet que la part du patrimoine qui n'est pas due.
 function donationFor(L, kid) {
   const keys = activeWill(L), key = `kid:${kid.name}`, inWill = keys.includes(key);
   const c = countryAt(kid.code || L.code, L.calYear), taxRate = c.gdp > 30000 ? 0.15 : 0.05;
-  const share = inWill ? Math.max(0, L.netWorth()) / keys.length : 0;
-  const gross = Math.min(share, Math.max(0, L.savings) * 0.9);
-  return { share, gross, net: gross * (1 - taxRate), capped: gross < share - 1, inWill, tax: gross * taxRate };
+  const eq = {
+    cash: Math.max(0, L.savings),
+    house: L.house ? Math.max(0, L.house.value - L.house.loan) : 0,
+    props: (L.props || []).reduce((s, p) => s + Math.max(0, p.value - p.loan), 0),
+    biz: (L.businesses || []).reduce((s, b) => s + b.value * (b.stake ?? 1), 0),
+  };
+  const gross = eq.cash + eq.house + eq.props + eq.biz, net = gross - (L.debt || 0);
+  const frac = inWill && gross > 0 ? clamp(net / gross, 0, 1) / keys.length : 0;
+  const value = gross * frac;
+  return { inWill, frac, taxRate, eq, share: value, gross: value, net: value * (1 - taxRate), tax: value * taxRate };
+}
+// La transmission elle-même : la même fraction de chaque bien passe de l'aïeul à l'enfant.
+function giveToHeir(L, K, kid) {
+  const g = donationFor(L, kid);
+  if (!g.inWill) { K.say(`${L.name} ne vous a pas prévu dans son testament : pas de patrimoine à recevoir.`, "money"); return g; }
+  if (g.frac <= 0) { K.say(`${L.name} n’a pas de patrimoine à transmettre : ses dettes dépassent ce qu’${L.g("il", "elle")} possède.`, "money"); return g; }
+  const fr = g.frac, keep = 1 - fr, rec = fr * (1 - g.taxRate), parts = [];
+  K.props = K.props || []; K.businesses = K.businesses || [];
+  const cash = L.savings * fr;
+  if (cash > 1) { L.withdraw(cash); K.addMoney(cash * (1 - g.taxRate)); parts.push(`${money(cash * (1 - g.taxRate))} d’épargne`); }
+  if (L.house && L.house.value > 0) {
+    const h = L.house;
+    K.props.push({ type: "share", label: `Part de la maison de ${L.name}`, use: "share", value: h.value * rec, loan: h.loan * rec, rate: h.rate, payment: h.payment * rec, yield: 0, happy: 0 });
+    h.value *= keep; h.loan *= keep; h.payment *= keep;
+    parts.push(fr >= 0.999 ? "la maison familiale (l’aïeul y vit toujours)" : `${Math.round(fr * 100)} % de la maison familiale`);
+  }
+  for (const p of [...(L.props || [])]) {
+    K.props.push({ ...p, value: p.value * rec, loan: p.loan * rec, payment: (p.payment || 0) * rec });
+    if (fr >= 0.999) L.props.splice(L.props.indexOf(p), 1); else { p.value *= keep; p.loan *= keep; p.payment = (p.payment || 0) * keep; }
+  }
+  if ((L.props || []).length || g.eq.props > 0) parts.push(fr >= 0.999 ? "ses biens immobiliers" : `${Math.round(fr * 100)} % de ses biens immobiliers`);
+  for (const b of [...(L.businesses || [])]) {
+    // L'enfant devient actionnaire ; un gérant dirige sa part.
+    K.businesses.push({ ...b, stake: (b.stake ?? 1) * rec, mode: "managed", manager: b.manager ? { ...b.manager } : null, did: {}, sideNoted: false });
+    if (fr >= 0.999) { if (L.focusBiz(b)) L.dropBusiness(); L.bizFocus = 0; } else b.stake = (b.stake ?? 1) * keep;
+    parts.push(fr >= 0.999 ? `l’entreprise « ${b.label} »` : `${Math.round(fr * 100)} % de l’entreprise « ${b.label} »`);
+  }
+  const list = parts.length > 1 ? `${parts.slice(0, -1).join(", ")} et ${parts[parts.length - 1]}` : parts[0] || "rien";
+  L.say(`Transmet de son vivant à ${kid.name} sa part du patrimoine : ${list} (${money(g.tax)} de droits).`, "money", true);
+  K.say(`Reçoit de ${L.name}, de son vivant, sa part du patrimoine (≈ ${money(g.net)}) : ${list}.`, "money", true);
+  K.bump("happy", 3);
+  return g;
 }
 
 // --- Adoption ----------------------------------------------------------------------------
@@ -441,7 +483,7 @@ function spendHtml(L) {
       return `<p class="sp-head">Testament</p>
     <p class="sp-note" style="margin-top:0">À qui laisser votre héritage ? Choisissez les personnes : il est partagé à parts égales entre elles.</p>
     <div class="sp-pills">${cands.map(c => `<button class="sp-pill${w.has(c.key) ? " on" : ""}" data-will-to="${esc(c.key)}">${esc(c.label)} <span>${esc(c.sub)}${w.has(c.key) && nw && nwth ? ` · ≈ ${eur(nwth / nw)}` : ""}</span></button>`).join("")}</div>
-    <p class="sp-note">S’applique à votre mort, et quand vous passez à la vie d’un descendant : il reçoit alors sa part de votre vivant, dans la limite de votre épargne. Sans choix, vos enfants se partagent tout (avant droits de succession).</p>`; })()}
+    <p class="sp-note">S’applique à votre mort, et quand vous passez à la vie d’un descendant : il reçoit alors sa part de votre vivant, prise sur tout votre patrimoine (épargne, maison, biens, parts d’entreprises). Sans choix, vos enfants se partagent tout (avant droits de succession).</p>`; })()}
     <p class="sp-head">Faire fructifier votre épargne</p>
     <div class="sp-pills">${assets.map(k => `<button class="sp-pill${(L.alloc[k] || 0) > 0 ? " on" : ""}" data-asset-toggle="${k}">${ASSETS[k].label} <span>· ${ASSET_RETURNS[k]}</span></button>`).join("")}</div>
     <p class="sp-note">Appuyez pour ajouter un placement à votre épargne ou l’en retirer ; la répartition se règle plus bas. Rendements réels, inflation déduite.</p>
