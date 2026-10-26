@@ -605,7 +605,10 @@ class Life {
     const career = !!(this.jobInfo && this.jobInfo.career);
     if (this.job && !this.retired && !this.business && !career) {
       const self = this.jobInfo && this.jobInfo.self;
-      if (rand() < (self ? 0.03 : 0.02 + c.unemp / 250) + (c.gdp < 10000 ? 0.02 : 0)) {
+      const pub = this.jobInfo && this.jobInfo.sector === "pub";
+      // Les métiers dangereux usent la santé ; le secteur public protège du licenciement.
+      if (this.jobInfo && this.jobInfo.risk) this.bump("health", -0.3 * this.jobInfo.risk);
+      if (rand() < ((self ? 0.03 : 0.02 + c.unemp / 250) + (c.gdp < 10000 ? 0.02 : 0)) * (pub ? 0.4 : 1)) {
         if (self) { this.say("Une mauvaise saison ruine le travail de l’année.", "work", true); this.incomePct = clamp(this.incomePct - 0.08, 0.01, 0.99); }
         else this.loseJob(pick(["Perd son travail.", "L’entreprise ferme ; il faut chercher autre chose.", "Est licencié·e."]).replace("licencié·e", this.g("licencié", "licenciée")));
         this.bump("happy", -8);

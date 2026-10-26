@@ -1229,10 +1229,7 @@ function moveToCity(L, prefer = []) {
   L.urban = true;
   if (L.job && L.jobInfo && L.jobInfo.sector === "agri") L.loseJob("Laisse les champs derrière soi.");
   if (L.job || L.business || L.age < 15) return;
-  const options = jobsFor(L).filter(o => o.job.sector !== "agri");
-  if (!options.length) return;
-  L.takeJob(weighted(options.map(o => [o.job, o.weight * (prefer.includes(o.job.id) ? 5 : 1)])));
-  L.say(`Trouve du travail en ville : ${L.job}.`, "work");
+  L.startWork({ city: true, prefer });
 }
 // Les décisions qui changent la vie elle-même.
 const MOMENT_RUN = {

@@ -117,6 +117,45 @@ function hireChance(L, j) {
   return clamp(0.8 - c.unemp / 35 + (L.stats.know - 50) / 180 + extra * 0.06 - (j.lo > 0.6 ? 0.2 : 0) - (j.hi > 0.95 ? 0.15 : 0) + (L.network || 0) * 0.05, 0.05, 0.95);
 }
 
+// Avantages et inconvénients d'un métier, pour choisir entre des offres.
+const JOB_NOTES = {
+  doctor: ["métier respecté", "longues gardes de nuit"], nurse: ["utile, demandé partout", "horaires de nuit et week-ends"], carer: ["utile, demandé partout", "physiquement épuisant"],
+  teacher: ["vacances scolaires", "classes chargées"], professor: ["liberté de recherche", "postes rares"], civil: ["sécurité de l’emploi", "travail routinier"],
+  lawyer: ["prestige", "semaines de 60 heures"], banker: ["primes", "pression et longues journées"], accountant: ["horaires réguliers", "travail répétitif"],
+  engineer: ["métier recherché", ""], developer: ["télétravail possible", "les technologies changent vite"], datasci: ["métier recherché", ""], researcher: ["passionnant", "contrats courts au début"],
+  journalist: ["métier passionnant", "précarité des débuts"], pilot: ["voyages", "absences, décalage horaire"], architect: ["métier créatif", "dépend des chantiers"],
+  callcenter: ["facile à décrocher", "travail répétitif, clients énervés"], cashier: ["facile à décrocher", "debout toute la journée"], waiter: ["pourboires", "horaires du soir"],
+  cook: ["métier qui voyage bien", "horaires du soir, chaleur"], guard: ["facile à décrocher", "nuits blanches"], trucker: ["autonomie", "loin de chez soi des jours entiers"],
+  soldier: ["logé, nourri", "danger en cas de guerre"], police: ["sécurité de l’emploi", "danger, horaires décalés"], miner: ["mieux payé que les champs", "poussière, accidents"],
+  builder: ["toujours du travail", "travail physique, accidents"], farmer: ["on travaille chez soi", "tout dépend de la pluie et des prix"], farmhand: ["pas besoin de diplôme", "journées sous le soleil, payé à la journée"],
+  herder: ["le bétail est une épargne", "sécheresses"], fisher: ["indépendance", "mer dangereuse, prises incertaines"], market: ["on est son propre patron", "revenus au jour le jour"],
+  domestic: ["logé chez l’employeur", "dépendance au patron, peu de droits"], porter: ["pas besoin de diplôme", "épuisant"], textile: ["salaire régulier", "cadences et heures sup"],
+  factory: ["salaire régulier", "travail à la chaîne"], courier: ["horaires libres", "payé à la course, sans protection"], vtc: ["horaires libres", "la voiture coûte cher"],
+  creator: ["liberté totale", "revenus très incertains"], artist: ["liberté", "revenus très incertains"], seller: ["contact avec les clients", "salaire modeste"], sales: ["primes à la vente", "objectifs à tenir"],
+  realtor: ["commissions", "revenus irréguliers"], hairdresser: ["métier de contact", "debout toute la journée"], tailor: ["travail à domicile possible", "concurrence des vêtements d’usine"],
+  technician: ["compétences recherchées", "astreintes"], electrician: ["toujours du travail", "risque électrique"], mechanic: ["métier concret", "mains dans le cambouis"],
+  welder: ["bien payé pour un métier manuel", "fumées et brûlures"], secretary: ["horaires réguliers", "peu d’évolution"], clerk: ["horaires réguliers", "travail de bureau répétitif"],
+  artteacher: ["vivre de sa passion", "peu d’heures, plusieurs employeurs"],
+  mototaxi: ["démarrage rapide", "accidents fréquents"], phonefix: ["métier d’avenir dans le quartier", "petites marges"], coach: ["passion du sport", "horaires du soir et week-ends"],
+};
+function jobTraits(L, j, pay) {
+  const c = L.here, ratio = pay / median(c), pros = [], cons = [];
+  if (ratio >= 2.5) pros.push("très bien payé"); else if (ratio >= 1.3) pros.push("bien payé"); else if (ratio < 0.6) cons.push("mal payé");
+  const field = L.degree && L.edu === "universite" && FIELD_BY_ID[L.degree.field], trade = L.trade && TRADE_BY_ID[L.trade];
+  if (field && field.jobs.includes(j.id)) pros.push("dans votre spécialité");
+  if (trade && trade.jobs.includes(j.id)) pros.push("le métier que vous avez appris");
+  const [pro, con] = JOB_NOTES[j.id] || [];
+  if (pro) pros.push(pro);
+  if (j.sector === "pub" && !pros.includes("sécurité de l’emploi")) pros.push("emploi stable");
+  if (j.informal) cons.push("sans contrat ni retraite");
+  else if (j.self) cons.push("revenus irréguliers");
+  if (j.risk >= 2 && !/accident|danger/.test(con || "")) cons.push("dangereux pour la santé");
+  if (con) cons.push(con);
+  if (j.hi >= 0.95 && ratio < 2.5) pros.push("belles perspectives");
+  return { pros: pros.slice(0, 3), cons: cons.slice(0, 3) };
+}
+const euroMonthly = x => `${(Math.round(x * 0.72 / 12 / 10) * 10).toLocaleString("fr-FR")} €`;
+
 // --- Placements --------------------------------------------------------------
 const ASSETS = {
   cash: { label: "Liquide", note: "Disponible, mais l’inflation le ronge chaque année." },
@@ -365,19 +404,25 @@ Object.assign(Life.prototype, {
   },
 
   // --- Travail ---
-  takeJob(j) {
+  // Position de salaire qu'obtiendrait cette personne dans ce métier.
+  jobPct(j) {
     const z = 0.45 * normInv((this.decile - 0.5) / 10) + 0.4 * EDU_Z[this.edu] + this.degreeZ(j) + 0.25 * (this.stats.know - 50) / 25 + 0.6 * randn();
     const u = clamp(normCdf(z / 0.95), 0.02, 0.98);
-    this.incomePct = clamp(j.lo + (j.hi - j.lo) * u, 0.01, 0.99);
+    return clamp(j.lo + (j.hi - j.lo) * u, 0.01, 0.99);
+  },
+  takeJob(j, pct = null) {
+    this.incomePct = pct ?? this.jobPct(j);
     this.job = jobLabel(j, this.sex);
-    this.jobInfo = { id: j.id, sector: j.sector, informal: !!j.informal, self: !!j.self };
+    this.jobInfo = { id: j.id, sector: j.sector, informal: !!j.informal, self: !!j.self, risk: j.risk || 0 };
     this.homemaker = false;
     if (this.firstJobAt == null) this.firstJobAt = this.age;
     this.computeIncome();
   },
-  // Premier emploi, ou retour à l'emploi : un métier tiré selon l'économie du pays.
-  startWork() {
-    if (this.job || this.business) return;
+  // Premier emploi, ou retour à l'emploi : plusieurs offres, tirées selon l'économie
+  // du pays, avec leur salaire, leurs avantages et leurs inconvénients.
+  // opts : migrant (on repart plus bas à l'étranger), prefer (métiers favorisés), city.
+  startWork(opts = {}) {
+    if (this.job || this.business || this.queue.some(d => d.offers)) return;
     const c = this.here;
     // Dans bien des pays et des époques, une femme mariée restait au foyer.
     if (this.sex === "f" && this.married && this.age >= 18 && rand() > clamp(c.flp / 65, 0.15, 1)) {
@@ -386,12 +431,38 @@ Object.assign(Life.prototype, {
     }
     const z = 0.45 * normInv((this.decile - 0.5) / 10) + 0.4 * EDU_Z[this.edu] + this.degreeZ(null) + 0.25 * (this.stats.know - 50) / 25 + 0.6 * randn();
     const target = clamp(normCdf(z / 0.95), 0.02, 0.98);
-    const options = jobsFor(this);
+    const prefer = opts.prefer || [];
+    const options = jobsFor(this).filter(o => !opts.city || o.job.sector !== "agri")
+      .map(o => ({ job: o.job, w: o.weight * Math.exp(-((((o.job.lo + o.job.hi) / 2 - target) / 0.3) ** 2)) * (prefer.includes(o.job.id) ? 5 : 1) * (opts.migrant && o.job.hi >= 0.6 ? 0.25 : 1) }));
     if (!options.length) return;
-    const j = weighted(options.map(o => [o.job, o.weight * Math.exp(-((((o.job.lo + o.job.hi) / 2 - target) / 0.3) ** 2))]));
-    this.takeJob(j);
-    const verb = /^(vend)/.test(this.job) ? this.job : `devient ${this.job}`;
-    this.say(`${this.age < 15 ? "Encore enfant, " + verb : capFirst(verb)}.`, "work", true);
+    const n = this.age < 15 ? 2 : EDU_RANK[this.edu] >= 2 ? 4 : 3, picked = [];
+    while (picked.length < n && options.length) picked.push(options.splice(weighted(options.map((o, i) => [i, o.w])), 1)[0].job);
+    const m = median(c);
+    const offers = picked.map(j => {
+      let pct = this.jobPct(j);
+      if (opts.migrant) pct = clamp(pct * 0.7 + this.langs * 0.02, 0.03, 0.9);
+      const pay = incomeAt(c, pct) * this.econ;
+      return { j, pct, pay, ...jobTraits(this, j, pay) };
+    }).sort((a, b) => b.pay - a.pay);
+    const start = o => {
+      this.takeJob(o.j, o.pct);
+      const verb = /^(vend)/.test(this.job) ? this.job : `devient ${this.job}`;
+      this.say(opts.migrant ? `Trouve du travail : ${this.job}.` : opts.city ? `Trouve du travail en ville : ${this.job}.` : `${this.age < 15 ? "Encore enfant, " + verb : capFirst(verb)}.`, "work", true);
+    };
+    if (offers.length === 1) return start(offers[0]);
+    const text = this.age < 15 ? "Il faut aider la famille. Quel travail prendre ?"
+      : opts.migrant ? `Nouvelle vie ${inCountry(c)} : quel travail accepter ?`
+      : this.firstJobAt == null ? (EDU_RANK[this.edu] >= 2 ? "Fin des études : plusieurs offres d’emploi se présentent. Laquelle choisir ?" : "Premier emploi : quelles offres se présentent ?")
+      : "Des offres d’emploi se présentent. Laquelle accepter ?";
+    const choices = offers.map(o => ({
+      label: `${capFirst(jobLabel(o.j, this.sex))} · ${money(o.pay)} par an`,
+      sub: [`≈ ${euroMonthly(o.pay)} par mois aux prix français`, o.pros.length ? `+ ${o.pros.join(", ")}` : "", o.cons.length ? `− ${o.cons.join(", ")}` : ""].filter(Boolean).join(" · "),
+      autoWeight: o.pay / m + 0.3 + (o.j.sector === "pub" ? 0.3 : 0),
+      apply: () => start(o),
+    }));
+    if (this.age >= 15) choices.push({ label: "Refuser et continuer à chercher", sub: "Rien cette année ; d’autres offres viendront peut-être.", autoWeight: 0.1, apply: () => this.say("Refuse les offres et continue à chercher.", "work") });
+    this.ask(text, choices);
+    this.queue[this.queue.length - 1].offers = true;
   },
   loseJob(text) {
     this.say(text, "work", true);
@@ -441,14 +512,7 @@ Object.assign(Life.prototype, {
     this.say(`Émigre ${inCountry(dest)} ${dest.flag}.`, "move", true);
     this.bump("rel", -12); this.bump("happy", -3);
     // On repart souvent plus bas dans l'échelle, puis on remonte.
-    const options = jobsFor(this);
-    if (options.length) {
-      const j = weighted(options.map(o => [o.job, o.weight * (o.job.hi < 0.6 ? 2 : 0.5)]));
-      this.takeJob(j);
-      this.incomePct = clamp(this.incomePct * 0.7 + this.langs * 0.02, 0.03, 0.9);
-      this.computeIncome();
-      this.say(`Trouve du travail : ${this.job}.`, "work");
-    }
+    this.startWork({ migrant: true });
   },
   // Héritage des parents (hors lignée) : selon l'aisance de la famille d'origine.
   inheritFrom(p) {
@@ -898,7 +962,7 @@ function offersFor(L, n) {
   const c = L.here;
   const list = picked.sort((a, b) => b.hi - a.hi).map(j => ({
     id: j.id, label: capFirst(jobLabel(j, L.sex)),
-    sub: `${SECTOR_LABEL[j.sector]} · ${money(incomeAt(c, j.lo) * L.econ)} à ${money(incomeAt(c, j.hi) * L.econ)} par an · chances ${Math.round(hireChance(L, j) * 100)} %`,
+    sub: (t => `${SECTOR_LABEL[j.sector]} · ${money(incomeAt(c, j.lo) * L.econ)} à ${money(incomeAt(c, j.hi) * L.econ)} par an · chances ${Math.round(hireChance(L, j) * 100)} %${t.pros.length ? ` · + ${t.pros.join(", ")}` : ""}${t.cons.length ? ` · − ${t.cons.join(", ")}` : ""}`)(jobTraits(L, j, incomeAt(c, (j.lo + j.hi) / 2) * L.econ)),
   }));
   L.offers = { age: L.age, list };
   return list;
