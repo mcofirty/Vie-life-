@@ -38,8 +38,8 @@ const SPENDS = [
     when: L => L.age < 16 ? "À partir de 16 ans." : true,
     run: L => { L.bump("rel", 4); L.bump("happy", 2); L.say(pick(["Invite les siens au restaurant et offre des cadeaux à chacun.", "Un grand repas avec la famille et les amis, à ses frais."]), "family"); } },
   { id: "realestate", label: "Investir dans l’immobilier", fx: "Choisir un bien parmi ceux à vendre, puis y vivre, le louer ou en faire une résidence secondaire · prêt possible selon le pays", cost: () => 0,
-    when: L => L.age < 18 ? "À partir de 18 ans." : planned(L.code, L.calYear) ? "Interdit dans une économie planifiée." : L.estateAskedAt === L.age ? "Déjà regardé cette année." : (L.props || []).length >= 8 ? "Déjà huit biens." : !propertyOffers(L, true).length ? `Pas assez pour un apport (il faut au moins ${eur(Math.min(...propertyOffers(L, false).map(o => o.down)))}).` : true,
-    run: L => { L.estateAskedAt = L.age; L.askProperty(); return "Des biens sont à vendre"; } },
+    when: L => L.age < 18 ? "À partir de 18 ans." : planned(L.code, L.calYear) ? "Interdit dans une économie planifiée." : !propertyOffers(L, true).length ? `Pas assez pour un apport (il faut au moins ${eur(Math.min(...propertyOffers(L, false).map(o => o.down)))}).` : true,
+    run: L => { L.askProperty(); return "Des biens sont à vendre"; } },
   { id: "props", label: "Vos biens immobiliers", fx: L => (L.props || []).map(p => `${p.label} (${p.use === "rent" ? `loué ${eur(p.value * p.yield)} par an` : p.use === "share" ? "part de propriété" : "résidence secondaire"}) : ${eur(p.value)}${p.loan > 0 ? `, reste ${eur(p.loan)}` : ""}`).join(" · ") + " · Vendre entraîne des frais d’environ 6 %",
     when: L => !(L.props || []).length ? "Pas de bien." : true,
     args: L => (L.props || []).map((p, i) => [String(i), `Vendre : ${p.label.toLowerCase()}`, -Math.max(0, p.value * 0.94 - p.loan)]),
@@ -130,7 +130,7 @@ const val = (f, L) => typeof f === "function" ? f(L) : f;
 function spendOptions(L) {
   return SPENDS.map(s => {
     let why = s.when(L);
-    if (why === true && (L.spentAt || {})[s.id] === L.age && s.id !== "props") why = "Déjà fait cette année.";
+    if (why === true && (L.spentAt || {})[s.id] === L.age && s.id !== "props" && s.id !== "realestate") why = "Déjà fait cette année.";
     const args = s.args ? s.args(L) : null;
     const cost = s.cost ? s.cost(L) : 0, gain = s.gain ? s.gain(L) : 0;
     const afford = x => x <= 0 || L.savings >= x;
@@ -145,7 +145,7 @@ function spendDo(L, id, arg) {
   const s = SPEND_BY_ID[id];
   if (!s || !L.alive || s.when(L) !== true) return null;
   L.spentAt = L.spentAt || {};
-  if (L.spentAt[id] === L.age && id !== "props") return null;
+  if (L.spentAt[id] === L.age && id !== "props" && id !== "realestate") return null;
   let x = s.cost ? s.cost(L) : 0;
   if (s.args) { const a = s.args(L).find(a => a[0] === arg); if (!a) return null; x = a[2]; }
   if (s.gain) x = s.gain(L);
@@ -234,40 +234,62 @@ Object.assign(Life.prototype, {
 // --- Immobilier : biens à vendre, pour y vivre, les louer ou en résidence secondaire ----
 // size : prix en part d'un logement moyen ; yield : loyer brut par an ; happy : bonheur d'une résidence secondaire.
 const PROPERTY_TYPES = [
+  { id: "chambre", label: "Chambre de bonne sous les toits", size: 0.2, yield: 0.06, happy: 0, urban: true },
   { id: "studio", label: "Studio en centre-ville", size: 0.45, yield: 0.055, happy: 1, urban: true },
+  { id: "campagne", label: "Maison de campagne", size: 0.7, yield: 0.03, happy: 3 },
   { id: "appart", label: "Appartement familial", size: 0.9, yield: 0.045, happy: 2 },
   { id: "maison", label: "Maison avec jardin", size: 1.2, yield: 0.04, happy: 3 },
-  { id: "campagne", label: "Maison de campagne", size: 0.7, yield: 0.03, happy: 3 },
-  { id: "mer", label: "Maison au bord de la mer", size: 1.6, yield: 0.035, happy: 4 },
   { id: "montagne", label: "Chalet à la montagne", size: 1.3, yield: 0.035, happy: 4, minGdp: 15000 },
+  { id: "mer", label: "Maison au bord de la mer", size: 1.6, yield: 0.035, happy: 4 },
+  { id: "loft", label: "Grand loft en ville", size: 2.2, yield: 0.04, happy: 3, urban: true },
   { id: "immeuble", label: "Petit immeuble de rapport (4 logements)", size: 3.2, yield: 0.06, happy: 0, rentOnly: true },
-  { id: "villa", label: "Villa de standing", size: 4.5, yield: 0.03, happy: 5, minTier: 4 },
+  { id: "villa", label: "Villa de standing avec piscine", size: 4.5, yield: 0.03, happy: 5 },
+  { id: "penthouse", label: "Penthouse avec vue sur la ville", size: 8, yield: 0.03, happy: 5 },
+  { id: "immeuble2", label: "Immeuble de 20 logements", size: 12, yield: 0.055, happy: 0, rentOnly: true },
+  { id: "hotelpart", label: "Hôtel particulier en centre-ville", size: 15, yield: 0.025, happy: 6 },
+  { id: "chateau", label: "Château avec son parc", size: 25, yield: 0.02, happy: 7 },
+  { id: "residence", label: "Résidence étudiante", size: 30, yield: 0.06, happy: 0, rentOnly: true },
+  { id: "bureaux", label: "Immeuble de bureaux", size: 60, yield: 0.055, happy: 0, rentOnly: true },
+  { id: "ile", label: "Villa sur une île privée", size: 90, yield: 0.02, happy: 9 },
+  { id: "galerie", label: "Centre commercial", size: 150, yield: 0.06, happy: 0, rentOnly: true },
+  { id: "tour", label: "Tour de bureaux dans un quartier d’affaires", size: 400, yield: 0.05, happy: 0, rentOnly: true },
 ];
+// Les biens à vendre, choisis selon votre patrimoine : du plus modeste au plus luxueux que vous puissiez acheter.
 function propertyOffers(L, affordableOnly) {
-  const c = L.here, base = L.housePrice() / (L.urban ? 1.2 : 0.75), d = L.houseDeal();
-  if (!L.estateOffers || L.estateOffers.age !== L.age) {
-    const pool = PROPERTY_TYPES.filter(t => (!t.minGdp || c.gdp >= t.minGdp) && (!t.minTier || L.livingTier() >= t.minTier));
-    const picked = [];
-    while (picked.length < 4 && pool.length) picked.push(pool.splice(Math.floor(rand() * pool.length), 1)[0]);
-    L.estateOffers = { age: L.age, list: picked.map(t => ({ type: t.id, noise: 0.85 + rand() * 0.3 })) };
+  const c = L.here, base = L.housePrice() / (L.urban ? 1.2 : 0.75), d = L.houseDeal(), y = L.calYear;
+  const rich = c.gdp > 25000, canBorrow = d.canBorrow, rate = L.mortgageRate(), r = clamp(rate, 0.005, 0.2);
+  const annuity = (1 - (1 + r) ** -25) / r;
+  const deal = (t, noise) => {
+    const price = base * t.size * noise;
+    // Emprunt : au plus ce que les revenus (et le loyer du bien, s'il se loue) permettent de rembourser.
+    const capacity = Math.max(0, L.netIncome() * 0.4 + price * t.yield * 0.6);
+    const maxLoan = canBorrow ? Math.min(price * (rich ? 0.8 : 0.7), capacity * annuity) : 0;
+    const loan = maxLoan, down = price - loan, payment = loan ? loan * r / (1 - (1 + r) ** -25) : 0;
+    return { ...t, price, down, loan, rate: r, payment, ok: L.savings >= down + price * 0.04 };
+  };
+  if (!L.estateOffers || L.estateOffers.age !== L.age || L.estateOffers.n !== (L.props || []).length + (L.house ? 1 : 0)) {
+    const pool = PROPERTY_TYPES.filter(t => (!t.minGdp || c.gdp >= t.minGdp) && (!t.urban || L.urban || t.size >= 2) && y >= 1900);
+    const all = pool.map(t => deal(t, 0.85 + rand() * 0.3)).sort((a, b) => a.price - b.price);
+    const can = all.filter(o => o.ok);
+    // Six offres : les plus chères que vous pouvez acheter, quelques-unes au milieu, et des plus modestes.
+    const pickIdx = new Set();
+    if (can.length) { [can.length - 1, can.length - 2, Math.floor(can.length * 0.66), Math.floor(can.length / 2), Math.floor(can.length / 3), 0].forEach(i => { if (i >= 0) pickIdx.add(can[i].id); }); }
+    // Et un ou deux biens hors de portée, pour voir ce qui vient ensuite.
+    all.filter(o => !o.ok).slice(0, 1).forEach(o => pickIdx.add(o.id));
+    L.estateOffers = { age: L.age, n: (L.props || []).length + (L.house ? 1 : 0), list: all.filter(o => pickIdx.has(o.id)).map(o => ({ type: o.id, noise: o.price / (base * o.size) })) };
   }
-  const rich = c.gdp > 25000, canBorrow = d.canBorrow, rate = L.mortgageRate();
-  return L.estateOffers.list.map(o => {
-    const t = PROPERTY_TYPES.find(x => x.id === o.type), price = base * t.size * o.noise;
-    const down = canBorrow ? price * (rich ? 0.2 : 0.3) : price, loan = price - down;
-    const payment = loan ? loan * rate / (1 - (1 + rate) ** -25) : 0;
-    return { ...t, price, down, loan, rate, payment, ok: L.savings >= down + price * 0.04 };
-  }).filter(o => !affordableOnly || o.ok);
+  return L.estateOffers.list.map(o => deal(PROPERTY_TYPES.find(x => x.id === o.type), o.noise)).filter(o => !affordableOnly || o.ok).sort((a, b) => b.price - a.price);
 }
 Object.assign(Life.prototype, {
   askProperty() {
-    const offers = propertyOffers(this, true);
-    if (!offers.length) return;
-    this.ask("Des biens sont à vendre. Lequel acheter ?", [
+    const offers = propertyOffers(this, false);
+    if (!offers.some(o => o.ok)) return;
+    this.ask(`Des biens sont à vendre, à la mesure de votre patrimoine (${money(Math.max(0, this.netWorth()))}). Lequel acheter ?`, [
       ...offers.map(o => ({
         label: `${o.label} · ${money(o.price)}`,
         sub: `≈ ${eur(o.price)} aux prix français · ${o.loan ? `apport ${eur(o.down)}, emprunt ${eur(o.loan)} sur 25 ans (${eur(o.payment)} par an)` : "payé comptant"} · frais de notaire ≈ ${eur(o.price * 0.04)} · loyer possible ≈ ${eur(o.price * o.yield)} par an`,
-        autoWeight: 1, apply: () => this.askUse(o),
+        ...(o.ok ? {} : { label: `${o.label} · ${money(o.price)} · hors de portée`, sub: `Il faudrait ${eur(o.down + o.price * 0.04)} d’apport et de frais ; vous avez ${eur(Math.max(0, this.savings))}.` }),
+        autoWeight: o.ok ? 1 : 0, apply: () => o.ok ? this.askUse(o) : this.say(`Rêve devant ${o.label.toLowerCase()}, encore hors de portée.`, "money"),
       })),
       { label: "Rien pour l’instant", autoWeight: 1, apply: () => this.say("Visite des biens à vendre, sans acheter.", "money") },
     ]);
