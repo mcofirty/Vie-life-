@@ -684,6 +684,7 @@ function panelSheet(kind) {
       ${L.age < 16 && !L.job ? `<p class="group-footer">Encore enfant : ces choix compteront dès le premier revenu.</p>` : ""}
       ${budget.length ? `<p class="group-header">Budget de l’année</p><div class="group">${rowsHtml(budget)}</div>` : ""}
       ${L.alive && L.passion ? careerHtml(L) : ""}
+      ${L.alive ? politicsHtml(L) : ""}
       ${L.alive && L.business ? businessHtml(L) : ""}
       ${L.alive && L.age >= 6 ? spendHtml(L) : ""}
       <p class="group-header">Train de vie</p>${choice("spend", SPEND, L.spend)}
