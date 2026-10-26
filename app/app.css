@@ -565,3 +565,8 @@ a { color: var(--tint); text-decoration: none; }
 /* Mode sombre : la barre de lecture se détache du fond nuit */
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .life-controls { background: #262D55; } }
 :root[data-theme="dark"] .life-controls { background: #262D55; }
+
+/* Raccourci « Politique » du tableau de bord */
+.stat-card.link { text-align: left; width: 100%; }
+.stat-card.link:active { background: var(--fill); }
+.stat-card.cta b { color: var(--tint); }

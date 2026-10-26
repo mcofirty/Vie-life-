@@ -393,3 +393,8 @@ tfoot td { text-align: left; color: var(--muted); font-size: .78rem; white-space
   .controls .btn { font-size: .8rem; padding-left: .6em; padding-right: .6em; }
   .toggle { gap: 2px; }
 }
+
+/* Raccourci « Politique » du tableau de bord */
+.dash button.chip-row { font: inherit; text-align: left; background: none; border: 0; padding: 0; color: inherit; cursor: pointer; border-radius: 6px; }
+.dash button.chip-row:hover b, .dash button.chip-row:focus-visible b { text-decoration: underline; }
+.dash button.chip-row.cta b { color: var(--accent); }
