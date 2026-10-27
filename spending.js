@@ -600,33 +600,41 @@ Object.assign(Life.prototype, {
 });
 
 // --- Adoption ----------------------------------------------------------------------------
+// N'importe quel âge, des deux côtés : un enfant de 0 à 17 ans, un adulte de tout âge. Le prix et l'attente
+// baissent avec l'âge de l'enfant (les nouveau-nés sont les plus demandés) ; l'adoption internationale coûte
+// bien plus cher. Seule règle d'âge : au moins 15 ans d'écart ; au-delà de 45 ans d'écart, l'agrément se fait rare.
+const ADOPT_GAP = 15;
 function adoptPlan(L, id) {
   const m = median(L.here), [kind, a, b] = id.split(":");
   const ages = kind === "nat" ? (a === "pair" ? [3, 6] : [+a]) : [+b], origin = kind === "int" ? a : null;
-  const older = Math.min(...ages) >= 8, baby = ages[0] <= 1;
-  const p = clamp((kind === "int" ? 0.55 : 0.75) + (L.married ? 0.1 : -0.1) + (older ? 0.1 : baby ? -0.1 : 0) + (L.livingTier() >= 3 ? 0.05 : 0) - (L.age > 45 ? 0.15 : 0), 0.1, 0.9);
-  return { ages, origin, p, cost: m * (kind === "int" ? 0.6 : 0.15) * ages.length, wait: (kind === "int" ? 2 : 1) + (baby ? 1 : 0) };
+  const young = Math.min(...ages), gap = L.age - young, baby = young <= 1;
+  // Plus l'enfant est jeune, plus c'est cher : frais de dossier, d'agence, de voyage pour l'étranger.
+  const perKid = age => m * (kind === "int" ? 0.25 + 1.1 * (1 - age / 17) ** 2 : 0.02 + 0.4 * (1 - age / 17) ** 2);
+  const p = clamp((kind === "int" ? 0.55 : 0.7) + (L.married ? 0.1 : -0.1) + Math.min(0.2, young / 50) - (baby ? 0.1 : 0) + (L.livingTier() >= 3 ? 0.05 : 0)
+    - Math.max(0, gap - 45) / 40, 0.05, 0.92);
+  const wait = young <= 1 ? (kind === "int" ? 3 : 2) : young <= 5 ? (kind === "int" ? 2 : 1) : 1;
+  return { ages, origin, p, gap, cost: ages.reduce((s, x) => s + perKid(x), 0), wait };
 }
 function adoptChoices(L) {
   const out = [], add = (id, label) => {
-    const x = adoptPlan(L, id);
-    out.push({ id, label, sub: `≈ ${eur(x.cost)} de frais · attente ≈ ${x.wait} an${x.wait > 1 ? "s" : ""} · chances d’agrément ${Math.round(x.p * 100)} %${L.married ? "" : " (célibataire)"}`, disabled: L.savings < x.cost });
+    const x = adoptPlan(L, id), tooClose = x.gap < ADOPT_GAP;
+    out.push({ id, label, sub: tooClose ? `il faut au moins ${ADOPT_GAP} ans d’écart avec l’enfant` : `≈ ${eur(x.cost)} de frais · attente ≈ ${x.wait} an${x.wait > 1 ? "s" : ""} · chances d’agrément ${Math.round(x.p * 100)} %${L.married ? "" : " (célibataire)"}${L.savings < x.cost ? " · pas assez d’argent" : ""}`, disabled: tooClose || L.savings < x.cost });
   };
-  add("nat:1", "Adopter un bébé du pays");
-  add("nat:5", "Adopter un enfant de 5 ans");
-  add("nat:10", "Adopter un enfant de 10 ans");
+  const ageLabel = a => a === 0 ? "un nouveau-né" : a === 1 ? "un bébé d’un an" : `un enfant de ${a} ans`;
+  for (let a = 0; a <= 17; a++) add(`nat:${a}`, `Adopter ${ageLabel(a)} du pays`);
   add("nat:pair", "Adopter deux frères et sœurs (3 et 6 ans)");
   if (L.calYear >= 1950 && !planned(L.code, L.calYear)) {
     const poorer = COUNTRIES.filter(c => c.code !== L.code && c.pop > 3 && countryAt(c.code, L.calYear).gdp < L.here.gdp * 0.6).sort((a, b) => countryAt(b.code, L.calYear).births - countryAt(a.code, L.calYear).births).slice(0, 3);
-    poorer.forEach((c, i) => { const age = [2, 4, 7][i]; add(`int:${c.code}:${age}`, `Adopter à l’étranger ${inCountry(c)} (enfant de ${age} ans)`); });
+    for (const c of poorer) for (const age of [0, 3, 6, 10, 14]) add(`int:${c.code}:${age}`, `Adopter ${ageLabel(age)} ${inCountry(c)}`);
   }
   return out;
 }
-ACTIONS.push({ id: "adopt", cat: "perso", label: "Adopter un enfant", desc: "Un dossier d’agrément, une attente, puis un enfant confié : du pays ou d’ailleurs, bébé ou plus grand.",
-  when: L => L.age < 25 ? "À partir de 25 ans." : L.age > 55 ? "Au-delà de 55 ans, c’est très rare." : L.calYear < 1920 ? "L’adoption n’est pas encore encadrée à cette époque." : (L.adoptions || []).length ? "Un dossier est déjà en cours." : L.children.filter(k => k.alive).length >= 6 ? "Votre famille est déjà nombreuse." : true,
+ACTIONS.push({ id: "adopt", cat: "perso", label: "Adopter un enfant", desc: "À tout âge, un enfant de 0 à 17 ans, du pays ou d’ailleurs : plus il est jeune, plus c’est cher et long. Un dossier d’agrément, une attente, puis un enfant confié.",
+  when: L => L.age < 18 ? "À partir de 18 ans." : L.calYear < 1920 ? "L’adoption n’est pas encore encadrée à cette époque." : (L.adoptions || []).length ? "Un dossier est déjà en cours." : L.children.filter(k => k.alive).length >= 6 ? "Votre famille est déjà nombreuse." : true,
   choices: L => adoptChoices(L),
   run: (L, id) => {
     const x = adoptPlan(L, id);
+    if (x.gap < ADOPT_GAP) return `Il faut au moins ${ADOPT_GAP} ans d’écart avec l’enfant.`;
     if (L.savings < x.cost) return "Pas assez d’argent pour les frais.";
     L.pay(x.cost);
     const where = x.origin ? ` ${inCountry(BY_CODE[x.origin])}` : "";
