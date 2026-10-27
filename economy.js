@@ -410,7 +410,8 @@ Object.assign(Life.prototype, {
     b.value = Math.max(0, income * (2.5 + size * 3));
     b.years += 1;
     const fail = (b.years === 1 ? 0.18 : b.years === 2 ? 0.13 : b.years <= 4 ? 0.08 : 0.04) * BUSINESSES[b.type].risk / this.econ * [1, 0.6, 0.3, 0.15][size];
-    if (rand() < fail) {
+    // L'année où on la reçoit en héritage, l'entreprise ne disparaît pas avant que vous ayez décidé de son sort.
+    if (b.inheritedAt !== this.age && rand() < fail) {
       this.say(`${b.label} fait faillite.`, "work", true);
       this.bump("happy", -10);
       this.dropBusiness();
@@ -625,6 +626,7 @@ Object.assign(Life.prototype, {
     if (p.paused) return; // un parent dont la vie est en pause : il a déjà transmis sa part de son vivant
     const c = this.here;
     let amount = 0;
+    if (p.previous && p.bequest) { this.receiveBequest(p.bequest); return; }
     if (p.previous) amount = p.estate || 0;
     else if (this.parents.every(x => !x.alive)) {
       const mult = this.decile >= 10 ? 8 : this.decile >= 8 ? 4 : this.decile >= 6 ? 1.5 : this.decile >= 4 ? 0.4 : 0;
@@ -840,7 +842,7 @@ Object.assign(Life.prototype, {
   initLineage(lin) {
     this.lineage = { id: lin.id, gen: lin.gen, ancestors: lin.ancestors, parentName: lin.parent.name };
     const p = lin.parent;
-    this.parents = [{ role: p.sex === "f" ? "mère" : "père", name: p.name, sex: p.sex, age: p.ageAtBirth, alive: true, previous: true, deathAt: p.deathAt, cause: p.cause, estate: lin.estate, job: p.job || null, edu: p.edu || null }];
+    this.parents = [{ role: p.sex === "f" ? "mère" : "père", name: p.name, sex: p.sex, age: p.ageAtBirth, alive: true, previous: true, deathAt: p.deathAt, cause: p.cause, estate: lin.estate, bequest: lin.bequest || null, job: p.job || null, edu: p.edu || null }];
     if (lin.other) {
       const sx = p.sex === "f" ? "m" : "f";
       this.parents.push({ role: sx === "f" ? "mère" : "père", name: lin.other, sex: sx, age: Math.max(16, p.ageAtBirth + (sx === "m" ? 3 : -2)), alive: true });
@@ -958,13 +960,16 @@ function lineageFor(rec, heirName, will) {
   const share = keys ? (keys.includes(`kid:${heirName}`) ? taxed / keys.length : 0)
     : will === "heritier" ? taxed : will === "oeuvres" ? taxed / 2 / n : taxed / n;
   const pct = d.pctAt[kid.born] ?? 0.4;
+  // Les biens eux-mêmes (placements, maison, immobilier, entreprises), dans la même proportion que la part du testament.
+  const w = keys ? (keys.includes(`kid:${heirName}`) ? 1 / keys.length : 0) : will === "heritier" ? 1 : will === "oeuvres" ? 0.5 / n : 1 / n;
+  const bequest = d.items ? bequestFor(rec, heirName, w, keys) : null;
   return {
     mode: "births", year: kid.year, code: kid.code, sex: kid.sex, name: kid.name,
     lineage: {
       id: d.lineageId, gen: d.gen + 1, ancestors: [...d.ancestors, { name: rec.s.name, sex: rec.s.sex, home: rec.s.home, year: rec.s.year, age: rec.s.age, cause: rec.s.cause, wealth: rec.s.wealth }],
       decile: clamp(Math.round(pct * 10 + 0.5) + (d.estate > median(c) * 10 ? 1 : 0), 1, 10),
       parent: { name: rec.s.name, sex: rec.s.sex, ageAtBirth: kid.born, deathAt: rec.s.age - kid.born, cause: rec.s.cause, job: rec.s.job, edu: rec.s.edu },
-      other: kid.other, estate: share, knowBonus: (rec.s.edu === "universite" ? 5 : rec.s.edu === "secondaire" ? 2 : 0) + Math.min(6, d.fund / median(c) * 2),
+      other: kid.other, estate: share, bequest, knowBonus: (rec.s.edu === "universite" ? 5 : rec.s.edu === "secondaire" ? 2 : 0) + Math.min(6, d.fund / median(c) * 2),
       siblings: d.allKids.filter(k => k.name !== kid.name).map(k => ({ name: k.name, sex: k.sex, born: k.born - kid.born, alive: k.alive })),
       fund: d.fund,
     },
@@ -976,7 +981,8 @@ function lineageFor(rec, heirName, will) {
 function fastForwardHeir(L) {
   const until = L.protectUntil || 0, wasAuto = L.auto;
   L.auto = true;
-  while (L.alive && L.age < until) { L.step(); L.autoResolveAll(); }
+  // La dernière année (celle de l'héritage) n'est pas décidée d'office : ses choix vous reviennent.
+  while (L.alive && L.age < until) { L.auto = L.age < until - 1; L.step(); if (L.auto) L.autoResolveAll(); }
   L.auto = wasAuto;
   L.actionsLeft = ACTIONS_PER_YEAR;
   if (L.alive) L.say(`Vous reprenez la vie de ${L.name}, à ${L.age} ans.`, "family", true);

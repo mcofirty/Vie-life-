@@ -31,7 +31,7 @@ Object.assign(Life.prototype, {
     b.manager = { name: this.freshName(rand() < 0.6 ? "m" : "f"), skill: clamp(Math.round(45 + size * 6 + randn() * 12), 15, 95), cut: 0.12 + size * 0.03 };
     b.mode = "managed";
     if (wasFull && this.jobInfo && this.jobInfo.id === "business") { this.job = null; this.jobInfo = null; }
-    this.say(`Confie la direction de ${b.label.toLowerCase()} à ${b.manager.name}, ${MANAGER_TITLE[size]}.`, "work", !quiet);
+    this.say(`Confie la direction de « ${b.label} » à ${b.manager.name}, ${MANAGER_TITLE[size]}.`, "work", !quiet);
   },
   takeBackBusiness() {
     const b = this.business;

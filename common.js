@@ -240,6 +240,7 @@ function dynastyData(L) {
   return {
     lineageId: L.lineage ? L.lineage.id : L.born.getTime(), gen: L.lineage ? L.lineage.gen : 1,
     ancestors: L.lineage ? L.lineage.ancestors : [], estate: Math.round(L.estate()), fund: Math.round(L.kidsFund || 0),
+    items: estateItems(L),
     willTo: activeWill(L), cands: willCandidates(L).map(c => ({ key: c.key, label: c.label, sub: c.sub })),
     heirs, allKids: L.children.map(k => ({ name: k.name, sex: k.sex, born: k.born, alive: k.alive })),
     pctAt: L.history.map(h => h ? h.pct : null),
@@ -300,6 +301,27 @@ function cleanRecord(r) {
   };
 }
 
+// Le détail d'un héritage importé : placements, maison, biens, entreprises (valeurs simples seulement).
+function cleanItems(it, str, num) {
+  if (!it || typeof it !== "object") return null;
+  const pos = x => Math.max(0, num(x)), plain = (o, depth = 0) => {
+    if (!o || typeof o !== "object" || Array.isArray(o)) return {};
+    const out = {};
+    for (const [k, v] of Object.entries(o).slice(0, 60)) {
+      if (typeof v === "number") out[k] = num(v); else if (typeof v === "boolean" || v === null) out[k] = v;
+      else if (typeof v === "string") out[k] = str(v, 200); else if (depth < 1 && typeof v === "object" && !Array.isArray(v)) out[k] = plain(v, depth + 1);
+    }
+    return out;
+  };
+  const prop = p => ({ type: str(p.type, 30), label: str(p.label, 80), use: ["rent", "second", "share"].includes(p.use) ? p.use : "second", value: pos(p.value), loan: pos(p.loan), rate: num(p.rate), payment: pos(p.payment), yield: num(p.yield), happy: num(p.happy) });
+  return {
+    fin: Object.fromEntries(Object.entries(it.fin && typeof it.fin === "object" ? it.fin : {}).filter(([k]) => ASSETS[k]).map(([k, v]) => [k, pos(v)])),
+    house: it.house && typeof it.house === "object" ? { value: pos(it.house.value), loan: pos(it.house.loan), rate: num(it.house.rate), payment: pos(it.house.payment), built: !!it.house.built } : null,
+    props: (Array.isArray(it.props) ? it.props : []).slice(0, 60).filter(p => p && typeof p === "object").map(prop),
+    biz: (Array.isArray(it.biz) ? it.biz : []).slice(0, 6).filter(b => b && BUSINESSES[b.type]).map(b => plain(b)),
+    debt: pos(it.debt),
+  };
+}
 function cleanDyn(d, str, num) {
   if (!d || typeof d !== "object") return null;
   const kid = k => k && ({ name: str(k.name, 40), sex: k.sex === "m" ? "m" : "f", born: Math.round(num(k.born)), alive: k.alive !== false });
@@ -312,6 +334,7 @@ function cleanDyn(d, str, num) {
     heirs: (Array.isArray(d.heirs) ? d.heirs : []).slice(0, 20).filter(h => h && BY_CODE[h.code]).map(h => ({ ...kid(h), age: Math.round(num(h.age)), year: clamp(Math.round(num(h.year)), MIN_YEAR, MAX_YEAR), code: h.code, other: h.other ? str(h.other, 40) : null })),
     allKids: (Array.isArray(d.allKids) ? d.allKids : []).slice(0, 30).map(kid).filter(Boolean),
     pctAt: (Array.isArray(d.pctAt) ? d.pctAt : []).slice(0, 121).map(x => x == null ? null : clamp(num(x, 0.4), 0, 1)),
+    items: cleanItems(d.items, str, num),
   };
 }
 
