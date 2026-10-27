@@ -1,6 +1,6 @@
 // Mise en cache pour un fonctionnement hors ligne.
-const CACHE = "lifelot-app-v29";
-const FILES = ["./", "index.html", "app.css?v=29", "app.js?v=29", "manifest.webmanifest", "icon.svg", "icon-180.png", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "../countries.js?v=29", "../data.js?v=29", "../sim.js?v=29", "../economy.js?v=29", "../moments.js?v=29", "../careers.js?v=29", "../company.js?v=29", "../stardom.js?v=29", "../politics.js?v=29", "../spending.js?v=29", "../common.js?v=29"];
+const CACHE = "lifelot-app-v30";
+const FILES = ["./", "index.html", "app.css?v=30", "app.js?v=30", "manifest.webmanifest", "icon.svg", "icon-180.png", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "../countries.js?v=30", "../data.js?v=30", "../sim.js?v=30", "../economy.js?v=30", "../moments.js?v=30", "../careers.js?v=30", "../company.js?v=30", "../stardom.js?v=30", "../politics.js?v=30", "../spending.js?v=30", "../common.js?v=30"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));

@@ -269,27 +269,28 @@ const domainOf = b => BIZ_DOMAIN[b.type] || (BUSINESSES[b.type] && BUSINESSES[b.
 
 // --- Lois et décisions ---------------------------------------------------------------------
 // pro / con : lobbys gagnants et perdants si la loi passe · pub : ce que l'opinion pense de voter
-// pour · side : camp qui la porte · fx : effet sur les entreprises d'un domaine (« * » : toutes).
+// pour · side : camp qui la porte · fx : effet sur les entreprises d'un domaine (« * » : toutes) ·
+// nat : effet sur le pays quand c'est le chef de l'exécutif qui la porte [économie, dette en points de PIB, tension sociale].
 const BILLS = [
-  { t: "une taxe carbone sur les carburants", pro: ["green"], con: ["oil", "industry"], pub: -2, side: "eco", fx: { Énergie: -0.06, Ressources: -0.04, Transport: -0.04, Industrie: -0.03 }, from: 1990 },
-  { t: "une baisse de l’impôt sur les sociétés", pro: ["bank", "industry", "retail", "tech"], con: ["unions"], pub: -1, side: "droite", fx: { "*": 0.04 } },
-  { t: "une hausse du salaire minimum", pro: ["unions"], con: ["retail", "build"], pub: 3, side: "gauche", fx: { Commerce: -0.03, Restauration: -0.04, Services: -0.02, Tourisme: -0.02 }, from: 1920 },
-  { t: "la déréglementation de la finance", pro: ["bank"], con: ["unions"], pub: -2, side: "droite", fx: { Finance: 0.08, Immobilier: 0.03 }, from: 1975 },
-  { t: "le plafonnement du prix des médicaments", pro: [], con: ["pharma"], pub: 3, side: "gauche", fx: { Santé: -0.07 }, from: 1945 },
-  { t: "de nouvelles subventions agricoles", pro: ["agri"], con: ["green"], pub: 1, side: "droite", fx: { Agriculture: 0.08 } },
-  { t: "un grand plan d’infrastructures (routes, ponts, logements)", pro: ["build", "unions", "industry"], con: [], pub: 2, side: "centre", fx: { Bâtiment: 0.1, Ingénierie: 0.06, Immobilier: 0.04 } },
-  { t: "une taxe sur les géants du numérique", pro: ["media", "retail"], con: ["tech"], pub: 2, side: "gauche", fx: { Technologie: -0.05 }, from: 2015 },
-  { t: "la hausse du budget de la défense", pro: ["arms", "industry"], con: ["green"], pub: 0, side: "droite", fx: { Industrie: 0.03 } },
-  { t: "une réforme des retraites (partir plus tard)", pro: ["bank"], con: ["unions"], pub: -4, side: "droite", fx: { Finance: 0.03 }, from: 1990 },
-  { t: "une loi contre la concentration des médias", pro: [], con: ["media"], pub: 2, side: "gauche", fx: { Médias: -0.06 }, from: 1950 },
-  { t: "une prime à la casse pour acheter une voiture neuve", pro: ["industry", "retail"], con: ["green"], pub: 1, side: "centre", fx: { Industrie: 0.06, Transport: 0.03 }, from: 1990 },
-  { t: "la protection des forêts et des zones naturelles", pro: ["green"], con: ["agri", "build", "oil"], pub: 1, side: "eco", fx: { Agriculture: -0.03, Bâtiment: -0.03, Ressources: -0.06 }, from: 1970 },
-  { t: "la privatisation de services publics", pro: ["bank", "build"], con: ["unions"], pub: -2, side: "droite", fx: { Finance: 0.04, Transport: 0.04, Énergie: 0.04 }, from: 1980 },
-  { t: "des aides massives aux énergies renouvelables", pro: ["green"], con: ["oil"], pub: 2, side: "eco", fx: { Énergie: 0.02 }, from: 2005 },
-  { t: "l’interdiction de la publicité pour le tabac et l’alcool", pro: [], con: ["media", "retail"], pub: 2, side: "gauche", fx: { Médias: -0.03, Restauration: -0.02 }, from: 1975 },
-  { t: "un encadrement strict de l’intelligence artificielle", pro: ["unions", "media"], con: ["tech"], pub: 2, side: "centre", fx: { Technologie: -0.05 }, from: 2023 },
-  { t: "un droit de grève plus encadré", pro: ["industry", "retail"], con: ["unions"], pub: -1, side: "droite", fx: { "*": 0.02 } },
-  { t: "le remboursement intégral des soins", pro: ["unions", "pharma"], con: ["bank"], pub: 3, side: "gauche", fx: { Santé: 0.04, Finance: -0.02 }, from: 1945 },
+  { t: "une taxe carbone sur les carburants", nat: [-0.01, -3, 10], pro: ["green"], con: ["oil", "industry"], pub: -2, side: "eco", fx: { Énergie: -0.06, Ressources: -0.04, Transport: -0.04, Industrie: -0.03 }, from: 1990 },
+  { t: "une baisse de l’impôt sur les sociétés", nat: [0.02, 4, 4], pro: ["bank", "industry", "retail", "tech"], con: ["unions"], pub: -1, side: "droite", fx: { "*": 0.04 } },
+  { t: "une hausse du salaire minimum", nat: [-0.005, 0, -8], pro: ["unions"], con: ["retail", "build"], pub: 3, side: "gauche", fx: { Commerce: -0.03, Restauration: -0.04, Services: -0.02, Tourisme: -0.02 }, from: 1920 },
+  { t: "la déréglementation de la finance", nat: [0.02, 0, 3], pro: ["bank"], con: ["unions"], pub: -2, side: "droite", fx: { Finance: 0.08, Immobilier: 0.03 }, from: 1975 },
+  { t: "le plafonnement du prix des médicaments", nat: [0, -1, -4], pro: [], con: ["pharma"], pub: 3, side: "gauche", fx: { Santé: -0.07 }, from: 1945 },
+  { t: "de nouvelles subventions agricoles", nat: [0.005, 2, -3], pro: ["agri"], con: ["green"], pub: 1, side: "droite", fx: { Agriculture: 0.08 } },
+  { t: "un grand plan d’infrastructures (routes, ponts, logements)", nat: [0.03, 6, -4], pro: ["build", "unions", "industry"], con: [], pub: 2, side: "centre", fx: { Bâtiment: 0.1, Ingénierie: 0.06, Immobilier: 0.04 } },
+  { t: "une taxe sur les géants du numérique", nat: [0, -2, -2], pro: ["media", "retail"], con: ["tech"], pub: 2, side: "gauche", fx: { Technologie: -0.05 }, from: 2015 },
+  { t: "la hausse du budget de la défense", nat: [0.005, 4, 0], pro: ["arms", "industry"], con: ["green"], pub: 0, side: "droite", fx: { Industrie: 0.03 } },
+  { t: "une réforme des retraites (partir plus tard)", nat: [0.005, -6, 16], pro: ["bank"], con: ["unions"], pub: -4, side: "droite", fx: { Finance: 0.03 }, from: 1990 },
+  { t: "une loi contre la concentration des médias", nat: [0, 0, -2], pro: [], con: ["media"], pub: 2, side: "gauche", fx: { Médias: -0.06 }, from: 1950 },
+  { t: "une prime à la casse pour acheter une voiture neuve", nat: [0.01, 2, -1], pro: ["industry", "retail"], con: ["green"], pub: 1, side: "centre", fx: { Industrie: 0.06, Transport: 0.03 }, from: 1990 },
+  { t: "la protection des forêts et des zones naturelles", nat: [-0.005, 0, 0], pro: ["green"], con: ["agri", "build", "oil"], pub: 1, side: "eco", fx: { Agriculture: -0.03, Bâtiment: -0.03, Ressources: -0.06 }, from: 1970 },
+  { t: "la privatisation de services publics", nat: [0.01, -6, 9], pro: ["bank", "build"], con: ["unions"], pub: -2, side: "droite", fx: { Finance: 0.04, Transport: 0.04, Énergie: 0.04 }, from: 1980 },
+  { t: "des aides massives aux énergies renouvelables", nat: [0.01, 3, -2], pro: ["green"], con: ["oil"], pub: 2, side: "eco", fx: { Énergie: 0.02 }, from: 2005 },
+  { t: "l’interdiction de la publicité pour le tabac et l’alcool", nat: [0, 0, 1], pro: [], con: ["media", "retail"], pub: 2, side: "gauche", fx: { Médias: -0.03, Restauration: -0.02 }, from: 1975 },
+  { t: "un encadrement strict de l’intelligence artificielle", nat: [-0.005, 0, -2], pro: ["unions", "media"], con: ["tech"], pub: 2, side: "centre", fx: { Technologie: -0.05 }, from: 2023 },
+  { t: "un droit de grève plus encadré", nat: [0.01, 0, 10], pro: ["industry", "retail"], con: ["unions"], pub: -1, side: "droite", fx: { "*": 0.02 } },
+  { t: "le remboursement intégral des soins", nat: [0, 6, -8], pro: ["unions", "pharma"], con: ["bank"], pub: 3, side: "gauche", fx: { Santé: 0.04, Finance: -0.02 }, from: 1945 },
 ];
 // Décisions d'une mairie (ou d'un conseil municipal).
 const LOCAL_BILLS = [
@@ -348,7 +349,12 @@ Object.assign(Life.prototype, {
     if (rank > 0) P.history.push({ y: this.calYear, t: capFirst(this.polTitle(rank)) });
     P.termEnd = O.term ? this.age + termOf(this, rank) : rank === 4 ? P.termEnd : null;
     // Quitter le sommet : là où la limite ne vaut que pour les mandats d'affilée, on pourra revenir, un mandat plus tard.
-    if (prev === 5 && rank !== 5) { P.tried = P.tried || {}; P.tried[5] = this.age; if (polSystem(this).consec) P.topTerms = 0; }
+    if (prev === 5 && rank !== 5) {
+      P.tried = P.tried || {}; P.tried[5] = this.age; if (polSystem(this).consec) P.topTerms = 0;
+      const N = P.nation;
+      if (N) { this.say(`Bilan au sommet (${N.since}-${this.calYear}) : dette publique passée de ${N.debt0} à ${Math.round(N.debt)} % du PIB, tension sociale ${Math.round(N.tension)}/100, popularité ${Math.round(P.pop)}/100.`, "work", true); P.nation = null; }
+    }
+    if (rank === 5 && prev !== 5) { P.nation = null; nationOf(this); }
     if (O.full) {
       if (this.job && !(this.jobInfo && this.jobInfo.politics)) this.say(`Quitte son emploi (${this.job}) pour son mandat.`, "work");
       if (this.retired) this.retired = false;
@@ -390,6 +396,8 @@ Object.assign(Life.prototype, {
     if (!this.politics) return;
     const titles = officeTitles(this, R);
     if (P.rank > 0 && !titles[P.rank]) this.leaveOffice();
+    // Au sommet, votre politique pèse sur l'économie du pays, donc sur les revenus de tous.
+    if (P.rank === 5) this.econ *= nationOf(this).econ;
     // Popularité, loyauté, trésor de campagne, relations avec les lobbys.
     P.pop = clamp(P.pop + (40 - P.pop) * 0.12 + randn() * 3 + (P.rank >= 4 ? (this.econ - 1) * 25 : 0) + (P.lob.media || 0) / 60, 0, 100);
     P.loyalty = clamp(P.loyalty + (50 - P.loyalty) * 0.05, 0, 100);
@@ -409,7 +417,7 @@ Object.assign(Life.prototype, {
     }
     if (R === "hybrid") P.govSide = "pouvoir";
     if (!elected(R)) P.govSide = R === "party" ? "parti" : "regime";
-    if (elected(R) && P.rank === 5) this.topYear(R);
+    if (P.rank === 5) { this.topYear(R); if (this.politics && P.rank === 5) nationYear(this, R); }
     if (!this.politics) return;
     // Fin de mandat : se représenter ou non (c'est vous qui choisissez).
     if (elected(R) && P.termEnd != null && a >= P.termEnd && [1, 2, 3, 5].includes(P.rank)) this.askReelection();
@@ -585,7 +593,7 @@ Object.assign(Life.prototype, {
       const passed = rand() < passOdds(vote && !abst);
       if (rank === 2) this.say(`${vote ? "Dit oui à" : "Dit non à"} ${bill.t}.`.replace(" à le ", " au ").replace(" à les ", " aux "), "work");
       else this.say(`${rank >= 4 ? (vote ? "Porte" : "Enterre") : abst ? "S’abstient sur" : vote ? "Vote pour" : "Vote contre"} ${bill.t}${rank >= 4 && !vote ? "" : passed ? " ; le texte est adopté" : " ; le texte est rejeté"}.`, "work", rank >= 3);
-      if (passed) applyBill(this, bill);
+      if (passed) { applyBill(this, bill); if (rank === 5) applyNation(this, bill.nat); }
     };
     const partyLine = line > 0 ? " · votre parti vote pour" : line < 0 ? " · votre parti vote contre" : "";
     const who = `${pro.length ? `Pour : ${pro.join(", ")}` : "Aucun lobby pour"} · ${con.length ? `contre : ${con.join(", ")}` : "aucun lobby contre"} · ${opinion}${partyLine}${bizNote}`;
@@ -640,7 +648,7 @@ const termOf = (L, rank) => rank === 5 ? polSystem(L).term : OFFICE[rank].term;
 // Ce que le chef de l'exécutif fait passer : la majorité, la coalition, les contre-pouvoirs, le régime.
 function execPower(L) {
   const P = L.politics, R = polRegime(L), S = polSystem(L);
-  if (R === "hybrid") return 0.95;
+  if (R !== "dem") return 0.95;
   if (S.sys !== "pres") return clamp(S.power - (S.sys === "parl" && !S.fptp && (campShares(L)[P.side] || 20) < 40 ? 0.15 : 0), 0.3, 0.95);
   return clamp(S.power * (lean(P.side, P.govSide) === 1 ? 1 : 0.55), 0.2, 0.95);
 }
@@ -816,6 +824,159 @@ function systemNote(L) {
   return `${how}${pick}${term}${mine}.`;
 }
 
+// --- Gouverner le pays ---------------------------------------------------------------------
+// Au sommet, on tient le pays : son économie (qui fait les revenus de tous, les vôtres et ceux de vos
+// entreprises), sa dette publique et sa tension sociale. Chaque geste les fait bouger, pour des années.
+// Dette publique au début des années 2010, en % du PIB (approximations) ; plus basse avant.
+const DEBT0 = { JP: 230, GR: 165, IT: 135, US: 115, FR: 110, PT: 110, BE: 105, ES: 105, CA: 105, SG: 160, GB: 95, AR: 85, BR: 85, IN: 82, CN: 80, ZA: 72, DE: 65, EG: 90, MX: 50, KR: 50, AU: 50, PL: 50, CH: 40, NO: 40, SE: 35, TR: 30, RU: 20, SA: 25, NG: 38 };
+function nationOf(L) {
+  const P = L.politics;
+  if (P.nation && P.nation.code === L.code) return P.nation;
+  const y = L.calYear, d = DEBT0[L.code] ?? 55, debt = Math.round(y >= 2008 ? d : y >= 1980 ? d * 0.65 : 35);
+  return P.nation = { code: L.code, econ: 1, debt, debt0: debt, tension: 30, since: y };
+}
+function applyNation(L, nat) {
+  const P = L.politics;
+  if (!P || P.rank !== 5 || !nat) return;
+  const N = nationOf(L);
+  N.econ = clamp(N.econ + nat[0], 0.8, 1.25); N.debt = clamp(N.debt + nat[1], 0, 300); N.tension = clamp(N.tension + nat[2], 0, 100);
+}
+const signed = (x, unit = "") => `${x > 0 ? "+" : x < 0 ? "−" : ""}${Math.abs(x).toLocaleString("fr-FR", { maximumFractionDigits: 1 })}${unit}`;
+// Ce qu'un geste fait au pays, en clair : « économie +3 % · dette +8 pts · tension −5 ».
+const natNote = nat => [nat[0] ? `économie ${signed(nat[0] * 100, " %")}` : "", nat[1] ? `dette ${signed(nat[1], " pts")}` : "", nat[2] ? `tension ${signed(nat[2])}` : ""].filter(Boolean).join(" · ");
+function lobbyShift(L, ids, d) {
+  const P = L.politics;
+  for (const id of ids) if (P.lob[id] != null) P.lob[id] = clamp(P.lob[id] + d, -100, 100);
+}
+// Les réformes sur la table cette année (quatre, qui changent d'une année à l'autre).
+function agenda(L) {
+  const pool = BILLS.filter(b => L.calYear >= (b.from || 0)), n = pool.length, start = L.calYear * 7 % n;
+  return [0, 1, 2, 3].map(k => pool[(start + k * 5) % n]).filter((b, i, a) => a.indexOf(b) === i);
+}
+const billIdx = b => BILLS.indexOf(b);
+// Faire voter, ou passer en force : la loi s'applique, avec ses gagnants et ses perdants.
+function enactBill(L, bill, forced) {
+  const P = L.politics, R = polRegime(L);
+  lobbyShift(L, bill.pro, 10); lobbyShift(L, bill.con, -12);
+  P.pop = clamp(P.pop + bill.pub * 1.2 - (forced && R === "dem" ? 3 : 0), 0, 100);
+  applyNation(L, bill.nat);
+  if (forced) applyNation(L, [0, 0, R === "dem" ? 8 : 3]);
+  if (bill.side) P.loyalty = clamp(P.loyalty + (lean(P.side, bill.side) === 1 ? 5 : -5), 0, 100);
+  applyBill(L, bill);
+}
+// La liste des gestes du sommet : [id, intitulé, détail, possible, pourquoi pas].
+function govOptions(L) {
+  const P = L.politics, R = polRegime(L), S = polSystem(L), N = nationOf(L), c = L.code, y = L.calYear, dem = R === "dem", out = [];
+  const add = (id, label, sub, ok = true, why = "") => out.push({ id, label, sub, ok: ok && (P.did || {})[id] !== L.age, why: (P.did || {})[id] === L.age ? "déjà cette année" : why });
+  // Deux politiques contraires ne se mènent pas la même année.
+  const not = id => (P.did || {})[id] !== L.age, contra = "contraire de ce que vous avez décidé cette année";
+  // L'économie et les finances publiques.
+  add("g_relance", y >= 1930 ? "Lancer un plan de relance" : "Lancer de grands travaux", `Grands chantiers, aides, embauches publiques · ${natNote([0.05, 8, -5])} · popularité +3 · le BTP et les syndicats applaudissent`, not("g_austerite"), contra);
+  add("g_austerite", "Imposer un plan d’économies", `Coupes dans les budgets, gel des salaires publics · ${natNote([-0.03, -10, 12])} · popularité −5 · les banques applaudissent, les syndicats grondent`, not("g_relance"), contra);
+  add("g_taxcut", "Baisser les impôts", `${natNote([0.02, 6, 3])} · popularité +4 · vos propres impôts baissent aussi`, not("g_taxrich"), contra);
+  add("g_taxrich", "Taxer les grandes fortunes", `${natNote([-0.01, -5, -8])} · popularité +3 · banques et industriels furieux · vous payez aussi (≈ 3 % de votre épargne)`, not("g_taxcut"), contra);
+  if (y >= 1900) add("g_tariffs", "Relever les droits de douane", `Protéger l’industrie et l’agriculture du pays · ${natNote([-0.015, -1, -3])} · popularité +2 · la grande distribution proteste`);
+  // Le pays et le monde.
+  add("g_speech", L.calYear >= 1950 ? "S’adresser à la nation à la télévision" : "S’adresser à la nation à la radio", `Apaiser, rassembler · tension −6 · popularité +1 à +4`);
+  add("g_summit", y >= 1945 ? "Voyage d’État et sommet international" : "Voyage d’État à l’étranger", `Contrats signés, photos avec les grands de ce monde · ${natNote([0.01, 0, 0])} · popularité +2 à +5 · fatigue`);
+  if (c !== "CH") add("g_war", "Lancer une intervention militaire", `Le pays se rassemble… ou s’enlise (≈ 40 %) · les marchands d’armes applaudissent${dem ? " · le Parlement et la presse demanderont des comptes" : ""}`);
+  if (S.sys !== "coll") add("g_reshuffle", S.sys === "parl" ? "Remanier son gouvernement" : c === "US" ? "Remanier son cabinet" : "Changer de Premier ministre, remanier", "Un nouveau souffle · popularité +4 · tension −4 · ceux qu’on écarte vous en voudront (loyauté −6)");
+  if (P.courtSeat) add("g_court", c === "US" ? "Nommer un juge à la Cour suprême" : c === "FR" ? "Nommer au Conseil constitutionnel" : "Nommer un juge à la Cour constitutionnelle", "Un siège se libère : un juge de votre camp, pour des années · vos décrets seront rarement annulés");
+  if (dem) add("g_referendum", "Organiser un référendum sur une grande réforme", `Le peuple tranche · gagné (≈ ${Math.round(clamp(P.pop / 110, 0.1, 0.85) * 100)} %) : la réforme passe, popularité +6 ; perdu : popularité −10`);
+  // Le pouvoir et ses tentations.
+  if (!dem) add("g_crackdown", "Réprimer l’opposition", "Arrestations, censure, manifestations interdites · tension −20 · popularité −4 · on parlera de vous dans les rapports des ONG");
+  add("g_enrich", "Puiser dans les caisses de l’État", `≈ ${money(median(L.here) * (4 + corruptionOf(L) * 30))} pour vous et vos proches · ${dem ? "gros risque de scandale, de procès" : "les rivaux du sérail prennent note"}`);
+  return out;
+}
+// Les gestes avec un choix : une réforme de l'agenda.
+function govAction(L, id, arg) {
+  const P = L.politics, R = polRegime(L), S = polSystem(L), N = nationOf(L), m = median(L.here), dem = R === "dem", e = L.g("", "e");
+  switch (id) {
+    case "g_bill": case "g_force": {
+      const bill = BILLS[+arg];
+      if (!bill || !agenda(L).includes(bill)) return null;
+      if (id === "g_bill") {
+        if (rand() >= execPower(L)) { P.pop = clamp(P.pop - 2, 0, 100); L.say(`Présente ${bill.t} : le Parlement la rejette.`, "work", true); return "Réforme rejetée"; }
+        enactBill(L, bill, false); L.say(`Fait adopter ${bill.t}.`, "work", true); return `Adoptée : ${bill.t}`;
+      }
+      // Passer en force : les juges peuvent censurer, sauf si la Cour est à vous.
+      const censure = dem ? (P.court === P.side ? 0.05 : L.code === "FR" ? 0.15 : 0.3) : 0;
+      if (rand() < censure) { P.pop = clamp(P.pop - 3, 0, 100); applyNation(L, [0, 0, 5]); L.say(`Impose ${bill.t} par ${L.code === "FR" ? "le 49.3" : "décret"} ; ${L.code === "US" ? "la Cour suprême" : L.code === "FR" ? "le Conseil constitutionnel" : "la justice"} l’annule.`, "work", true); return "Annulée par les juges"; }
+      enactBill(L, bill, true); L.say(`Impose ${bill.t} ${L.code === "FR" ? "par le 49.3" : "par décret"}, sans vote du Parlement.`, "work", true); return `Imposée : ${bill.t}`;
+    }
+    case "g_relance": applyNation(L, [0.05, 8, -5]); P.pop = clamp(P.pop + 3, 0, 100); lobbyShift(L, ["build", "unions", "industry"], 6); L.say("Lance un grand plan de relance : chantiers, aides, embauches.", "work", true); return "Relance lancée";
+    case "g_austerite": applyNation(L, [-0.03, -10, 12]); P.pop = clamp(P.pop - 5, 0, 100); lobbyShift(L, ["bank"], 8); lobbyShift(L, ["unions"], -12); L.say("Impose un plan d’économies : budgets coupés, salaires publics gelés.", "work", true); return "Économies imposées";
+    case "g_taxcut": applyNation(L, [0.02, 6, 3]); P.pop = clamp(P.pop + 4, 0, 100); lobbyShift(L, ["bank", "retail", "industry"], 6); L.addMoney(Math.max(0, L.income || 0) * 0.04); L.say("Baisse les impôts.", "work", true); return "Impôts en baisse";
+    case "g_taxrich": {
+      applyNation(L, [-0.01, -5, -8]); P.pop = clamp(P.pop + 3, 0, 100); lobbyShift(L, ["bank", "industry", "tech"], -12); lobbyShift(L, ["unions"], 8);
+      const x = Math.max(0, L.savings) * 0.03; if (x > 0) L.pay(x);
+      L.say("Crée un impôt sur les grandes fortunes.", "work", true); return x > 0 ? `Vous payez aussi : ${money(x)}` : "Impôt sur la fortune créé";
+    }
+    case "g_tariffs": applyNation(L, [-0.015, -1, -3]); P.pop = clamp(P.pop + 2, 0, 100); lobbyShift(L, ["industry", "agri"], 10); lobbyShift(L, ["retail", "tech"], -8); L.say("Relève les droits de douane pour protéger l’industrie du pays.", "work", true); return "Droits de douane relevés";
+    case "g_speech": { const d = 1 + rand() * 3; applyNation(L, [0, 0, -6]); P.pop = clamp(P.pop + d, 0, 100); L.say("S’adresse solennellement à la nation.", "work"); return `Popularité +${Math.round(d)} · tension −6`; }
+    case "g_summit": { const d = 2 + rand() * 3; applyNation(L, [0.01, 0, 0]); P.pop = clamp(P.pop + d, 0, 100); lobbyShift(L, ["arms", "industry", "oil"], 4); L.bump("health", -1); L.network += 0.5; L.say(pick(["Voyage d’État : contrats signés et dîner de gala.", "Sommet international : la photo de famille fait le tour du monde.", "Reçoit avec faste un chef d’État étranger."]), "work"); return `Popularité +${Math.round(d)}`; }
+    case "g_war": {
+      lobbyShift(L, ["arms"], 12); applyNation(L, [0, 4, 0]); L.bump("happy", -3);
+      if (rand() < 0.6) { P.pop = clamp(P.pop + 8, 0, 100); applyNation(L, [0, 0, -8]); L.say("Lance une intervention militaire : succès rapide, le pays se rassemble derrière son chef.", "history", true); return "Succès : popularité +8"; }
+      P.pop = clamp(P.pop - 12, 0, 100); applyNation(L, [-0.01, 4, 12]); L.say("Lance une intervention militaire ; le conflit s’enlise et les cercueils reviennent.", "history", true); return "Enlisement : popularité −12";
+    }
+    case "g_reshuffle": P.pop = clamp(P.pop + 4, 0, 100); P.loyalty = clamp(P.loyalty - 6, 0, 100); applyNation(L, [0, 0, -4]); L.say(S.sys === "parl" ? "Remanie son gouvernement." : L.code === "US" ? "Remanie son cabinet." : "Change de Premier ministre et remanie le gouvernement.", "work", true); return "Nouveau gouvernement";
+    case "g_court": P.courtSeat = false; P.court = P.side; lobbyShift(L, Object.keys(LOBBIES).filter(k => LOBBIES[k].side === P.side), 6); L.say(L.code === "FR" ? "Nomme un fidèle au Conseil constitutionnel." : `Nomme un juge de son camp à ${L.code === "US" ? "la Cour suprême" : "la Cour constitutionnelle"}.`, "work", true); return "La Cour penche de votre côté";
+    case "g_referendum": {
+      const bill = agenda(L)[0];
+      if (rand() < clamp(P.pop / 110, 0.1, 0.85)) { enactBill(L, bill, false); P.pop = clamp(P.pop + 6, 0, 100); L.say(`Référendum gagné : ${bill.t} est adoptée par le peuple.`, "work", true); return "Référendum gagné"; }
+      P.pop = clamp(P.pop - 10, 0, 100); applyNation(L, [0, 0, 4]); L.say(`Référendum perdu sur ${bill.t} : un désaveu personnel.`, "work", true); return "Référendum perdu";
+    }
+    case "g_crackdown": applyNation(L, [0, 0, -20]); P.pop = clamp(P.pop - 4, 0, 100); P.dirt += 1.5; L.say("Fait arrêter des opposants et interdire les manifestations.", "work", true); return "Tension −20";
+    case "g_enrich": {
+      const x = m * (4 + corruptionOf(L) * 30);
+      L.addMoney(x); P.dirt += dem ? 4 : 2; applyNation(L, [0, 1, 3]);
+      L.say(`Détourne discrètement de l’argent public (${money(x)}).`, "money", true); return `+${money(x)}`;
+    }
+  }
+  return null;
+}
+// L'année du pays : les effets s'estompent, la dette grossit, la rue gronde, les marchés s'affolent.
+function nationYear(L, R) {
+  const P = L.politics, N = nationOf(L), e = L.g("", "e");
+  N.econ = 1 + (N.econ - 1) * 0.7;
+  N.debt = clamp(N.debt + 1 + (N.econ < 1 ? 3 : 0), 0, 300);
+  N.tension = clamp(N.tension + (30 - N.tension) * 0.2 + (L.econ < 0.97 ? 6 : 0) + (L.econ > 1.03 ? -3 : 0), 0, 100);
+  if (P.court && P.court !== P.side) P.court = null;
+  if (!P.courtSeat && R === "dem" && rand() < 0.15) P.courtSeat = true;
+  if (N.debt > 100 && rand() < (N.debt - 100) / 250) {
+    N.econ = clamp(N.econ - 0.06, 0.8, 1.25); N.tension = clamp(N.tension + 10, 0, 100); P.pop = clamp(P.pop - 8, 0, 100);
+    L.say(`Crise de la dette : les marchés paniquent, les taux s’envolent (dette ≈ ${Math.round(N.debt)} % du PIB).`, "history", true);
+  }
+  if (N.tension >= 70 && rand() < (N.tension - 55) / 60) {
+    P.pop = clamp(P.pop - 5, 0, 100); N.econ = clamp(N.econ - 0.02, 0.8, 1.25);
+    // Sous un régime autoritaire, la rue ou l'armée peuvent emporter le chef.
+    if (R !== "dem" && N.tension >= 85 && rand() < 0.3) {
+      const exile = rand() < 0.5;
+      L.leaveOffice(exile ? `Renversé${e} par la rue ; fuit le pays en catastrophe.` : `Renversé${e} par un coup d’État militaire ; arrêté${e}.`);
+      L.bump("happy", -20); if (!exile) L.bump("health", -8);
+      return;
+    }
+    L.say(R === "dem" ? pick(["Grève générale : le pays est paralysé des semaines durant.", "Manifestations monstres contre la politique du gouvernement."]) : "Émeutes dans les grandes villes ; le pouvoir vacille.", "history", true);
+  }
+}
+const pctTxt = x => `${x >= 0 ? "+" : "−"}${Math.abs(x * 100).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} %`;
+function nationHtml(L, bar) {
+  const P = L.politics, N = nationOf(L), opts = govOptions(L), R = polRegime(L), ag = agenda(L), forceOk = R !== "dem" || polSystem(L).sys === "pres";
+  const pill = o => `<button class="sp-pill" data-pol="${o.id}"${o.ok ? "" : " disabled"}>${esc(o.label)} <span>${esc(o.ok ? o.sub : o.why)}</span></button>`;
+  const done = id => (P.did || {})[id] === L.age;
+  const billPill = (id, b, why) => { const pro = b.pro.map(k => LOBBIES[k].who), con = b.con.map(k => LOBBIES[k].who), op = b.pub >= 2 ? "l’opinion est pour" : b.pub <= -2 ? "l’opinion est contre" : "l’opinion est partagée";
+    return `<button class="sp-pill" data-pol="${id}" data-arg="${billIdx(b)}"${done(id) ? " disabled" : ""}>${esc(capFirst(b.t))} <span>${esc(done(id) ? "déjà cette année" : `${why} · ${op}${b.nat ? ` · ${natNote(b.nat)}` : ""}${pro.length ? ` · pour : ${pro.join(", ")}` : ""}${con.length ? ` · contre : ${con.join(", ")}` : ""}`)}</span></button>`; };
+  return `<p class="sp-head">Gouverner le pays</p>
+    <div class="sp-card"><div class="sp-main"><b>État du pays</b>
+      <small>Économie : ${pctTxt(N.econ - 1)} sous l’effet de votre politique (revenus, entreprises, popularité) · dette publique ≈ ${Math.round(N.debt)} % du PIB${N.debt > 100 ? " : les marchés surveillent" : ""}</small>
+      <small>Tension sociale ${Math.round(N.tension)}/100 ${bar(N.tension)}${N.tension >= 70 ? " · grèves et manifestations menacent" : ""}</small>
+      <small>Vos pouvoirs : ${esc(powerNote(L))}</small></div></div>
+    <div class="sp-pills">${opts.map(pill).join("")}</div>
+    <details class="sp-more"><summary>Faire voter une réforme <small>chances ≈ ${Math.round(execPower(L) * 100)} % · une par an</small></summary><div class="sp-pills">${ag.map(b => billPill("g_bill", b, `Vote ≈ ${Math.round(execPower(L) * 100)} %`)).join("")}</div></details>
+    ${forceOk ? `<details class="sp-more"><summary>${L.code === "FR" ? "Passer en force (49.3)" : "Passer en force par décret"} <small>sans vote · tension +${R === "dem" ? 8 : 3}${R === "dem" ? " · les juges peuvent annuler" : ""}</small></summary><div class="sp-pills">${ag.map(b => billPill("g_force", b, R === "dem" ? `Annulation ≈ ${Math.round((P.court === P.side ? 0.05 : L.code === "FR" ? 0.15 : 0.3) * 100)} %` : "Le Parlement obéit")).join("")}</div></details>` : ""}`;
+}
+
 // --- Les gestes de l'année (panneau « Dépenser et investir ») --------------------------------
 function polOptions(L) {
   const P = L.politics, out = [];
@@ -847,7 +1008,6 @@ function polOptions(L) {
   // Les pouvoirs du sommet, selon le pays.
   if (P.rank === 5 && elected(R)) {
     const S = polSystem(L);
-    if (S.sys === "pres" || R === "hybrid") add("decree", L.code === "US" ? "Signer un décret présidentiel (executive order)" : L.code === "FR" ? "Légiférer par ordonnances" : "Gouverner par décret", `Sans passer par le Parlement : vos alliés applaudissent${R === "dem" ? ", mais un juge peut l’annuler" : ""}`);
     if (R === "dem" && (S.sys === "parl" || (L.code === "FR" && S.sys === "pres"))) {
       const ch = generalChance(L, candidateEdge(L, true), "parl");
       add("dissolve", S.sys === "pres" ? "Dissoudre l’Assemblée nationale" : "Provoquer des élections anticipées", `Victoire ≈ ${Math.round(ch * 100)} % : ${S.sys === "pres" ? "une majorité pour gouverner ; sinon, la cohabitation" : "un nouveau mandat ; sinon, l’opposition gouverne"}`);
@@ -867,6 +1027,17 @@ function polAction(L, id, arg) {
   if (id === "enter") { const why = polJoinWhy(L); return why ? `Impossible : ${why}.` : L.joinPolitics(arg); }
   if (!P) return null;
   if (id === "meet" || id === "snub" || id === "join") return lobbyAction(L, id, arg);
+  // Gouverner : seulement au sommet, chaque geste une fois par an.
+  if (id.startsWith("g_")) {
+    if (P.rank !== 5) return null;
+    P.did = P.did || {};
+    if (P.did[id] === L.age) return "Déjà cette année.";
+    const o = govOptions(L).find(x => x.id === id);
+    if (id !== "g_bill" && id !== "g_force" && (!o || !o.ok)) return o ? `Impossible : ${o.why}.` : null;
+    const r = govAction(L, id, arg);
+    if (r) P.did[id] = L.age;
+    return r;
+  }
   const o = polOptions(L).find(x => x.id === id);
   if (!o || !o.ok) return o ? `Impossible : ${o.why}.` : null;
   P.did = P.did || {}; P.did[id] = L.age;
@@ -892,13 +1063,6 @@ function polAction(L, id, arg) {
       for (const b of L.businesses || []) b.mult *= 1 + g;
       P.conflict += 2; P.dirt += 1;
       L.say("Fait passer en douce une mesure taillée pour ses propres entreprises.", "money"); return `Bénéfices +${Math.round(g * 100)} %`;
-    }
-    case "decree": {
-      for (const k in P.lob) if (LOBBIES[k].side === P.side || (P.side === "pouvoir" && !LOBBIES[k].people)) P.lob[k] = clamp(P.lob[k] + 8, -100, 100);
-      const d = randn() * 3 - (R === "dem" ? 1 : 0);
-      P.pop = clamp(P.pop + d, 0, 100);
-      if (R === "dem" && rand() < 0.25) { L.say(`Signe un décret ; ${L.code === "US" ? "la Cour suprême" : L.code === "FR" ? "le Conseil d’État" : "la justice"} le suspend.`, "work", true); return "Décret annulé par les juges"; }
-      L.say("Gouverne par décret, sans passer par le Parlement.", "work", true); return `Vos alliés applaudissent · popularité ${d >= 0 ? "+" : ""}${Math.round(d)}`;
     }
     case "dissolve": {
       const S = polSystem(L), pres = S.sys === "pres", e = L.g("", "e");
@@ -1001,8 +1165,8 @@ function politicsHtml(L, full = false) {
       <small>Popularité ${Math.round(P.pop)}/100 ${bar(P.pop)} · influence ${inf}/100 ${bar(inf)} · loyauté ${Math.round(P.loyalty)}/100</small>
       <small>${esc(REGIME_NOTE[R])}${gov}${P.termEnd != null && P.rank > 0 ? ` · mandat jusqu’à ${P.termEnd} ans` : ""}${P.funds >= 1 ? ` · trésor de campagne ≈ ${eur(P.funds)}` : ""}${P.banUntil != null && L.age < P.banUntil ? ` · inéligible jusqu’à ${P.banUntil} ans` : ""}</small>
       ${elected(R) && titles[5] ? `<small>${esc(systemNote(L))}</small>` : ""}
-      ${P.rank === 5 && elected(R) ? `<small>Vos pouvoirs : ${esc(powerNote(L))}</small>` : ""}
       ${P.history.length ? `<small>Parcours : ${P.history.slice(-6).map(h => `${esc(h.t)} (${h.y})`).join(" · ")}</small>` : ""}</div></div>
+    ${P.rank === 5 ? `${nationHtml(L, bar)}<p class="sp-head">Campagne et vie du parti</p>` : ""}
     <div class="sp-pills">${opts.filter(o => o.id !== "switch").map(o => `<button class="sp-pill" data-pol="${o.id}"${o.ok ? "" : " disabled"}>${esc(o.label)} <span>${esc(o.ok ? o.sub : o.why)}</span></button>`).join("")}</div>
     ${(sw => sw ? `<details class="sp-more"><summary>Changer de parti <small>${esc(sw.ok ? sw.sub : sw.why)}</small></summary><div class="sp-pills">${partiesFor(L).filter(p => p.id !== P.side).map(p => `<button class="sp-pill" data-pol="switch" data-arg="${p.id}"${sw.ok ? "" : " disabled"}>Rejoindre : ${esc(p.label.charAt(0).toLowerCase() + p.label.slice(1))} <span>${esc(p.sub)}</span></button>`).join("")}</div></details>` : "")(opts.find(o => o.id === "switch"))}
     <p class="sp-head">Les lobbys</p>
@@ -1063,5 +1227,7 @@ ACTIONS.push({ id: "politics", cat: "pro", label: "S’engager en politique",
 function polMiniRows(L) {
   const P = L.politics;
   if (!P) return [["Engagement", "aucun", L.age >= POL_MIN_AGE ? "Ouvert à tous, quel que soit le métier" : `Possible dès ${POL_MIN_AGE} ans`]];
-  return [["Poste", capFirst(P.rank > 0 ? L.polTitle() : L.g(officeTitles(L)[0][0], officeTitles(L)[0][1])), P.party], ["Popularité", `${Math.round(P.pop)}/100`, `influence ${L.polInfluence()}/100`]];
+  const rows = [["Poste", capFirst(P.rank > 0 ? L.polTitle() : L.g(officeTitles(L)[0][0], officeTitles(L)[0][1])), P.party], ["Popularité", `${Math.round(P.pop)}/100`, `influence ${L.polInfluence()}/100`]];
+  if (P.rank === 5) { const N = nationOf(L); rows.push(["Le pays", `économie ${pctTxt(N.econ - 1)}`, `dette ≈ ${Math.round(N.debt)} % du PIB · tension ${Math.round(N.tension)}/100`]); }
+  return rows;
 }
