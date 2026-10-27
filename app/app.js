@@ -239,7 +239,7 @@ function openSheet(html, opts = {}) {
   sheetOpts = opts;
   $("sheetBody").innerHTML = html;
   $("sheetBody").scrollTop = 0;
-  sheetJump();
+  if (opts.tabs) sheetTabs(opts);
   const sh = $("sheet"), bd = $("sheetBackdrop");
   sh.classList.remove("closing"); bd.classList.remove("backdrop-closing");
   sh.style.transform = "";
@@ -247,33 +247,54 @@ function openSheet(html, opts = {}) {
   sh.hidden = false; bd.hidden = false;
   if (!wasOpen) { sh.style.animation = "none"; void sh.offsetWidth; sh.style.animation = ""; }
 }
-// Une feuille longue (Politique, Argent…) : une rangée de raccourcis vers ses rubriques, collée en haut,
-// qui suit la lecture. On sait où l'on est et l'on saute directement au sujet voulu.
-function sheetJump() {
-  const body = $("sheetBody"), heads = [...body.querySelectorAll(".sp-head, .group-header")].filter(h => h.textContent.trim());
-  if (heads.length < 4) { body.onscroll = null; return; }
+// Les longues feuilles (Politique, Argent) se lisent par onglets : un seul sujet à la fois, au lieu
+// de plusieurs écrans à faire défiler. opts.tabs dit à quel onglet appartient chaque rubrique ; ce qui
+// précède la première rubrique va dans le premier onglet. L'onglet choisi est gardé quand la feuille
+// se rafraîchit après un geste.
+const sheetTabMemory = {};
+function sheetTabs(opts) {
+  const body = $("sheetBody"), tabOf = opts.tabs;
+  if (!tabOf) return;
+  // Les rubriques repliées dans un « Voir plus » ne comptent pas.
+  const isHead = el => el.matches(".sp-head, .group-header") && !el.closest("details");
+  const hasHead = el => [...el.querySelectorAll(".sp-head, .group-header")].some(isHead);
+  const blocks = [];
+  const walk = el => { for (const c of el.children) { if (c.classList.contains("sheet-title")) continue; if (!isHead(c) && hasHead(c)) walk(c); else blocks.push(c); } };
+  walk(body);
+  let cur = null;
+  const order = opts.tabOrder, sections = new Map();
+  for (const el of blocks) {
+    if (isHead(el)) cur = tabOf(el.textContent.trim()) || cur;
+    const t = cur || order[0];
+    if (!sections.has(t)) sections.set(t, []);
+    sections.get(t).push(el);
+  }
+  const tabs = order.filter(t => sections.has(t));
+  if (tabs.length < 2) return;
+  const key = opts.tabKey || "";
+  let active = tabs.includes(sheetTabMemory[key]) ? sheetTabMemory[key] : tabs[0];
   const nav = document.createElement("nav");
-  nav.className = "sheet-jump"; nav.setAttribute("aria-label", "Rubriques de la feuille");
-  const btns = heads.map(h => {
+  nav.className = "sheet-tabs"; nav.setAttribute("role", "tablist");
+  const show = t => {
+    active = t; sheetTabMemory[key] = t;
+    for (const [k, els] of sections) for (const el of els) el.classList.toggle("tab-off", k !== t);
+    nav.querySelectorAll("button").forEach(b => { const on = b.dataset.tab === t; b.classList.toggle("on", on); b.setAttribute("aria-selected", String(on)); });
+  };
+  for (const t of tabs) {
     const b = document.createElement("button");
-    b.textContent = h.textContent.trim().replace(/\s+/g, " ");
-    b.addEventListener("click", () => { haptic(); h.scrollIntoView({ behavior: "smooth", block: "start" }); });
+    b.dataset.tab = t; b.textContent = t; b.setAttribute("role", "tab");
+    b.addEventListener("click", () => { if (t === active) return; haptic(); show(t); body.scrollTop = 0; });
     nav.appendChild(b);
-    return b;
-  });
+  }
   const title = body.querySelector(".sheet-title");
   if (title) title.after(nav); else body.prepend(nav);
-  const mark = () => {
-    const y = body.getBoundingClientRect().top + nav.offsetHeight + 24;
-    let cur = 0;
-    heads.forEach((h, i) => { if (h.getBoundingClientRect().top <= y) cur = i; });
-    btns.forEach((b, i) => b.classList.toggle("on", i === cur));
-    if (btns[cur]) nav.scrollTo({ left: btns[cur].offsetLeft - 18, behavior: "smooth" });
-  };
-  let raf = 0;
-  body.onscroll = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(mark); };
-  mark();
+  show(active);
 }
+// Les onglets des feuilles Argent et Politique.
+const MONEY_TABS = { order: ["Aperçu", "Dépenses", "Épargne", "Logement", "Travail"],
+  of: h => /^Budget/.test(h) ? "Aperçu" : /^(À faire|Train de vie|Sans demander)/.test(h) ? "Dépenses" : /^(Faire fructifier|Placements|Testament)/.test(h) ? "Épargne" : /^Logement/.test(h) ? "Logement" : /(carrière|entreprise)/i.test(h) ? "Travail" : null };
+const POL_TABS = { order: ["Carrière", "Gouverner", "Campagne", "Lobbys", "Entreprises"],
+  of: h => /^(Votre carrière politique|S’engager)/.test(h) ? "Carrière" : /^Gouverner/.test(h) ? "Gouverner" : /^Campagne/.test(h) ? "Campagne" : /lobbys/i.test(h) ? "Lobbys" : /entreprises/i.test(h) ? "Entreprises" : null };
 function closeSheet() {
   const sh = $("sheet"), bd = $("sheetBackdrop");
   if (sh.hidden) return;
@@ -695,7 +716,7 @@ function panelSheet(kind) {
   const L = life;
   const choice = (name, obj, cur) => `<div class="group">${Object.entries(obj).map(([k, o]) => `<button class="cell link choice-cell" data-choice="${name}" data-v="${k}"><span class="tick">${k === cur ? "✓" : ""}</span><span class="cell-main"><b>${typeof o === "string" ? o : o.label}</b>${o.note ? `<small>${o.note}</small>` : ""}</span></button>`).join("")}</div>`;
   if (kind === "politics") {
-    openSheet(`<h2 class="sheet-title">Politique</h2>${L.alive ? politicsHtml(L, true) : ""}`, { dismissable: true, onClose: renderLife });
+    openSheet(`<h2 class="sheet-title">Politique</h2>${L.alive ? politicsHtml(L, true) : ""}`, { dismissable: true, onClose: renderLife, tabs: POL_TABS.of, tabOrder: POL_TABS.order, tabKey: "politics" });
   } else if (kind === "family") {
     openSheet(`<h2 class="sheet-title">Famille et vie</h2>
       <div class="group">${rowsHtml(familyRows(L))}</div>
@@ -719,7 +740,8 @@ function panelSheet(kind) {
       setTimeout(() => { if (play) beginLife(); else { saveCurrent(life, peers); beginLife(true); } toast(play ? `Vous jouez désormais ${life.name}` : `Retour à la vie de ${life.name}`); }, 320);
     }));
   } else {
-    const d = L.houseDeal(), port = portfolioRows(L), alloc = L.validAlloc(), budget = budgetRows(L);
+    // Répartition : seulement les placements choisis (on en ajoute avec « Faire fructifier votre épargne »).
+    const d = L.houseDeal(), port = portfolioRows(L).filter(r => r.target > 0 || r.value > 0), alloc = L.validAlloc(), budget = budgetRows(L);
     openSheet(`<h2 class="sheet-title">Dépenser et investir</h2>
       <div class="group">${rowsHtml(moneyRows(L).map(([k, v]) => [k, v.split(" · ")[0], v.split(" · ")[1]]))}</div>
       ${L.age < 16 && !L.job ? `<p class="group-footer">Encore enfant : ces choix compteront dès le premier revenu.</p>` : ""}
@@ -738,7 +760,7 @@ function panelSheet(kind) {
         ${L.house ? `<button class="btn-gray" data-do="sell">Vendre le logement</button>` : `<button class="btn-gray" data-do="buy" ${d.ok ? "" : "disabled"}>Acheter</button>`}
         <button class="btn-gray" data-do="repay" ${(L.debt > 0 || (L.house && L.house.loan > 0)) && L.savings > 0 ? "" : "disabled"}>Rembourser</button>
       </div>
-      <p class="group-footer">Dollars PPA à prix constants. Les dettes pèsent sur le bonheur et la santé.</p>`, { dismissable: true, onClose: renderLife });
+      <p class="group-footer">Dollars PPA à prix constants. Les dettes pèsent sur le bonheur et la santé.</p>`, { dismissable: true, onClose: renderLife, tabs: MONEY_TABS.of, tabOrder: MONEY_TABS.order, tabKey: "money" });
     $("sheetBody").querySelectorAll("[data-asset]").forEach(i => i.addEventListener("input", () => {
       L.alloc[i.dataset.asset] = +i.value;
       L.rebalance();

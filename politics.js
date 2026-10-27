@@ -871,21 +871,21 @@ function govOptions(L) {
   // Deux politiques contraires ne se mènent pas la même année.
   const not = id => (P.did || {})[id] !== L.age, contra = "contraire de ce que vous avez décidé cette année";
   // L'économie et les finances publiques.
-  add("g_relance", y >= 1930 ? "Lancer un plan de relance" : "Lancer de grands travaux", `Grands chantiers, aides, embauches publiques · ${natNote([0.05, 8, -5])} · popularité +3 · le BTP et les syndicats applaudissent`, not("g_austerite"), contra);
-  add("g_austerite", "Imposer un plan d’économies", `Coupes dans les budgets, gel des salaires publics · ${natNote([-0.03, -10, 12])} · popularité −5 · les banques applaudissent, les syndicats grondent`, not("g_relance"), contra);
-  add("g_taxcut", "Baisser les impôts", `${natNote([0.02, 6, 3])} · popularité +4 · vos propres impôts baissent aussi`, not("g_taxrich"), contra);
-  add("g_taxrich", "Taxer les grandes fortunes", `${natNote([-0.01, -5, -8])} · popularité +3 · banques et industriels furieux · vous payez aussi (≈ 3 % de votre épargne)`, not("g_taxcut"), contra);
-  if (y >= 1900) add("g_tariffs", "Relever les droits de douane", `Protéger l’industrie et l’agriculture du pays · ${natNote([-0.015, -1, -3])} · popularité +2 · la grande distribution proteste`);
+  add("g_relance", y >= 1930 ? "Lancer un plan de relance" : "Lancer de grands travaux", `${natNote([0.05, 8, -5])} · popularité +3`, not("g_austerite"), contra);
+  add("g_austerite", "Imposer un plan d’économies", `${natNote([-0.03, -10, 12])} · popularité −5 · syndicats furieux`, not("g_relance"), contra);
+  add("g_taxcut", "Baisser les impôts", `${natNote([0.02, 6, 3])} · popularité +4 · vos impôts baissent aussi`, not("g_taxrich"), contra);
+  add("g_taxrich", "Taxer les grandes fortunes", `${natNote([-0.01, -5, -8])} · popularité +3 · vous payez ≈ 3 % de votre épargne`, not("g_taxcut"), contra);
+  if (y >= 1900) add("g_tariffs", "Relever les droits de douane", `${natNote([-0.015, -1, -3])} · popularité +2 · industrie et agriculture protégées`);
   // Le pays et le monde.
-  add("g_speech", L.calYear >= 1950 ? "S’adresser à la nation à la télévision" : "S’adresser à la nation à la radio", `Apaiser, rassembler · tension −6 · popularité +1 à +4`);
-  add("g_summit", y >= 1945 ? "Voyage d’État et sommet international" : "Voyage d’État à l’étranger", `Contrats signés, photos avec les grands de ce monde · ${natNote([0.01, 0, 0])} · popularité +2 à +5 · fatigue`);
-  if (c !== "CH") add("g_war", "Lancer une intervention militaire", `Le pays se rassemble… ou s’enlise (≈ 40 %) · les marchands d’armes applaudissent${dem ? " · le Parlement et la presse demanderont des comptes" : ""}`);
-  if (S.sys !== "coll") add("g_reshuffle", S.sys === "parl" ? "Remanier son gouvernement" : c === "US" ? "Remanier son cabinet" : "Changer de Premier ministre, remanier", "Un nouveau souffle · popularité +4 · tension −4 · ceux qu’on écarte vous en voudront (loyauté −6)");
-  if (P.courtSeat) add("g_court", c === "US" ? "Nommer un juge à la Cour suprême" : c === "FR" ? "Nommer au Conseil constitutionnel" : "Nommer un juge à la Cour constitutionnelle", "Un siège se libère : un juge de votre camp, pour des années · vos décrets seront rarement annulés");
-  if (dem) add("g_referendum", "Organiser un référendum sur une grande réforme", `Le peuple tranche · gagné (≈ ${Math.round(clamp(P.pop / 110, 0.1, 0.85) * 100)} %) : la réforme passe, popularité +6 ; perdu : popularité −10`);
+  add("g_speech", L.calYear >= 1950 ? "S’adresser à la nation à la télévision" : "S’adresser à la nation à la radio", `tension −6 · popularité +1 à +4`);
+  add("g_summit", y >= 1945 ? "Voyage d’État et sommet international" : "Voyage d’État à l’étranger", `${natNote([0.01, 0, 0])} (contrats) · popularité +2 à +5`);
+  if (c !== "CH") add("g_war", "Lancer une intervention militaire", `60 % : popularité +8, tension −8 · 40 % : enlisement, popularité −12`);
+  if (S.sys !== "coll") add("g_reshuffle", S.sys === "parl" ? "Remanier son gouvernement" : c === "US" ? "Remanier son cabinet" : "Changer de Premier ministre, remanier", "popularité +4 · tension −4 · loyauté −6");
+  if (P.courtSeat) add("g_court", c === "US" ? "Nommer un juge à la Cour suprême" : c === "FR" ? "Nommer au Conseil constitutionnel" : "Nommer un juge à la Cour constitutionnelle", "Un siège se libère · vos passages en force ne seront presque plus annulés");
+  if (dem) add("g_referendum", "Organiser un référendum sur une grande réforme", `Gagné (≈ ${Math.round(clamp(P.pop / 110, 0.1, 0.85) * 100)} %) : réforme adoptée, popularité +6 · perdu : −10`);
   // Le pouvoir et ses tentations.
-  if (!dem) add("g_crackdown", "Réprimer l’opposition", "Arrestations, censure, manifestations interdites · tension −20 · popularité −4 · on parlera de vous dans les rapports des ONG");
-  add("g_enrich", "Puiser dans les caisses de l’État", `≈ ${money(median(L.here) * (4 + corruptionOf(L) * 30))} pour vous et vos proches · ${dem ? "gros risque de scandale, de procès" : "les rivaux du sérail prennent note"}`);
+  if (!dem) add("g_crackdown", "Réprimer l’opposition", "tension −20 · popularité −4 · arrestations, censure");
+  add("g_enrich", "Puiser dans les caisses de l’État", `≈ ${money(median(L.here) * (4 + corruptionOf(L) * 30))} pour vous · ${dem ? "gros risque de scandale" : "les rivaux prennent note"}`);
   return out;
 }
 // Les gestes avec un choix : une réforme de l'agenda.
@@ -972,9 +972,9 @@ function nationHtml(L, bar) {
       <small>Économie : ${pctTxt(N.econ - 1)} sous l’effet de votre politique (revenus, entreprises, popularité) · dette publique ≈ ${Math.round(N.debt)} % du PIB${N.debt > 100 ? " : les marchés surveillent" : ""}</small>
       <small>Tension sociale ${Math.round(N.tension)}/100 ${bar(N.tension)}${N.tension >= 70 ? " · grèves et manifestations menacent" : ""}</small>
       <small>Vos pouvoirs : ${esc(powerNote(L))}</small></div></div>
-    <div class="sp-pills">${opts.map(pill).join("")}</div>
-    <details class="sp-more"><summary>Faire voter une réforme <small>chances ≈ ${Math.round(execPower(L) * 100)} % · une par an</small></summary><div class="sp-pills">${ag.map(b => billPill("g_bill", b, `Vote ≈ ${Math.round(execPower(L) * 100)} %`)).join("")}</div></details>
-    ${forceOk ? `<details class="sp-more"><summary>${L.code === "FR" ? "Passer en force (49.3)" : "Passer en force par décret"} <small>sans vote · tension +${R === "dem" ? 8 : 3}${R === "dem" ? " · les juges peuvent annuler" : ""}</small></summary><div class="sp-pills">${ag.map(b => billPill("g_force", b, R === "dem" ? `Annulation ≈ ${Math.round((P.court === P.side ? 0.05 : L.code === "FR" ? 0.15 : 0.3) * 100)} %` : "Le Parlement obéit")).join("")}</div></details>` : ""}`;
+    <div class="sp-pills stack">${opts.map(pill).join("")}</div>
+    <details class="sp-more"><summary>Faire voter une réforme <small>chances ≈ ${Math.round(execPower(L) * 100)} % · une par an</small></summary><div class="sp-pills stack">${ag.map(b => billPill("g_bill", b, `Vote ≈ ${Math.round(execPower(L) * 100)} %`)).join("")}</div></details>
+    ${forceOk ? `<details class="sp-more"><summary>${L.code === "FR" ? "Passer en force (49.3)" : "Passer en force par décret"} <small>sans vote · tension +${R === "dem" ? 8 : 3}${R === "dem" ? " · les juges peuvent annuler" : ""}</small></summary><div class="sp-pills stack">${ag.map(b => billPill("g_force", b, R === "dem" ? `Annulation ≈ ${Math.round((P.court === P.side ? 0.05 : L.code === "FR" ? 0.15 : 0.3) * 100)} %` : "Le Parlement obéit")).join("")}</div></details>` : ""}`;
 }
 
 // --- Les gestes de l'année (panneau « Dépenser et investir ») --------------------------------
@@ -1167,13 +1167,14 @@ function politicsHtml(L, full = false) {
       ${elected(R) && titles[5] ? `<small>${esc(systemNote(L))}</small>` : ""}
       ${P.history.length ? `<small>Parcours : ${P.history.slice(-6).map(h => `${esc(h.t)} (${h.y})`).join(" · ")}</small>` : ""}</div></div>
     ${P.rank === 5 ? `${nationHtml(L, bar)}<p class="sp-head">Campagne et vie du parti</p>` : ""}
-    <div class="sp-pills">${opts.filter(o => o.id !== "switch").map(o => `<button class="sp-pill" data-pol="${o.id}"${o.ok ? "" : " disabled"}>${esc(o.label)} <span>${esc(o.ok ? o.sub : o.why)}</span></button>`).join("")}</div>
-    ${(sw => sw ? `<details class="sp-more"><summary>Changer de parti <small>${esc(sw.ok ? sw.sub : sw.why)}</small></summary><div class="sp-pills">${partiesFor(L).filter(p => p.id !== P.side).map(p => `<button class="sp-pill" data-pol="switch" data-arg="${p.id}"${sw.ok ? "" : " disabled"}>Rejoindre : ${esc(p.label.charAt(0).toLowerCase() + p.label.slice(1))} <span>${esc(p.sub)}</span></button>`).join("")}</div></details>` : "")(opts.find(o => o.id === "switch"))}
+    <div class="sp-pills stack">${opts.filter(o => o.id !== "switch").map(o => `<button class="sp-pill" data-pol="${o.id}"${o.ok ? "" : " disabled"}>${esc(o.label)} <span>${esc(o.ok ? o.sub : o.why)}</span></button>`).join("")}</div>
+    ${(sw => sw ? `<details class="sp-more"><summary>Changer de parti <small>${esc(sw.ok ? sw.sub : sw.why)}</small></summary><div class="sp-pills stack">${partiesFor(L).filter(p => p.id !== P.side).map(p => `<button class="sp-pill" data-pol="switch" data-arg="${p.id}"${sw.ok ? "" : " disabled"}>Rejoindre : ${esc(p.label.charAt(0).toLowerCase() + p.label.slice(1))} <span>${esc(p.sub)}</span></button>`).join("")}</div></details>` : "")(opts.find(o => o.id === "switch"))}
     <p class="sp-head">Les lobbys</p>
     <p class="sp-note" style="margin-top:0">Plus votre poste est haut, plus ils vous courtisent : un maire intéresse les promoteurs, un ministre les lobbys de son ministère, un chef de gouvernement tout le monde. Leur soutien finance vos campagnes ; leur hostilité vous coûte des voix.</p>
-    <div class="sp-pills">${lobbiesHere(L).sort((x, y) => lobbyPower(L, y) - lobbyPower(L, x)).map(id => { const B = LOBBIES[id], r = P.lob[id] || 0, w = lobbyPower(L, id), done = (P.did || {})[`meet:${id}`] === L.age;
-      return `<button class="sp-pill" data-pol="meet" data-arg="${id}"${done ? " disabled" : ""}>Recevoir : ${esc(B.label)} <span>${relLabel(r)} (${r > 0 ? "+" : ""}${Math.round(r)}) · poids ${w >= 5 ? "énorme" : w >= 2.5 ? "fort" : w >= 1 ? "moyen" : "faible"} pour vous${B.dom.length ? ` · défend : ${B.dom.slice(0, 3).join(", ").toLowerCase()}` : ""}</span></button>`; }).join("")}</div>
-    <details class="sp-more"><summary>Tenir un lobby à distance${P.former >= 3 && P.rank <= 1 ? ", ou travailler pour lui" : ""}</summary><div class="sp-pills">${lobbiesHere(L).map(id => `<button class="sp-pill" data-pol="snub" data-arg="${id}">Refuser de recevoir : ${esc(LOBBIES[id].label)} <span>relation −12</span></button>${P.former >= 3 && P.rank <= 1 && (P.lob[id] || 0) >= 25 && !L.retired ? `<button class="sp-pill" data-pol="join" data-arg="${id}">Travailler pour eux : ${esc(LOBBIES[id].label)} <span>Un salaire très confortable ; on parlera de pantouflage</span></button>` : ""}`).join("")}</div></details>
+    ${(ids => { const lob = id => { const B = LOBBIES[id], r = P.lob[id] || 0, w = lobbyPower(L, id), done = (P.did || {})[`meet:${id}`] === L.age;
+      return `<button class="sp-pill" data-pol="meet" data-arg="${id}"${done ? " disabled" : ""}>Recevoir : ${esc(B.label)} <span>${relLabel(r)} (${r > 0 ? "+" : ""}${Math.round(r)}) · poids ${w >= 5 ? "énorme" : w >= 2.5 ? "fort" : w >= 1 ? "moyen" : "faible"} pour vous${B.dom.length ? ` · défend : ${B.dom.slice(0, 3).join(", ").toLowerCase()}` : ""}</span></button>`; };
+      return `<div class="sp-pills stack">${ids.slice(0, 6).map(lob).join("")}</div>${ids.length > 6 ? `<details class="sp-more"><summary>Voir les autres lobbys (${ids.length - 6})</summary><div class="sp-pills stack">${ids.slice(6).map(lob).join("")}</div></details>` : ""}`; })(lobbiesHere(L).sort((x, y) => lobbyPower(L, y) - lobbyPower(L, x)))}
+    <details class="sp-more"><summary>Tenir un lobby à distance${P.former >= 3 && P.rank <= 1 ? ", ou travailler pour lui" : ""}</summary><div class="sp-pills stack">${lobbiesHere(L).map(id => `<button class="sp-pill" data-pol="snub" data-arg="${id}">Refuser de recevoir : ${esc(LOBBIES[id].label)} <span>relation −12</span></button>${P.former >= 3 && P.rank <= 1 && (P.lob[id] || 0) >= 25 && !L.retired ? `<button class="sp-pill" data-pol="join" data-arg="${id}">Travailler pour eux : ${esc(LOBBIES[id].label)} <span>Un salaire très confortable ; on parlera de pantouflage</span></button>` : ""}`).join("")}</div></details>
     <p class="sp-note">Chaque geste, une fois par an. Les élections de fin de mandat, les nominations, les lois à voter et les offres des lobbys arrivent d’elles-mêmes, comme des décisions. Enveloppes, cadeaux et votes pour vos propres entreprises finissent parfois en scandale, d’autant plus vite que la presse est libre.</p>`;
   }
   if (bigBiz.length) {

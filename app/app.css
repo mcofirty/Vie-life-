@@ -536,9 +536,9 @@ a { color: var(--tint); text-decoration: none; }
 .sp-pill.on { background: var(--tint); color: #fff; }
 .sp-pill.on span { color: inherit; opacity: .8; }
 .sp-pill[disabled] { opacity: .45; }
-/* Un geste avec son détail : une carte lisible (titre, puis détail en dessous), pas une bulle de texte. */
-.sp-pill:has(> span) { display: flex; flex-direction: column; gap: 3px; flex: 1 1 100%; border-radius: 16px; padding: 11px 14px; font-weight: 600; line-height: 1.3; }
-.sp-pill:has(> span) span { font-weight: 400; line-height: 1.4; }
+/* Les gestes politiques : des cartes lisibles (titre, puis détail en dessous), pas des bulles de texte. */
+.sp-pills.stack .sp-pill { display: flex; flex-direction: column; gap: 3px; flex: 1 1 100%; border-radius: 16px; padding: 11px 14px; font-weight: 600; line-height: 1.3; }
+.sp-pills.stack .sp-pill span { font-weight: 400; line-height: 1.4; }
 .sp-pill:not([disabled]):active { transform: scale(.98); }
 .sp-more { margin: 6px 0 4px; }
 .sp-more > summary { cursor: pointer; font-weight: 600; padding: 10px 6px; color: var(--tint); }
@@ -581,9 +581,11 @@ a { color: var(--tint); text-decoration: none; }
 .off-list > summary::after { content: ""; width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); margin: -3px 0 0 auto; transition: transform .2s; }
 .off-list[open] > summary::after { transform: rotate(-135deg); margin-top: 3px; }
 .off-list #actOffN { background: var(--fill); border-radius: 9px; padding: 1px 7px; font-size: 11px; }
-/* Raccourcis de rubriques en haut des longues feuilles. */
-.sheet-jump { position: sticky; top: -16px; z-index: 3; display: flex; gap: 6px; overflow-x: auto; margin: -8px -18px 12px; padding: 10px 18px; background: var(--bg); scrollbar-width: none; box-shadow: 0 8px 12px -10px rgba(23, 20, 43, .25); }
-.sheet-jump::-webkit-scrollbar { display: none; }
-.sheet-jump button { flex: none; padding: 7px 13px; border-radius: 999px; background: var(--fill); color: var(--label-2); font-size: 13px; font-weight: 600; white-space: nowrap; transition: background .2s, color .2s; }
-.sheet-jump button.on { background: var(--tint); color: #fff; }
-.sheet-body .sp-head, .sheet-body .group-header { scroll-margin-top: 62px; }
+/* Onglets des longues feuilles : un sujet à la fois, collés en haut. */
+.sheet-tabs { position: sticky; top: -16px; z-index: 3; display: flex; gap: 4px; overflow-x: auto; margin: -10px -18px 14px; padding: 10px 18px; background: var(--bg); scrollbar-width: none; box-shadow: 0 8px 12px -10px rgba(23, 20, 43, .25); }
+.sheet-tabs::-webkit-scrollbar { display: none; }
+.sheet-tabs button { flex: 1 0 auto; padding: 8px 10px; border-radius: 999px; background: var(--fill); color: var(--label-2); font-size: 14px; font-weight: 600; white-space: nowrap; transition: background .2s, color .2s; }
+.sheet-tabs button.on { background: var(--tint); color: #fff; box-shadow: 0 4px 12px rgba(255, 90, 54, .3); }
+.tab-off { display: none !important; }
+/* Une feuille à onglets garde sa hauteur : elle ne saute pas d'un onglet à l'autre. */
+.sheet:has(.sheet-tabs) { height: 92vh; }
