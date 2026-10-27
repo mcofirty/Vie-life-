@@ -129,7 +129,7 @@ function businessHtml(L) {
   L.bizFocus = 0;
   const total = list.reduce((s, b) => s + median(L.here) * b.mult * L.econ, 0);
   return `<div class="sp"><p class="sp-head">${list.length > 1 ? `Vos ${list.length} entreprises · bénéfice total ≈ ${eur(total)} par an` : "Votre entreprise"}</p>${parts.join("")}
-    <p class="sp-note">Créer une autre entreprise, dans n’importe quel domaine : « Agir » › « Créer une entreprise » (six au plus). Mener plusieurs entreprises soi-même double la charge de travail ; un gérant libère du temps mais prend sa part.</p></div>`;
+    <p class="sp-note">Créer une autre entreprise, dans n’importe quel domaine : « Agir » › « Créer une entreprise », sans limite de nombre. Mener plusieurs entreprises soi-même double la charge de travail ; un gérant libère du temps mais prend sa part.</p></div>`;
 }
 function oneBusinessHtml(L, i, many) {
   const b = L.business;

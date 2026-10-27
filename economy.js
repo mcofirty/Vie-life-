@@ -1055,7 +1055,7 @@ const ACTIONS = [
       return "Inscription réussie.";
     } },
   { id: "business", cat: "pro", label: "Créer une entreprise", desc: "Commerce, atelier, ferme, start-up… Beaucoup échouent dans les cinq ans ; certaines réussissent très bien.",
-    when: L => L.age < 18 || L.age > 70 ? "Entre 18 et 70 ans." : (L.businesses || []).length >= 6 ? "Six entreprises au plus." : L.retired ? "À la retraite." : planned(L.code, L.calYear) ? "Interdit dans une économie planifiée." : true,
+    when: L => L.age < 18 || L.age > 70 ? "Entre 18 et 70 ans." : L.retired ? "À la retraite." : planned(L.code, L.calYear) ? "Interdit dans une économie planifiée." : true,
     choices: L => businessChoices(L), run: (L, id) => startBusiness(L, id) },
   { id: "sellbiz", cat: "pro", label: "Vendre une entreprise", desc: "Récupérer la valeur d’une de vos entreprises.",
     when: L => !L.business ? "Pas d’entreprise." : true,
