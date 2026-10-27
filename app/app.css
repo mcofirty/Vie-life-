@@ -173,6 +173,7 @@ a { color: var(--tint); text-decoration: none; }
 /* Fonctionnalités */
 .feature-scroller { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; margin: 0 -16px; padding: 0 16px 6px; scrollbar-width: none; }
 .feature-scroller::-webkit-scrollbar { display: none; }
+.feature:only-child { flex-basis: 100%; max-width: none; }
 .feature { flex: 0 0 72%; max-width: 260px; scroll-snap-align: start; background: var(--cell); border-radius: 22px; padding: 18px; box-shadow: var(--shadow); }
 .feature-icon { width: 40px; height: 40px; border-radius: 50%; background: var(--tint-soft); color: var(--tint); display: grid; place-items: center; margin-bottom: 14px; }
 .feature-icon svg { width: 22px; height: 22px; }
@@ -535,6 +536,10 @@ a { color: var(--tint); text-decoration: none; }
 .sp-pill.on { background: var(--tint); color: #fff; }
 .sp-pill.on span { color: inherit; opacity: .8; }
 .sp-pill[disabled] { opacity: .45; }
+/* Un geste avec son détail : une carte lisible (titre, puis détail en dessous), pas une bulle de texte. */
+.sp-pill:has(> span) { display: flex; flex-direction: column; gap: 3px; flex: 1 1 100%; border-radius: 16px; padding: 11px 14px; font-weight: 600; line-height: 1.3; }
+.sp-pill:has(> span) span { font-weight: 400; line-height: 1.4; }
+.sp-pill:not([disabled]):active { transform: scale(.98); }
 .sp-more { margin: 6px 0 4px; }
 .sp-more > summary { cursor: pointer; font-weight: 600; padding: 10px 6px; color: var(--tint); }
 .sp-more > summary small { font-weight: 400; color: var(--label-2); }
@@ -554,5 +559,7 @@ a { color: var(--tint); text-decoration: none; }
 
 /* Raccourci « Politique » du tableau de bord */
 .stat-card.link { text-align: left; width: 100%; }
+/* Une carte seule sur sa ligne prend toute la largeur, plutôt que de laisser un trou. */
+.dash-status > :last-child:nth-child(odd) { grid-column: 1 / -1; }
 .stat-card.link:active { background: var(--fill); }
 .stat-card.cta b { color: var(--tint); }

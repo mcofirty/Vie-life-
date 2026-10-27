@@ -3,7 +3,8 @@
 
 const nf = new Intl.NumberFormat("fr-FR");
 const fmt = (n, d = 0) => new Intl.NumberFormat("fr-FR", { maximumFractionDigits: d, minimumFractionDigits: d }).format(n);
-const esc = s => String(s ?? "").replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+// Échappe le texte, et colle les unités à leur nombre (« 8 % », « 30 ans ») pour qu'un retour à la ligne ne les sépare pas.
+const esc = s => String(s ?? "").replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch])).replace(/(\d) (?=%|\$|€|ans?\b|pts\b)/g, "$1\u00a0");
 const ans = n => `${n} an${n > 1 ? "s" : ""}`;
 const PPP_TO_EUR_FR = 0.72; // 1 $ PPA ≈ 0,72 € aux prix français
 const SPEEDS = [1, 2, 4, 8, 12, 16];
@@ -155,7 +156,7 @@ function dashboardData(L) {
     { icon: "child", label: "Enfants", value: kids.length ? `${kids.length} · ${kids.map(k => `${k.name} ${L.age - k.born}`).join(", ")}` : "Aucun" },
     ...(L.passion ? [{ icon: "leisure", label: "Passion", value: L.passionLabel() }] : []),
     // Toujours visible dès 16 ans : un raccourci vers le panneau « Politique », quel que soit le métier.
-    ...(L.alive && L.age >= 16 ? [{ icon: "work", label: "Politique", act: "politics", cta: !L.politics, value: L.politics ? `${capFirst(L.politics.rank > 0 ? L.polTitle() : L.politics.party)} · popularité ${Math.round(L.politics.pop)}/100` : "S’engager ›" }] : []),
+    ...(L.alive && L.age >= 16 ? [{ icon: "civic", label: "Politique", act: "politics", cta: !L.politics, value: L.politics ? `${capFirst(L.politics.rank > 0 ? L.polTitle() : L.politics.party)} · popularité ${Math.round(L.politics.pop)}/100` : "S’engager ›" }] : []),
     { icon: "home", label: "Logement", value: `${L.house ? "Propriétaire" : L.age < 23 && !L.married && L.parents.some(p => p.alive) ? "Chez les parents" : "Locataire"} · ${L.urban ? "en ville" : "à la campagne"}` },
   ];
   const todo = [];

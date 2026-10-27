@@ -30,6 +30,7 @@ const ICON_PATHS = {
   money: '<rect x="3" y="6" width="18" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.5"/>',
   couple: '<circle cx="9" cy="13" r="5"/><circle cx="15" cy="13" r="5"/>',
   child: '<circle cx="12" cy="8" r="3.5"/><path d="M6 20a6 6 0 0 1 12 0"/>',
+  civic: '<path d="M3 10l9-6 9 6M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/>',
 };
 const icon = (name, cls = "ico") => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON_PATHS[name] || ICON_PATHS.dot}</svg>`;
 
@@ -818,7 +819,7 @@ function renderData() {
   const a = Math.min(L.age, 100);
   $("survival").innerHTML = `<line class="axis" x1="34" y1="128" x2="294" y2="128"/>
     <text class="lbl" x="30" y="16" text-anchor="end">100 %</text><text class="lbl" x="30" y="131" text-anchor="end">0</text>
-    ${[0, 25, 50, 75, 100].map(t => `<text class="lbl" x="${X(t)}" y="144" text-anchor="middle">${t}</text>`).join("")}
+    ${[0, 25, 50, 75, 100].map(t => `<text class="lbl" x="${X(t)}" y="144" text-anchor="${t === 100 ? "end" : "middle"}">${t === 100 ? "100 ans" : t}</text>`).join("")}
     <polygon class="area" points="${X(0)},128 ${pts} ${X(100)},128"/><polyline class="curve" points="${pts}"/>
     <circle class="marker" cx="${X(a)}" cy="${Y(lx[a])}" r="6"/>`;
   $("survivalNote").textContent = `${fmt(lx[a] * 100, 0)} % des ${L.g("garçons", "filles")} ${L.g("nés", "nées")} ${inCountry(BY_CODE[L.home])} en ${L.year} sont encore en vie à ${ans(a)} (hors guerres et catastrophes).`;
