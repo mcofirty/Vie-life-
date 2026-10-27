@@ -563,3 +563,27 @@ a { color: var(--tint); text-decoration: none; }
 .dash-status > :last-child:nth-child(odd) { grid-column: 1 / -1; }
 .stat-card.link:active { background: var(--fill); }
 .stat-card.cta b { color: var(--tint); }
+/* Une carte cliquable se reconnaît : petit chevron en haut à droite. */
+.stat-card.link { position: relative; padding-right: 22px; }
+.stat-card.link::after { content: ""; position: absolute; right: 11px; top: 13px; width: 6px; height: 6px; border-right: 2px solid var(--label-3); border-top: 2px solid var(--label-3); transform: rotate(45deg); }
+.stat-card.link:active, .dash .tile:active { transform: scale(.97); }
+/* Badge d'onglet : ce qu'il reste à faire, visible sans ouvrir l'onglet. */
+.seg-badge { display: inline-grid; place-items: center; min-width: 17px; height: 17px; padding: 0 4px; margin-left: 5px; border-radius: 9px; background: var(--tint); color: #fff; font-size: 11px; font-weight: 800; vertical-align: 1px; }
+.segmented button.on .seg-badge { background: #fff; color: var(--tint); }
+/* Jauge des actions de l'année : des pastilles plutôt qu'une phrase. */
+.act-dots { display: inline-flex; gap: 5px; margin-left: 8px; vertical-align: 1px; }
+.act-dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--tint); }
+.act-dots i.used { background: var(--fill-2); }
+/* Actions impossibles : repliées, pour que les possibles ressortent. */
+.off-list { margin-top: 18px; }
+.off-list > summary { list-style: none; cursor: pointer; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--label-2); font-weight: 600; padding: 8px 6px; display: flex; align-items: center; gap: 8px; }
+.off-list > summary::-webkit-details-marker { display: none; }
+.off-list > summary::after { content: ""; width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); margin: -3px 0 0 auto; transition: transform .2s; }
+.off-list[open] > summary::after { transform: rotate(-135deg); margin-top: 3px; }
+.off-list #actOffN { background: var(--fill); border-radius: 9px; padding: 1px 7px; font-size: 11px; }
+/* Raccourcis de rubriques en haut des longues feuilles. */
+.sheet-jump { position: sticky; top: -16px; z-index: 3; display: flex; gap: 6px; overflow-x: auto; margin: -8px -18px 12px; padding: 10px 18px; background: var(--bg); scrollbar-width: none; box-shadow: 0 8px 12px -10px rgba(23, 20, 43, .25); }
+.sheet-jump::-webkit-scrollbar { display: none; }
+.sheet-jump button { flex: none; padding: 7px 13px; border-radius: 999px; background: var(--fill); color: var(--label-2); font-size: 13px; font-weight: 600; white-space: nowrap; transition: background .2s, color .2s; }
+.sheet-jump button.on { background: var(--tint); color: #fff; }
+.sheet-body .sp-head, .sheet-body .group-header { scroll-margin-top: 62px; }

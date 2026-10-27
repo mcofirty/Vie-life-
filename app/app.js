@@ -239,12 +239,40 @@ function openSheet(html, opts = {}) {
   sheetOpts = opts;
   $("sheetBody").innerHTML = html;
   $("sheetBody").scrollTop = 0;
+  sheetJump();
   const sh = $("sheet"), bd = $("sheetBackdrop");
   sh.classList.remove("closing"); bd.classList.remove("backdrop-closing");
   sh.style.transform = "";
   const wasOpen = !sh.hidden;
   sh.hidden = false; bd.hidden = false;
   if (!wasOpen) { sh.style.animation = "none"; void sh.offsetWidth; sh.style.animation = ""; }
+}
+// Une feuille longue (Politique, Argent…) : une rangée de raccourcis vers ses rubriques, collée en haut,
+// qui suit la lecture. On sait où l'on est et l'on saute directement au sujet voulu.
+function sheetJump() {
+  const body = $("sheetBody"), heads = [...body.querySelectorAll(".sp-head, .group-header")].filter(h => h.textContent.trim());
+  if (heads.length < 4) { body.onscroll = null; return; }
+  const nav = document.createElement("nav");
+  nav.className = "sheet-jump"; nav.setAttribute("aria-label", "Rubriques de la feuille");
+  const btns = heads.map(h => {
+    const b = document.createElement("button");
+    b.textContent = h.textContent.trim().replace(/\s+/g, " ");
+    b.addEventListener("click", () => { haptic(); h.scrollIntoView({ behavior: "smooth", block: "start" }); });
+    nav.appendChild(b);
+    return b;
+  });
+  const title = body.querySelector(".sheet-title");
+  if (title) title.after(nav); else body.prepend(nav);
+  const mark = () => {
+    const y = body.getBoundingClientRect().top + nav.offsetHeight + 24;
+    let cur = 0;
+    heads.forEach((h, i) => { if (h.getBoundingClientRect().top <= y) cur = i; });
+    btns.forEach((b, i) => b.classList.toggle("on", i === cur));
+    if (btns[cur]) nav.scrollTo({ left: btns[cur].offsetLeft - 18, behavior: "smooth" });
+  };
+  let raf = 0;
+  body.onscroll = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(mark); };
+  mark();
 }
 function closeSheet() {
   const sh = $("sheet"), bd = $("sheetBackdrop");
@@ -590,6 +618,10 @@ function renderLife() {
   const h = L.stats.happy / 100;
   $("lifeHero").style.setProperty("--glow", (0.15 + h * 0.6).toFixed(2));
 
+  // L'onglet « Agir » affiche ce qu'il reste à jouer cette année : on le voit sans l'ouvrir.
+  const left = L.alive && L.age >= 6 ? L.actionsLeft : 0;
+  $("actBadge").textContent = left || "";
+  $("actBadge").hidden = !left;
   renderDash();
   renderFeed();
   if (pane === "act") renderActions();
@@ -746,7 +778,8 @@ function renderDash() {
   const d = dashboardData(life);
   $("dash").innerHTML = `<div class="dash-money">${d.money.map(m => `<button class="tile ${m.tone || ""}" data-dash="money"><small>${m.label}</small><b>${esc(m.value)}</b>${m.sub ? `<span>${esc(m.sub)}</span>` : ""}</button>`).join("")}</div>
     <div class="dash-status">${d.status.map(s => s.act ? `<button class="stat-card link${s.cta ? " cta" : ""}" data-dash="${s.act}"><small>${icon(s.icon)}${s.label}</small><b>${esc(s.value)}</b></button>` : `<div class="stat-card"><small>${icon(s.icon)}${s.label}</small><b>${esc(s.value)}</b></div>`).join("")}</div>
-    ${d.todo.length ? `<div class="dash-todo">${d.todo.map(t => `<div class="todo ${t.tone}"><span>${esc(t.text)}</span>${t.act ? `<button data-dash="${t.act}">${t.btn}</button>` : ""}</div>`).join("")}</div>` : ""}`;
+    ${(todo => todo.length ? `<div class="dash-todo">${todo.map(t => `<div class="todo ${t.tone}"><span>${esc(t.text)}</span>${t.act ? `<button data-dash="${t.act}">${t.btn}</button>` : ""}</div>`).join("")}</div>` : "")(d.todo.filter(t => t.act !== "decision" && t.tone !== "info"))}`;
+  // Décision en attente : la pastille flottante s'en charge. Actions restantes : le badge de l'onglet « Agir ».
 }
 $("dash").addEventListener("click", e => {
   const b = e.target.closest("[data-dash]"); if (!b || !life) return;
@@ -755,7 +788,11 @@ $("dash").addEventListener("click", e => {
   if (a === "decision") decisionSheet();
   if (a === "money") panelSheet("money");
   if (a === "politics") panelSheet("politics");
-  if (a === "agir") { $("lifeSeg").querySelector('[data-v="act"]').click(); $("lifeSeg").scrollIntoView({ behavior: "smooth", block: "start" }); }
+  if (a === "family") panelSheet("family");
+  if (a === "agir" || a === "agir-perso") {
+    document.querySelector(`[data-name=actcat] [data-v=${a === "agir" ? "pro" : "perso"}]`).click();
+    $("lifeSeg").querySelector('[data-v="act"]').click(); $("lifeSeg").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 });
 
 // ---------- Agir ----------
@@ -764,9 +801,10 @@ segmented("actcat", actCat, v => { actCat = v; renderActions(); });
 function renderActions() {
   const L = life;
   const acts = L.alive ? L.availableActions().filter(a => a.cat === actCat) : [];
-  $("actLeft").textContent = `Agir cette année · ${L.actionsLeft} action${L.actionsLeft > 1 ? "s" : ""} sur ${ACTIONS_PER_YEAR}`;
+  $("actLeft").innerHTML = `Agir cette année <span class="act-dots" aria-label="${L.actionsLeft} action${L.actionsLeft > 1 ? "s" : ""} sur ${ACTIONS_PER_YEAR}">${Array.from({ length: ACTIONS_PER_YEAR }, (_, i) => `<i class="${i < L.actionsLeft ? "" : "used"}"></i>`).join("")}</span>`;
   $("actList").innerHTML = acts.filter(a => a.ok).map(a => `<button class="cell link" data-act-id="${a.id}"><span class="cell-main"><b>${esc(a.label)}</b><small>${esc(a.desc)}</small></span><span class="chev"></span></button>`).join("")
     || `<div class="cell"><span class="cell-main"><small>${L.actionsLeft ? "Rien de possible pour l’instant." : "Plus d’actions cette année : laissez passer le temps."}</small></span></div>`;
+  $("actOffN").textContent = acts.filter(a => !a.ok).length || "";
   $("actOff").innerHTML = acts.filter(a => !a.ok).map(a => `<div class="cell"><span class="cell-main"><b style="color:var(--label-2)">${esc(a.label)}</b><small>${esc(a.why)}</small></span></div>`).join("") || `<div class="cell"><span class="cell-main"><small>Tout est possible.</small></span></div>`;
 }
 $("actList").addEventListener("click", e => {

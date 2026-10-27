@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="app.css?v=31">
+<link rel="stylesheet" href="app.css?v=32">
 </head>
 <body>
 
@@ -288,9 +288,9 @@
 
     <div class="segmented life-seg" id="lifeSeg">
       <button data-v="story" class="on">Récit</button>
-      <button data-v="act">Agir</button>
+      <button data-v="act">Agir<span class="seg-badge" id="actBadge" hidden></span></button>
       <button data-v="me">Situation</button>
-      <button data-v="peers">Autres</button>
+      <button data-v="peers">Comparer</button>
       <button data-v="data">Données</button>
     </div>
 
@@ -303,8 +303,10 @@
         <button data-v="perso">Vie personnelle</button>
       </div>
       <div class="group" id="actList"></div>
-      <p class="group-header">Impossible pour l’instant</p>
-      <div class="group" id="actOff"></div>
+      <details class="off-list">
+        <summary>Impossible pour l’instant <span id="actOffN"></span></summary>
+        <div class="group" id="actOff"></div>
+      </details>
     </div>
 
     <div class="pane" id="pane-me" hidden>
@@ -346,7 +348,7 @@
   <footer class="life-controls">
     <button class="pill" id="speedBtn">×1</button>
     <button class="play" id="playBtn" aria-label="Pause"><svg viewBox="0 0 24 24" id="playIcon"><path d="M7 5h3.5v14H7zm6.5 0H17v14h-3.5z"/></svg></button>
-    <button class="pill" id="nextBtn">Suivant<svg viewBox="0 0 24 24"><path d="M5 5l7 7-7 7zm7 0l7 7-7 7z"/></svg></button>
+    <button class="pill" id="nextBtn" aria-label="Avancer jusqu’au prochain moment">Avancer<svg viewBox="0 0 24 24"><path d="M5 5l7 7-7 7zm7 0l7 7-7 7z"/></svg></button>
   </footer>
 </section>
 
@@ -359,17 +361,17 @@
 
 <div class="toast" id="toast" hidden></div>
 
-<script src="../countries.js?v=31"></script>
-<script src="../data.js?v=31"></script>
-<script src="../sim.js?v=31"></script>
-<script src="../economy.js?v=31"></script>
-<script src="../moments.js?v=31"></script>
-<script src="../careers.js?v=31"></script>
-<script src="../company.js?v=31"></script>
-<script src="../stardom.js?v=31"></script>
-<script src="../spending.js?v=31"></script>
-<script src="../politics.js?v=31"></script>
-<script src="../common.js?v=31"></script>
-<script src="app.js?v=31"></script>
+<script src="../countries.js?v=32"></script>
+<script src="../data.js?v=32"></script>
+<script src="../sim.js?v=32"></script>
+<script src="../economy.js?v=32"></script>
+<script src="../moments.js?v=32"></script>
+<script src="../careers.js?v=32"></script>
+<script src="../company.js?v=32"></script>
+<script src="../stardom.js?v=32"></script>
+<script src="../spending.js?v=32"></script>
+<script src="../politics.js?v=32"></script>
+<script src="../common.js?v=32"></script>
+<script src="app.js?v=32"></script>
 </body>
 </html>

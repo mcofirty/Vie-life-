@@ -492,7 +492,8 @@ $("dash").addEventListener("click", e => {
   if (a === "decision") showDecision();
   if (a === "money") openPanel("money");
   if (a === "politics") openPanel("politics");
-  if (a === "agir") { $("actPanel").scrollIntoView({ behavior: "smooth", block: "center" }); $("actPanel").classList.remove("flash"); void $("actPanel").offsetWidth; $("actPanel").classList.add("flash"); }
+  if (a === "family") openPanel("family");
+  if (a === "agir" || a === "agir-perso") { $("actPanel").scrollIntoView({ behavior: "smooth", block: "center" }); $("actPanel").classList.remove("flash"); void $("actPanel").offsetWidth; $("actPanel").classList.add("flash"); }
 });
 
 // Agir : trois actions par an, selon la vie et le pays.
