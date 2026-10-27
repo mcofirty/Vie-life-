@@ -866,7 +866,8 @@ function openHeirs() {
 function updateHeirNote() {
   const rec = reviewRecord, name = document.querySelector("input[name=heir]:checked").value, will = [...document.querySelectorAll("input[name=will]:checked")].map(i => i.value);
   const opts = lineageFor(rec, name, will), now = document.querySelector("input[name=hstart]:checked").value === "now";
-  $("heirNote").textContent = `${name} héritera d’environ ${dollars(opts.lineage.estate)} à ${opts.lineage.parent.deathAt} ans (après droits de succession). ${now ? `Vous reprenez sa vie à ${opts.lineage.parent.deathAt} ans, en ${opts.year + opts.lineage.parent.deathAt}.` : `Vous revivez sa vie depuis ${opts.year}.`} Génération ${opts.lineage.gen}.`;
+  const what = andList(bequestParts(opts.lineage.bequest));
+  $("heirNote").textContent = `${name} héritera d’environ ${dollars(opts.lineage.estate)} à ${opts.lineage.parent.deathAt} ans (après droits de succession)${what ? ` : ${what}. Les biens eux-mêmes, pas seulement leur valeur : vous déciderez ensuite de les garder, d’y habiter, de les louer, de diriger l’entreprise ou de vendre` : ""}. ${now ? `Vous reprenez sa vie à ${opts.lineage.parent.deathAt} ans, en ${opts.year + opts.lineage.parent.deathAt}.` : `Vous revivez sa vie depuis ${opts.year}.`} Génération ${opts.lineage.gen}.`;
   $("heirGo").textContent = now ? `Reprendre la vie de ${name}` : "Vivre sa vie";
 }
 $("heirModal").addEventListener("change", updateHeirNote);

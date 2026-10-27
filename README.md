@@ -6,6 +6,12 @@ Simulation de vie en français, inspirée du concept de [1in8b.life](https://1in
 
 Vous naissez au hasard parmi les bébés de l’année (ou parmi les 8 milliards d’humains), puis vous vivez une vie entière, année après année, guidée par les statistiques réelles de tous les pays et territoires du monde (216), de 1900 à 2100.
 
+## Nouveautés (version 10) : un héritage en biens, pas en argent
+
+- **À la mort, on transmet les biens eux-mêmes** : l’enfant qui reprend la lignée reçoit sa part du testament de chaque bien — les placements tels quels (actions, obligations, fonds mondial, or, épargne…, avec un compte en banque ouvert si besoin), la maison de famille, les biens immobiliers (loués ou non), les entreprises (parts et gérant compris). Les droits de succession et sa part des dettes se règlent en argent, sur les placements reçus d’abord.
+- **Puis c’est vous qui décidez** : seul héritier, habiter la maison de famille, la garder, la louer ou la vendre ; garder l’entreprise avec un gérant, la diriger soi-même ou la vendre. Héritage partagé : pour chaque bien, garder sa part, racheter celles des frères et sœurs, y habiter, louer ou vendre sa part. L’écran de la lignée annonce ce que l’enfant recevra, bien par bien.
+- De son vivant aussi, les placements passent désormais classe par classe, et non plus en liquide.
+
 ## Nouveautés (version 9) : carrière politique et lobbys
 
 - **S’engager en politique**, ouvert à tous quel que soit le métier (salarié, chef d’entreprise, artiste, sportif, étudiant, retraité…), dès 16 ans, sans compter parmi les trois actions de l’année : panneau **« Politique »** (menu ⋯, colonne de gauche ou onglet « Situation » dans l’app) ou action « S’engager en politique ». On milite à côté de son activité ; seuls les mandats à plein temps la remplacent, et on se présente dès 18 ans. Le chemin dépend du régime du pays à cette époque : le chemin dépend du régime du pays à cette époque (approximatif, d’après les grandes périodes connues) :

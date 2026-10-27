@@ -969,7 +969,7 @@ function heirSheet(rec, mode, heir = rec.dyn.heirs[0].name, will = null, start =
     <p class="group-header">Le testament</p>
     <p class="group-footer" style="margin:-4px 4px 8px">À qui laisser l’héritage ? Il est partagé à parts égales entre les personnes cochées.</p>
     <div class="group">${wo.cands.map(c => `<button class="cell link choice-cell" data-will="${esc(c.key)}"><span class="tick">${will.includes(c.key) ? "✓" : ""}</span><span class="cell-main"><b>${esc(c.label)}</b>${c.sub ? `<small>${esc(c.sub)}</small>` : ""}</span></button>`).join("")}</div>
-    <p class="group-footer">${esc(heir)} héritera d’environ ${dollars(opts.lineage.estate)} à ${opts.lineage.parent.deathAt} ans. Génération ${opts.lineage.gen}.</p>
+    <p class="group-footer">${esc(heir)} héritera d’environ ${dollars(opts.lineage.estate)} à ${opts.lineage.parent.deathAt} ans${(w => w ? ` : ${esc(w)}. Les biens eux-mêmes : vous déciderez ensuite de les garder, d’y habiter, de les louer, de diriger l’entreprise ou de vendre` : "")(andList(bequestParts(opts.lineage.bequest)))}. Génération ${opts.lineage.gen}.</p>
     <button class="btn-filled" id="heirGo" style="margin-top:16px">${start === "now" ? `Reprendre la vie de ${esc(heir)}` : "Vivre sa vie"}</button>
     <button class="btn-plain" id="heirBack">Retour</button>`, { dismissable: false });
   $("sheetBody").querySelectorAll("[data-heir]").forEach(b => b.onclick = () => { haptic(); heirSheet(rec, mode, b.dataset.heir, will, start); });
