@@ -6,6 +6,14 @@ Simulation de vie en français, inspirée du concept de [1in8b.life](https://1in
 
 Vous naissez au hasard parmi les bébés de l’année (ou parmi les 8 milliards d’humains), puis vous vivez une vie entière, année après année, guidée par les statistiques réelles de tous les pays et territoires du monde (216), de 1900 à 2100.
 
+## Nouveautés (version 12) : les vrais clubs, dans n’importe quel pays
+
+- **Les vrais clubs des 5 grands championnats de chaque sport** (composition 2025-2026) : football (Premier League, LaLiga, Serie A, Bundesliga, Ligue 1), basket (NBA, Liga ACB, Süper Lig, Grèce, LNB Élite), rugby (Top 14, Premiership, URC, Super Rugby, Japon), hockey (NHL, KHL, SHL, Liiga, National League), baseball (MLB, NPB, KBO, CPBL, Mexique), cricket (IPL, Big Bash, County Championship, PSL, SA20), cyclisme (WorldTour) et e-sport (LCK, LPL, LEC, LTA Nord, CBLOL) : plus de 500 clubs.
+- **Racheter ou investir, dans n’importe quel pays** : « Racheter un club de sport » propose chaque grande ligue (avec la fourchette de prix), puis le club, puis la part : 100 %, la majorité (51 %), ou 25 % comme investisseur (un dividende chaque saison bénéficiaire, sans gérer ; on peut ensuite prendre la majorité). Le prix suit les recettes réelles du club et l’économie de son pays, à chaque époque.
+- **Des saisons contre les vrais adversaires** : classement parmi les clubs du championnat (podium, champion), relégations là où elles existent (pas en NBA, NHL, MLB…), et **compétition continentale** à élimination directe contre les qualifiés des autres grandes ligues : coupe d’Europe des clubs champions, coupe d’Europe de basket et de rugby, ligue des champions de hockey, série d’Asie (baseball), ligue des champions T20 (2009-2014), Tour de France, championnat du monde d’e-sport. Les offres pour vos joueurs viennent de vrais grands clubs.
+- **Monter jusqu’à l’élite** : un club fondé ou racheté en division inférieure monte, en trois saisons réussies, jusqu’au vrai championnat de son pays (ou en NHL pour le Canada, en LEC pour l’e-sport européen).
+- La feuille du club indique la force réelle de l’équipe (avec l’entraîneur, le centre et les supporters) et un pronostic de classement.
+
 ## Nouveautés (version 11) : gérer un club de sport
 
 - **Fonder ou racheter un club** : football, basket, rugby, hockey sur glace, baseball, cricket, équipe cycliste, e-sport. On le fonde avec « Créer une entreprise » (il part en troisième division), ou on rachète un club de première, deuxième ou troisième division avec l’action « Racheter un club de sport » (prix selon le sport, le pays et la division). Seuls les sports qui se pratiquent vraiment dans le pays sont proposés.
