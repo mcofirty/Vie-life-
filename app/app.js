@@ -595,7 +595,7 @@ $("menuBtn").addEventListener("click", () => {
   const sw = (key, label) => `<label class="cell"><span class="cell-main"><b>${label}</b></span><input type="checkbox" class="switch" data-pref="${key}"${prefs[key] ? " checked" : ""}></label>`;
   const btn = (act, label, sub = "") => `<button class="cell link" data-act="${act}"><span class="cell-main"><b>${label}</b>${sub ? `<small>${sub}</small>` : ""}</span><span class="chev"></span></button>`;
   openSheet(`<h2 class="sheet-title">${esc(life.name)}, ${ans(life.age)}</h2>
-    <div class="group menu-list">${btn("family", "Famille et vie")}${btn("money", "Dépenser et investir")}${btn("politics", "Politique", life.politics ? "" : "Ouvert à tous, quel que soit le métier")}${btn("nextdec", "Aller à la prochaine décision")}</div>
+    <div class="group menu-list">${btn("family", "Famille et vie")}${btn("money", "Dépenser et investir")}${btn("politics", "Politique", life.politics ? "" : "Ouvert à tous, quel que soit le métier")}${firstClubIdx(life) >= 0 ? btn("club", "Votre club", life.ensureClub(life.businesses[firstClubIdx(life)]).name) : ""}${btn("nextdec", "Aller à la prochaine décision")}</div>
     <div class="group menu-list">${sw("music", "Musique douce")}${sw("pauses", "Pauses de réflexion")}${sw("gentle", "Pas de scènes effrayantes")}</div>
     <div class="group menu-list">${prefs.classroom ? "" : btn("birthcard", "Carte de naissance", "Une image à partager")}${btn("help", "Besoin d’aide")}${btn("quit", "Quitter", "La vie est gardée : vous pourrez la reprendre")}</div>`, { dismissable: true });
 });
@@ -612,6 +612,7 @@ document.addEventListener("click", e => {
   const act = b.dataset.act;
   haptic();
   if (act === "family" || act === "money" || act === "politics") panelSheet(act);
+  if (act === "club" && firstClubIdx(life) >= 0) panelSheet(`club:${firstClubIdx(life)}`);
   if (act === "nextdec") { closeSheet(); setTimeout(() => skip(true), 320); }
   if (act === "birthcard") shareCard("birth", life).then(r => r === "downloaded" && toast("Image enregistrée"));
   if (act === "help") helpSheet();
@@ -717,6 +718,10 @@ function panelSheet(kind) {
   const choice = (name, obj, cur) => `<div class="group">${Object.entries(obj).map(([k, o]) => `<button class="cell link choice-cell" data-choice="${name}" data-v="${k}"><span class="tick">${k === cur ? "✓" : ""}</span><span class="cell-main"><b>${typeof o === "string" ? o : o.label}</b>${o.note ? `<small>${o.note}</small>` : ""}</span></button>`).join("")}</div>`;
   if (kind === "politics") {
     openSheet(`<h2 class="sheet-title">Politique</h2>${L.alive ? politicsHtml(L, true) : ""}`, { dismissable: true, onClose: renderLife, tabs: POL_TABS.of, tabOrder: POL_TABS.order, tabKey: "politics" });
+  } else if (kind.startsWith("club:")) {
+    const b = (L.businesses || [])[+kind.slice(5)];
+    if (!b || !isClub(b)) return;
+    openSheet(`<h2 class="sheet-title">${esc(L.ensureClub(b).name)}</h2>${L.alive ? clubHtml(L, kind.slice(5)) : ""}`, { dismissable: true, onClose: renderLife, tabs: CLUB_TABS.of, tabOrder: CLUB_TABS.order, tabKey: "club" });
   } else if (kind === "family") {
     openSheet(`<h2 class="sheet-title">Famille et vie</h2>
       <div class="group">${rowsHtml(familyRows(L))}</div>
@@ -810,6 +815,7 @@ $("dash").addEventListener("click", e => {
   if (a === "decision") decisionSheet();
   if (a === "money") panelSheet("money");
   if (a === "politics") panelSheet("politics");
+  if (a.startsWith("club:")) panelSheet(a);
   if (a === "family") panelSheet("family");
   if (a === "agir" || a === "agir-perso") {
     document.querySelector(`[data-name=actcat] [data-v=${a === "agir" ? "pro" : "perso"}]`).click();

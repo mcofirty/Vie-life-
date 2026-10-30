@@ -6,6 +6,18 @@ Simulation de vie en français, inspirée du concept de [1in8b.life](https://1in
 
 Vous naissez au hasard parmi les bébés de l’année (ou parmi les 8 milliards d’humains), puis vous vivez une vie entière, année après année, guidée par les statistiques réelles de tous les pays et territoires du monde (216), de 1900 à 2100.
 
+## Nouveautés (version 11) : gérer un club de sport
+
+- **Fonder ou racheter un club** : football, basket, rugby, hockey sur glace, baseball, cricket, équipe cycliste, e-sport. On le fonde avec « Créer une entreprise » (il part en troisième division), ou on rachète un club de première, deuxième ou troisième division avec l’action « Racheter un club de sport » (prix selon le sport, le pays et la division). Seuls les sports qui se pratiquent vraiment dans le pays sont proposés.
+- **La feuille du club** (carte « Club » du tableau de bord, menu ⋯, ou « Gérer le club » sur la fiche de l’entreprise), en cinq onglets :
+  - **Saison** : force de l’équipe face au niveau de la division, entraîneur, supporters, trésorerie, résultats et palmarès ; injecter de l’argent, se verser un dividende, soigner les supporters ;
+  - **Effectif** : chaque joueur avec son âge, son niveau et son potentiel ; vendre un joueur ;
+  - **Transferts** : le marché de l’année (une star, des titulaires, un espoir, un vétéran en fin de contrat), indemnités et salaires affichés ;
+  - **Formation** : développer le centre de formation, qui sort chaque saison des jeunes (parfois une pépite) ; lancer un jeune en équipe première ;
+  - **Investir** : agrandir le stade (billetterie, supporters), moderniser le centre d’entraînement (progression des joueurs), changer d’entraîneur.
+- **Chaque saison** : classement, 3 montées et 3 descentes, titre, coupe nationale, coupe continentale pour les 4 premiers de l’élite ; recettes (droits télé, billetterie, sponsors, primes) et salaires. Les joueurs progressent jusqu’à leur potentiel, déclinent après 30 ans, prennent leur retraite ; les grands clubs viennent chercher vos meilleurs joueurs (vendre ou refuser), une caisse dans le rouge oblige à renflouer, vendre ou déposer le bilan. Un club confié à un directeur gère seul ses transferts.
+- Le club garde ses gains dans sa propre trésorerie : sa valeur compte dans votre patrimoine, il se vend, se transmet en héritage.
+
 ## Nouveautés (version 10) : un héritage en biens, pas en argent
 
 - **À la mort, on transmet les biens eux-mêmes** : l’enfant qui reprend la lignée reçoit sa part du testament de chaque bien — les placements tels quels (actions, obligations, fonds mondial, or, épargne…, avec un compte en banque ouvert si besoin), la maison de famille, les biens immobiliers (loués ou non), les entreprises (parts et gérant compris). Les droits de succession et sa part des dettes se règlent en argent, sur les placements reçus d’abord.
