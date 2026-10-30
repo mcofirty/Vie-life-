@@ -77,11 +77,92 @@ function officeTitles(L, R = polRegime(L)) {
   if (R === "party") return [pair("membre du parti"), pair("cadre local du parti", "cadre locale du parti"), pair("secrétaire du parti de la ville"), pair("membre du comité central"), pair("ministre"), pair("secrétaire général du parti", "secrétaire générale du parti")];
   if (R === "auto" || R === "colony") return [pair("notable"), pair("conseiller municipal nommé", "conseillère municipale nommée"), pair("gouverneur de province", "gouverneure de province"), pair(R === "colony" ? "membre du conseil colonial" : "membre du conseil consultatif"), pair(R === "colony" ? "conseiller du gouverneur général" : "ministre", R === "colony" ? "conseillère du gouverneur général" : "ministre"), null];
   const deputy = code === "US" ? pair("membre du Congrès") : code === "DE" ? pair("député au Bundestag", "députée au Bundestag") : code === "GB" ? pair("député (MP)", "députée (MP)") : code === "IN" ? pair("député de la Lok Sabha", "députée de la Lok Sabha") : pair("député", "députée");
+  const S = polSystem(L);
   const top = code === "US" ? pair("président des États-Unis", "présidente des États-Unis") : code === "DE" || code === "AT" ? pair("chancelier", "chancelière")
-    : inList(code, PRESIDENTIAL) || (code === "TR" && L.calYear >= 2014) ? pair("président de la République", "présidente de la République") : pair("Premier ministre", "Première ministre");
+    : S.sys === "coll" ? pair("conseiller fédéral", "conseillère fédérale") : code === "ES" && S.sys === "parl" ? pair("président du gouvernement", "présidente du gouvernement")
+    : (code === "IT" || code === "FR") && S.sys === "parl" ? pair("président du Conseil", "présidente du Conseil")
+    : S.sys === "pres" ? pair("président de la République", "présidente de la République") : pair("Premier ministre", "Première ministre");
   return [pair("militant", "militante"), pair("conseiller municipal", "conseillère municipale"), pair("maire"), deputy, code === "US" ? pair("membre du cabinet (ministre)") : pair("ministre"), top];
 }
 const elected = R => R === "dem" || R === "hybrid";
+
+// --- Systèmes politiques -------------------------------------------------------------------
+// Comment on arrive au sommet, pays par pays. sys : « pres », le chef de l'exécutif est élu au
+// suffrage universel ; « parl », c'est le chef du parti (ou de la coalition) qui gagne les législatives ;
+// « coll », un gouvernement collégial élu par le Parlement (Suisse). pick : l'investiture : primary
+// (primaires), members (vote des adhérents), caucus (les parlementaires du parti), congress (le congrès,
+// l'appareil). rounds : tours de scrutin · term, limit : durée et nombre de mandats (consec : seulement
+// d'affilée) · minAge · power : ce que le chef de l'exécutif fait passer quand il a la majorité ·
+// mid : des législatives en cours de mandat (Congrès hostile, cohabitation) · fptp : scrutin majoritaire à
+// un tour, qui donne la majorité au premier parti (pas de coalition).
+function polSystem(L) {
+  const c = L.code, y = L.calYear, pres = inList(c, PRESIDENTIAL) || (c === "TR" && y >= 2014);
+  const S = pres ? { sys: "pres", pick: y >= 1990 ? "members" : "congress", rounds: 2, term: 5, limit: 2, consec: false, minAge: 35, power: 0.8, mid: false }
+    : { sys: "parl", pick: y >= 1990 ? "members" : "caucus", rounds: 1, term: 5, limit: Infinity, consec: false, minAge: 18, power: 0.85, mid: false };
+  const set = o => Object.assign(S, o);
+  if (c === "US") set({ pick: y >= 1972 ? "primary" : "congress", rounds: 1, term: 4, limit: y >= 1951 ? 2 : Infinity, power: 0.6, mid: true });
+  else if (c === "FR") set(y >= 1958 ? { pick: y >= 2011 && y < 2022 ? "primary" : "members", term: y >= 2002 ? 5 : 7, limit: y >= 2008 ? 2 : Infinity, consec: true, minAge: y >= 2011 ? 18 : 23, power: 0.9, mid: y < 2002 }
+    : { sys: "parl", pick: "caucus", rounds: 1, term: 5, limit: Infinity, minAge: 23, power: 0.55 });
+  else if (c === "MX") set({ rounds: 1, term: 6, limit: 1, power: 0.8 });
+  else if (c === "KR") set({ rounds: 1, term: 5, limit: 1, minAge: 40, power: 0.8 });
+  else if (c === "PH") set({ rounds: 1, term: 6, limit: 1, power: 0.75 });
+  else if (c === "BR") set({ term: y >= 1994 ? 4 : 5, limit: y >= 1997 ? 2 : 1, consec: true, power: 0.6 });
+  else if (c === "AR") set({ pick: y >= 2011 ? "primary" : S.pick, term: y >= 1994 ? 4 : 6, limit: y >= 1994 ? 2 : 1, consec: true, power: 0.75 });
+  else if (c === "CL") set({ pick: y >= 2013 ? "primary" : S.pick, term: 4, limit: 1, consec: true, power: 0.75 });
+  else if (c === "UY") set({ pick: y >= 1999 ? "primary" : S.pick, limit: 1, consec: true, power: 0.7 });
+  else if (c === "CO") set({ term: 4, limit: y >= 2005 && y < 2015 ? 2 : 1, power: 0.7 });
+  else if (c === "PE") set({ limit: 1, consec: true, power: 0.6 });
+  else if (c === "RU") set({ term: y >= 2012 ? 6 : 4, consec: true, power: 0.9 });
+  else if (c === "GB") set({ pick: y >= 1998 ? "members" : "caucus", power: 0.9, fptp: true });
+  else if (c === "DE") set({ pick: "congress", term: 4, power: 0.7 });
+  else if (c === "IT") set({ pick: "congress", power: 0.6 });
+  else if (c === "IN") set({ pick: "congress", power: 0.85, minAge: 25, fptp: true });
+  else if (c === "JP") set({ pick: "caucus", term: 4, power: 0.8 });
+  else if (c === "CA") set({ pick: "members", term: 4, fptp: true });
+  else if (c === "AU" || c === "NZ") set({ pick: "caucus", term: 3, power: 0.8, fptp: c === "AU" || y < 1996 });
+  else if (inList(c, "SE NO DK")) set({ term: 4, power: 0.75 });
+  else if (c === "CH") set({ sys: "coll", pick: "caucus", term: 4, power: 0.4 });
+  return S;
+}
+// Le poids des camps : parts de voix approximatives (le reste : petits partis). Un candidat du
+// premier parti part avec une longueur d'avance ; celui d'un petit parti n'a presque aucune chance.
+function campShares(L, R = polRegime(L)) {
+  const c = L.code, y = L.calYear;
+  if (R === "hybrid") return { pouvoir: 62, opposition: 26 };
+  let s = { gauche: 32, centre: 18, droite: 32 };
+  if (c === "US") return { gauche: 47, droite: 47 };
+  if (c === "GB") s = { gauche: 37, centre: y >= 1980 ? 17 : 9, droite: 40 };
+  else if (c === "DE") s = { gauche: 31, centre: 9, droite: 36 };
+  else if (c === "FR") s = y >= 2017 ? { gauche: 22, centre: 25, droite: 26 } : { gauche: 30, centre: 15, droite: 30 };
+  else if (c === "JP" && y >= 1955) s = { gauche: 22, centre: 14, droite: 46 };
+  else if (c === "IN") s = y < 1990 ? { gauche: 44, centre: 12, droite: 12 } : y >= 2014 ? { gauche: 22, centre: 15, droite: 38 } : { gauche: 30, centre: 15, droite: 28 };
+  else if (c === "ZA" && y >= 1994) s = { gauche: 58, centre: 20, droite: 8 };
+  else if (inList(c, "SE NO DK")) s = { gauche: 38, centre: 16, droite: 28 };
+  else if (c === "CA") s = { gauche: 17, centre: 38, droite: 34 };
+  if (y >= 1980) s.eco = c === "DE" ? 9 : inList(c, "SE NO DK NL AT CH BE LU FI NZ AU") ? 7 : 4;
+  return s;
+}
+const PICK_LABEL = { primary: "primaires", members: "vote des adhérents", caucus: "vote des parlementaires du parti", congress: "congrès du parti" };
+// Tirages fixes, pour estimer les chances : le chiffre affiché ne bouge pas d'un clic à l'autre.
+const NORM = (() => { let s = 20240; const u = () => (s = s * 16807 % 2147483647) / 2147483647; return Array.from({ length: 4001 }, () => Math.sqrt(-2 * Math.log(u())) * Math.cos(2 * Math.PI * u())); })();
+// Le camp au pouvoir change : on note depuis quand, pour l'usure du pouvoir.
+function setGov(L, side) {
+  const P = L.politics;
+  if (P.govSide !== side) P.govSince = L.calYear;
+  P.govSide = side;
+}
+// Qui gagne les législatives, quand le pays change de majorité : les grands partis plus souvent.
+function pickGov(L, not) {
+  const sh = campShares(L), sides = Object.keys(sh).filter(s => s !== not && s !== "eco");
+  let r = rand() * sides.reduce((t, s) => t + sh[s], 0);
+  for (const s of sides) if ((r -= sh[s]) < 0) return s;
+  return sides[0];
+}
+// Le principal adversaire d'un camp.
+function rivalOf(L, side) {
+  const sh = campShares(L);
+  return Object.keys(sh).filter(s => s !== side && lean(s, side) < 1).sort((a, b) => sh[b] - sh[a])[0] || side;
+}
 
 // --- Partis -----------------------------------------------------------------------------
 function partiesFor(L, R = polRegime(L)) {
@@ -91,7 +172,11 @@ function partiesFor(L, R = polRegime(L)) {
   if (R === "colony") return [{ id: "regime", label: "L’administration coloniale", sub: "Quelques postes pour les notables du pays." }, { id: "opposition", label: "Le mouvement pour l’indépendance", sub: "Meetings, grèves, prison parfois ; un destin si le pays se libère." }];
   if (R === "hybrid") return [{ id: "pouvoir", label: "Le parti au pouvoir", sub: "Les élections se gagnent d’avance, la carrière dépend des chefs." }, { id: "opposition", label: "L’opposition", sub: "Peu de chances de gagner, des risques d’arrestation." }];
   const names = code === "US" ? { gauche: "Le Parti démocrate", droite: "Le Parti républicain" } : code === "GB" ? { gauche: "Le Parti travailliste", droite: "Le Parti conservateur", centre: "Les libéraux-démocrates" }
-    : code === "DE" ? { gauche: "Le SPD (sociaux-démocrates)", droite: "La CDU (chrétiens-démocrates)", centre: "Le FDP (libéraux)", eco: "Les Verts" } : {};
+    : code === "DE" ? { gauche: "Le SPD (sociaux-démocrates)", droite: "La CDU (chrétiens-démocrates)", centre: "Le FDP (libéraux)", eco: "Les Verts" }
+    : code === "CA" ? { gauche: "Le NPD (néo-démocrates)", centre: "Le Parti libéral", droite: "Le Parti conservateur" }
+    : code === "IN" ? { gauche: "Le Parti du Congrès", droite: y >= 1980 ? "Le BJP (nationalistes hindous)" : undefined }
+    : code === "JP" && y >= 1955 ? { droite: "Le PLD (libéraux-démocrates)" } : code === "ZA" && y >= 1994 ? { gauche: "L’ANC (Congrès national africain)", centre: "L’Alliance démocratique" } : {};
+  const sh = campShares(L, R), weight = l => l.map(p => sh[p.id] == null ? p : { ...p, sub: `${p.sub} · ≈ ${sh[p.id]} % des voix${sh[p.id] === Math.max(...Object.values(sh)) ? ", premier parti" : ""}` });
   const list = [
     { id: "gauche", label: names.gauche || "Le grand parti de gauche", sub: "Proche des syndicats ; impôts, services publics, salaires." },
     { id: "centre", label: names.centre || "Le parti du centre", sub: "Ni l’un ni l’autre : on gouverne souvent en coalition." },
@@ -100,7 +185,7 @@ function partiesFor(L, R = polRegime(L)) {
   if (code === "US") list.splice(1, 1);
   if (y >= 1980 && code !== "US") list.push({ id: "eco", label: names.eco || "Les écologistes", sub: "Climat, nature, santé ; un petit parti qui monte." });
   list.push({ id: "ind", label: "Sans étiquette", sub: "Libre de ses votes ; personne pour vous porter aux élections nationales." });
-  return list;
+  return weight(list);
 }
 function partyName(L) {
   const c = L.code;
@@ -184,27 +269,28 @@ const domainOf = b => BIZ_DOMAIN[b.type] || (BUSINESSES[b.type] && BUSINESSES[b.
 
 // --- Lois et décisions ---------------------------------------------------------------------
 // pro / con : lobbys gagnants et perdants si la loi passe · pub : ce que l'opinion pense de voter
-// pour · side : camp qui la porte · fx : effet sur les entreprises d'un domaine (« * » : toutes).
+// pour · side : camp qui la porte · fx : effet sur les entreprises d'un domaine (« * » : toutes) ·
+// nat : effet sur le pays quand c'est le chef de l'exécutif qui la porte [économie, dette en points de PIB, tension sociale].
 const BILLS = [
-  { t: "une taxe carbone sur les carburants", pro: ["green"], con: ["oil", "industry"], pub: -2, side: "eco", fx: { Énergie: -0.06, Ressources: -0.04, Transport: -0.04, Industrie: -0.03 }, from: 1990 },
-  { t: "une baisse de l’impôt sur les sociétés", pro: ["bank", "industry", "retail", "tech"], con: ["unions"], pub: -1, side: "droite", fx: { "*": 0.04 } },
-  { t: "une hausse du salaire minimum", pro: ["unions"], con: ["retail", "build"], pub: 3, side: "gauche", fx: { Commerce: -0.03, Restauration: -0.04, Services: -0.02, Tourisme: -0.02 }, from: 1920 },
-  { t: "la déréglementation de la finance", pro: ["bank"], con: ["unions"], pub: -2, side: "droite", fx: { Finance: 0.08, Immobilier: 0.03 }, from: 1975 },
-  { t: "le plafonnement du prix des médicaments", pro: [], con: ["pharma"], pub: 3, side: "gauche", fx: { Santé: -0.07 }, from: 1945 },
-  { t: "de nouvelles subventions agricoles", pro: ["agri"], con: ["green"], pub: 1, side: "droite", fx: { Agriculture: 0.08 } },
-  { t: "un grand plan d’infrastructures (routes, ponts, logements)", pro: ["build", "unions", "industry"], con: [], pub: 2, side: "centre", fx: { Bâtiment: 0.1, Ingénierie: 0.06, Immobilier: 0.04 } },
-  { t: "une taxe sur les géants du numérique", pro: ["media", "retail"], con: ["tech"], pub: 2, side: "gauche", fx: { Technologie: -0.05 }, from: 2015 },
-  { t: "la hausse du budget de la défense", pro: ["arms", "industry"], con: ["green"], pub: 0, side: "droite", fx: { Industrie: 0.03 } },
-  { t: "une réforme des retraites (partir plus tard)", pro: ["bank"], con: ["unions"], pub: -4, side: "droite", fx: { Finance: 0.03 }, from: 1990 },
-  { t: "une loi contre la concentration des médias", pro: [], con: ["media"], pub: 2, side: "gauche", fx: { Médias: -0.06 }, from: 1950 },
-  { t: "une prime à la casse pour acheter une voiture neuve", pro: ["industry", "retail"], con: ["green"], pub: 1, side: "centre", fx: { Industrie: 0.06, Transport: 0.03 }, from: 1990 },
-  { t: "la protection des forêts et des zones naturelles", pro: ["green"], con: ["agri", "build", "oil"], pub: 1, side: "eco", fx: { Agriculture: -0.03, Bâtiment: -0.03, Ressources: -0.06 }, from: 1970 },
-  { t: "la privatisation de services publics", pro: ["bank", "build"], con: ["unions"], pub: -2, side: "droite", fx: { Finance: 0.04, Transport: 0.04, Énergie: 0.04 }, from: 1980 },
-  { t: "des aides massives aux énergies renouvelables", pro: ["green"], con: ["oil"], pub: 2, side: "eco", fx: { Énergie: 0.02 }, from: 2005 },
-  { t: "l’interdiction de la publicité pour le tabac et l’alcool", pro: [], con: ["media", "retail"], pub: 2, side: "gauche", fx: { Médias: -0.03, Restauration: -0.02 }, from: 1975 },
-  { t: "un encadrement strict de l’intelligence artificielle", pro: ["unions", "media"], con: ["tech"], pub: 2, side: "centre", fx: { Technologie: -0.05 }, from: 2023 },
-  { t: "un droit de grève plus encadré", pro: ["industry", "retail"], con: ["unions"], pub: -1, side: "droite", fx: { "*": 0.02 } },
-  { t: "le remboursement intégral des soins", pro: ["unions", "pharma"], con: ["bank"], pub: 3, side: "gauche", fx: { Santé: 0.04, Finance: -0.02 }, from: 1945 },
+  { t: "une taxe carbone sur les carburants", nat: [-0.01, -3, 10], pro: ["green"], con: ["oil", "industry"], pub: -2, side: "eco", fx: { Énergie: -0.06, Ressources: -0.04, Transport: -0.04, Industrie: -0.03 }, from: 1990 },
+  { t: "une baisse de l’impôt sur les sociétés", nat: [0.02, 4, 4], pro: ["bank", "industry", "retail", "tech"], con: ["unions"], pub: -1, side: "droite", fx: { "*": 0.04 } },
+  { t: "une hausse du salaire minimum", nat: [-0.005, 0, -8], pro: ["unions"], con: ["retail", "build"], pub: 3, side: "gauche", fx: { Commerce: -0.03, Restauration: -0.04, Services: -0.02, Tourisme: -0.02 }, from: 1920 },
+  { t: "la déréglementation de la finance", nat: [0.02, 0, 3], pro: ["bank"], con: ["unions"], pub: -2, side: "droite", fx: { Finance: 0.08, Immobilier: 0.03 }, from: 1975 },
+  { t: "le plafonnement du prix des médicaments", nat: [0, -1, -4], pro: [], con: ["pharma"], pub: 3, side: "gauche", fx: { Santé: -0.07 }, from: 1945 },
+  { t: "de nouvelles subventions agricoles", nat: [0.005, 2, -3], pro: ["agri"], con: ["green"], pub: 1, side: "droite", fx: { Agriculture: 0.08 } },
+  { t: "un grand plan d’infrastructures (routes, ponts, logements)", nat: [0.03, 6, -4], pro: ["build", "unions", "industry"], con: [], pub: 2, side: "centre", fx: { Bâtiment: 0.1, Ingénierie: 0.06, Immobilier: 0.04 } },
+  { t: "une taxe sur les géants du numérique", nat: [0, -2, -2], pro: ["media", "retail"], con: ["tech"], pub: 2, side: "gauche", fx: { Technologie: -0.05 }, from: 2015 },
+  { t: "la hausse du budget de la défense", nat: [0.005, 4, 0], pro: ["arms", "industry"], con: ["green"], pub: 0, side: "droite", fx: { Industrie: 0.03 } },
+  { t: "une réforme des retraites (partir plus tard)", nat: [0.005, -6, 16], pro: ["bank"], con: ["unions"], pub: -4, side: "droite", fx: { Finance: 0.03 }, from: 1990 },
+  { t: "une loi contre la concentration des médias", nat: [0, 0, -2], pro: [], con: ["media"], pub: 2, side: "gauche", fx: { Médias: -0.06 }, from: 1950 },
+  { t: "une prime à la casse pour acheter une voiture neuve", nat: [0.01, 2, -1], pro: ["industry", "retail"], con: ["green"], pub: 1, side: "centre", fx: { Industrie: 0.06, Transport: 0.03 }, from: 1990 },
+  { t: "la protection des forêts et des zones naturelles", nat: [-0.005, 0, 0], pro: ["green"], con: ["agri", "build", "oil"], pub: 1, side: "eco", fx: { Agriculture: -0.03, Bâtiment: -0.03, Ressources: -0.06 }, from: 1970 },
+  { t: "la privatisation de services publics", nat: [0.01, -6, 9], pro: ["bank", "build"], con: ["unions"], pub: -2, side: "droite", fx: { Finance: 0.04, Transport: 0.04, Énergie: 0.04 }, from: 1980 },
+  { t: "des aides massives aux énergies renouvelables", nat: [0.01, 3, -2], pro: ["green"], con: ["oil"], pub: 2, side: "eco", fx: { Énergie: 0.02 }, from: 2005 },
+  { t: "l’interdiction de la publicité pour le tabac et l’alcool", nat: [0, 0, 1], pro: [], con: ["media", "retail"], pub: 2, side: "gauche", fx: { Médias: -0.03, Restauration: -0.02 }, from: 1975 },
+  { t: "un encadrement strict de l’intelligence artificielle", nat: [-0.005, 0, -2], pro: ["unions", "media"], con: ["tech"], pub: 2, side: "centre", fx: { Technologie: -0.05 }, from: 2023 },
+  { t: "un droit de grève plus encadré", nat: [0.01, 0, 10], pro: ["industry", "retail"], con: ["unions"], pub: -1, side: "droite", fx: { "*": 0.02 } },
+  { t: "le remboursement intégral des soins", nat: [0, 6, -8], pro: ["unions", "pharma"], con: ["bank"], pub: 3, side: "gauche", fx: { Santé: 0.04, Finance: -0.02 }, from: 1945 },
 ];
 // Décisions d'une mairie (ou d'un conseil municipal).
 const LOCAL_BILLS = [
@@ -240,13 +326,15 @@ Object.assign(Life.prototype, {
   polInfluence() {
     const P = this.politics;
     if (!P) return 0;
-    return Math.round(clamp(OFFICE[P.rank].w * (0.6 + P.pop / 250), 1, 100));
+    // Au sommet, l'influence dépend aussi des pouvoirs du poste : majorité, coalition, contre-pouvoirs.
+    const w = P.rank === 5 && elected(polRegime(this)) ? OFFICE[5].w * (0.6 + execPower(this) * 0.4) : OFFICE[P.rank].w;
+    return Math.round(clamp(w * (0.6 + P.pop / 250), 1, 100));
   },
   joinPolitics(side) {
     const R = polRegime(this), list = partiesFor(this, R), p = list.find(x => x.id === side);
     if (!p) return null;
     this.politics = { code: this.code, regime: R, side, party: p.label, rank: 0, former: 0, pop: clamp(15 + (this.network || 0) * 3 + this.stats.know / 8 + (this.passion ? this.passion.fame / 4 : 0), 5, 60),
-      loyalty: 50, funds: 0, dirt: 0, conflict: 0, lob: {}, did: {}, history: [], startAt: this.age, govSide: elected(R) ? (R === "hybrid" ? "pouvoir" : pick(["gauche", "droite", "centre"])) : side, cycle: this.calYear % 5 };
+      loyalty: 50, funds: 0, dirt: 0, conflict: 0, lob: {}, did: {}, history: [], startAt: this.age, govSide: elected(R) ? (R === "hybrid" ? "pouvoir" : pickGov(this)) : side, govSince: this.calYear - Math.floor(rand() * 8), cycle: this.calYear % 5 };
     const P = this.politics;
     for (const id of lobbiesHere(this)) P.lob[id] = LOBBIES[id].side === side ? 15 : 0;
     this.say(side === "opposition" ? `Rejoint ${p.label.charAt(0).toLowerCase() + p.label.slice(1)}. Un engagement qui peut coûter cher.` : `S’engage en politique : ${p.label.charAt(0).toLowerCase() + p.label.slice(1)}.`, "work", true);
@@ -259,7 +347,14 @@ Object.assign(Life.prototype, {
     P.rank = rank;
     P.former = Math.max(P.former, rank);
     if (rank > 0) P.history.push({ y: this.calYear, t: capFirst(this.polTitle(rank)) });
-    P.termEnd = O.term ? this.age + O.term : rank === 4 ? P.termEnd : null;
+    P.termEnd = O.term ? this.age + termOf(this, rank) : rank === 4 ? P.termEnd : null;
+    // Quitter le sommet : là où la limite ne vaut que pour les mandats d'affilée, on pourra revenir, un mandat plus tard.
+    if (prev === 5 && rank !== 5) {
+      P.tried = P.tried || {}; P.tried[5] = this.age; if (polSystem(this).consec) P.topTerms = 0;
+      const N = P.nation;
+      if (N) { this.say(`Bilan au sommet (${N.since}-${this.calYear}) : dette publique passée de ${N.debt0} à ${Math.round(N.debt)} % du PIB, tension sociale ${Math.round(N.tension)}/100, popularité ${Math.round(P.pop)}/100.`, "work", true); P.nation = null; }
+    }
+    if (rank === 5 && prev !== 5) { P.nation = null; nationOf(this); }
     if (O.full) {
       if (this.job && !(this.jobInfo && this.jobInfo.politics)) this.say(`Quitte son emploi (${this.job}) pour son mandat.`, "work");
       if (this.retired) this.retired = false;
@@ -301,6 +396,8 @@ Object.assign(Life.prototype, {
     if (!this.politics) return;
     const titles = officeTitles(this, R);
     if (P.rank > 0 && !titles[P.rank]) this.leaveOffice();
+    // Au sommet, votre politique pèse sur l'économie du pays, donc sur les revenus de tous.
+    if (P.rank === 5) this.econ *= nationOf(this).econ;
     // Popularité, loyauté, trésor de campagne, relations avec les lobbys.
     P.pop = clamp(P.pop + (40 - P.pop) * 0.12 + randn() * 3 + (P.rank >= 4 ? (this.econ - 1) * 25 : 0) + (P.lob.media || 0) / 60, 0, 100);
     P.loyalty = clamp(P.loyalty + (50 - P.loyalty) * 0.05, 0, 100);
@@ -313,14 +410,15 @@ Object.assign(Life.prototype, {
     // L'alternance (démocratie) : tous les cinq ans, le pays peut changer de majorité.
     if (R === "dem" && this.calYear % 5 === P.cycle && P.rank !== 5) {
       if (rand() < 0.45) {
-        const sides = ["gauche", "droite", "centre"].filter(s => s !== P.govSide);
-        P.govSide = pick(sides);
+        setGov(this, pickGov(this, P.govSide));
         this.say(`Élections législatives : ${P.govSide === "centre" ? "le centre" : `la ${P.govSide}`} l’emporte.`, "history");
         if (P.rank === 4 && lean(P.side, P.govSide) < 1) { this.setOffice(3, "Changement de majorité : quitte le gouvernement et retrouve son siège."); P.termEnd = a + 1 + Math.floor(rand() * 4); }
       }
     }
     if (R === "hybrid") P.govSide = "pouvoir";
     if (!elected(R)) P.govSide = R === "party" ? "parti" : "regime";
+    if (P.rank === 5) { this.topYear(R); if (this.politics && P.rank === 5) nationYear(this, R); }
+    if (!this.politics) return;
     // Fin de mandat : se représenter ou non (c'est vous qui choisissez).
     if (elected(R) && P.termEnd != null && a >= P.termEnd && [1, 2, 3, 5].includes(P.rank)) this.askReelection();
     // Ministre : nommé par le chef du gouvernement de son camp ; remaniements.
@@ -346,7 +444,7 @@ Object.assign(Life.prototype, {
       P.pop = clamp(P.pop + 30, 0, 100); P.loyalty = 70;
       P.side = R === "dem" ? "centre" : R === "hybrid" ? "pouvoir" : R === "party" ? "parti" : "regime";
       P.party = (partiesFor(this, R).find(x => x.id === P.side) || {}).label || P.party;
-      P.govSide = P.side;
+      setGov(this, P.side);
       this.say(old === "colony" ? "L’indépendance ! Ceux qui l’ont réclamée en prison sont désormais ceux qu’on écoute." : "Le régime tombe : ceux qui l’ont combattu deviennent les figures de la liberté retrouvée.", "history", true);
       this.bump("happy", 10);
       if (!elected(R) && P.rank < 3 && rand() < 0.5) this.setOffice(3, `Entre au cœur du nouveau pouvoir : ${this.polTitle(3)}.`);
@@ -356,18 +454,35 @@ Object.assign(Life.prototype, {
     if (!elected(R) && elected(old)) P.pop = clamp(P.pop - 10, 0, 100);
     const parties = partiesFor(this, R);
     if (!parties.some(x => x.id === P.side)) { P.side = parties[0].id; P.party = parties[0].label; }
-    P.govSide = elected(R) ? (R === "hybrid" ? "pouvoir" : pick(["gauche", "droite", "centre"])) : P.side;
+    setGov(this, elected(R) ? (R === "hybrid" ? "pouvoir" : pickGov(this)) : P.side);
   },
   askReelection() {
     const P = this.politics, rank = P.rank, title = this.polTitle(rank);
     if (P.askedAt === this.age) return;
     P.askedAt = this.age;
-    const limit = rank === 5 && (P.topTerms || 0) >= 2;
-    const ch = electionChance(this, rank, true);
-    this.ask(`Fin de votre mandat de ${title}. Se représenter ?`, [
-      ...(limit ? [] : [{ label: "Se représenter", sub: `Chances ≈ ${Math.round(ch * 100)} % · campagne ≈ ${eur(campaignCost(this, rank))}`, autoWeight: 3, apply: () => { if (this.politics === P && P.rank === rank) runElection(this, rank, true); } }]),
-      { label: limit ? "Passer la main (deux mandats au plus)" : "Ne pas se représenter", sub: "Quitter ce poste la tête haute.", autoWeight: 1, apply: () => { if (this.politics === P && P.rank === rank) this.leaveOffice(`Ne se représente pas ; quitte son poste de ${title}.`); } },
+    const S = polSystem(this), max = S.limit + (P.extraTerms || 0), limit = rank === 5 && (P.topTerms || 0) >= max;
+    const ch = electionChance(this, rank, true), parl = rank === 5 && S.sys !== "pres";
+    this.ask(parl ? `Fin de la législature : ${title}, vous menez votre parti aux élections. Y aller ?` : `Fin de votre mandat de ${title}. Se représenter ?`, [
+      ...(limit ? [] : [{ label: parl ? "Mener la campagne" : "Se représenter", sub: `Chances ≈ ${Math.round(ch * 100)} % · campagne ≈ ${eur(campaignCost(this, rank))}`, autoWeight: 3, apply: () => { if (this.politics === P && P.rank === rank) runElection(this, rank, true); } }]),
+      { label: limit ? `Passer la main (${max === 1 ? "un seul mandat" : `${max} mandats au plus`}${S.consec ? " d’affilée" : ""})` : parl ? "Passer la main à un successeur" : "Ne pas se représenter", sub: "Quitter ce poste la tête haute.", autoWeight: 1, apply: () => { if (this.politics === P && P.rank === rank) this.leaveOffice(`Ne se représente pas ; quitte son poste de ${title}.`); } },
     ]);
+  },
+  // Une année au sommet : législatives de mi-mandat, fronde de son propre parti.
+  topYear(R) {
+    const P = this.politics, S = polSystem(this), e = this.g("", "e");
+    if (R === "dem" && S.sys === "pres" && S.mid && P.midAt === this.age) {
+      const hold = clamp(0.3 + (P.pop - 40) / 80 + clamp((this.econ - 1) * 2, -0.2, 0.2), 0.1, 0.85);
+      if (lean(P.side, P.govSide) === 1 && rand() >= hold) {
+        setGov(this, rivalOf(this, P.side));
+        this.say(this.code === "US" ? "Élections de mi-mandat : le Congrès bascule dans l’opposition ; chaque loi devra se négocier." : "Législatives perdues : c’est la cohabitation ; le gouvernement vient du camp adverse.", "work", true);
+      } else if (lean(P.side, P.govSide) === 1) this.say(this.code === "US" ? "Élections de mi-mandat : votre camp garde le Congrès." : "Législatives : votre camp garde la majorité.", "work");
+    }
+    // Un chef de gouvernement tient tant que son parti le suit : impopulaire, il est renversé de l'intérieur.
+    if (R === "dem" && S.sys === "parl" && P.pop < 28 && rand() < 0.15) {
+      this.setOffice(3, `Lâché${e} par son parti, au plus bas dans les sondages : un rival prend la tête du parti et du gouvernement.`);
+      P.termEnd = this.age + 2;
+      this.bump("happy", -10);
+    }
   },
   offerMinistry() {
     const P = this.politics, y = this.calYear;
@@ -464,7 +579,7 @@ Object.assign(Life.prototype, {
     const line = local || !bill.side ? 0 : lean(P.side, bill.side);
     const bizNote = fx.n ? ` · vos entreprises : ${fx.gain > 0 ? "+" : "−"}${eur(Math.abs(fx.gain) * 0.4)} de valeur` : "";
     const verb = rank >= 4 ? "Votre gouvernement prépare" : rank === 2 ? "Votre mairie doit trancher sur" : rank === 1 ? "Le conseil municipal vote" : "Le Parlement vote";
-    const passOdds = vote => rank >= 4 ? (vote ? (elected(R) ? 0.8 : 0.95) : 0) : local ? (rank === 2 ? (vote ? 1 : 0) : 0.5 + (vote ? 0.1 : -0.1)) : clamp(0.45 + (bill.side ? lean(P.govSide, bill.side) * 0.25 : 0) + (vote ? 0.05 : -0.05), 0.1, 0.9);
+    const passOdds = vote => rank >= 4 ? (vote ? (rank === 5 && elected(R) ? execPower(this) : elected(R) ? 0.8 : 0.95) : 0) : local ? (rank === 2 ? (vote ? 1 : 0) : 0.5 + (vote ? 0.1 : -0.1)) : clamp(0.45 + (bill.side ? lean(P.govSide, bill.side) * 0.25 : 0) + (vote ? 0.05 : -0.05), 0.1, 0.9);
     const settle = (vote, abst) => {
       if (this.politics !== P || P.rank !== rank) return;
       if (!abst) {
@@ -478,7 +593,7 @@ Object.assign(Life.prototype, {
       const passed = rand() < passOdds(vote && !abst);
       if (rank === 2) this.say(`${vote ? "Dit oui à" : "Dit non à"} ${bill.t}.`.replace(" à le ", " au ").replace(" à les ", " aux "), "work");
       else this.say(`${rank >= 4 ? (vote ? "Porte" : "Enterre") : abst ? "S’abstient sur" : vote ? "Vote pour" : "Vote contre"} ${bill.t}${rank >= 4 && !vote ? "" : passed ? " ; le texte est adopté" : " ; le texte est rejeté"}.`, "work", rank >= 3);
-      if (passed) applyBill(this, bill);
+      if (passed) { applyBill(this, bill); if (rank === 5) applyNation(this, bill.nat); }
     };
     const partyLine = line > 0 ? " · votre parti vote pour" : line < 0 ? " · votre parti vote contre" : "";
     const who = `${pro.length ? `Pour : ${pro.join(", ")}` : "Aucun lobby pour"} · ${con.length ? `contre : ${con.join(", ")}` : "aucun lobby contre"} · ${opinion}${partyLine}${bizNote}`;
@@ -529,60 +644,337 @@ Object.assign(Life.prototype, {
   },
 });
 function campaignCost(L, rank) { return median(L.here) * OFFICE[rank].cost; }
+const termOf = (L, rank) => rank === 5 ? polSystem(L).term : OFFICE[rank].term;
+// Ce que le chef de l'exécutif fait passer : la majorité, la coalition, les contre-pouvoirs, le régime.
+function execPower(L) {
+  const P = L.politics, R = polRegime(L), S = polSystem(L);
+  if (R !== "dem") return 0.95;
+  if (S.sys !== "pres") return clamp(S.power - (S.sys === "parl" && !S.fptp && (campShares(L)[P.side] || 20) < 40 ? 0.15 : 0), 0.3, 0.95);
+  return clamp(S.power * (lean(P.side, P.govSide) === 1 ? 1 : 0.55), 0.2, 0.95);
+}
+function powerNote(L) {
+  const P = L.politics, R = polRegime(L), S = polSystem(L), c = L.code, maj = lean(P.side, P.govSide) === 1;
+  if (R === "hybrid") return "Les élections se gagnent d’avance et le Parlement obéit : presque tout passe ; le danger vient des rivaux du sérail.";
+  if (S.sys === "coll") return "Le Conseil fédéral décide à sept, à tour de rôle à la présidence, et le peuple peut tout défaire par référendum.";
+  if (S.sys === "parl") return S.fptp || (campShares(L)[P.side] || 20) >= 40 ? "Votre parti gouverne seul : les lois passent, tant que le parti vous suit. Vous pouvez dissoudre et convoquer des élections." : "Gouvernement de coalition : chaque réforme se négocie avec les partenaires. Vous pouvez dissoudre et convoquer des élections.";
+  if (c === "US") return maj ? "Le Congrès est de votre côté : vos réformes passent souvent ; décrets (executive orders), veto, nominations à la Cour suprême." : "Le Congrès est à l’opposition : chaque loi se négocie et beaucoup échouent ; il reste les décrets et le veto.";
+  if (c === "FR") return maj ? "Majorité présidentielle : vous fixez le cap, le gouvernement applique ; ordonnances, dissolution, référendum." : "Cohabitation : le gouvernement vient du camp adverse ; il vous reste la diplomatie, la défense et la dissolution.";
+  return maj ? "Votre camp tient le Parlement : vous gouvernez, par la loi ou par décret." : "Le Parlement est à l’opposition : vos réformes s'y enlisent ; restent les décrets.";
+}
+// Une élection nationale. Chaque camp part de son poids dans le pays, avec un aléa (sondages trompeurs) ;
+// edge : l'avance ou le retard propre au candidat. Renvoie « win », « first » (éliminé au premier tour) ou « lose ».
+// mode : « parl » pour des législatives, même dans un régime présidentiel (dissolution).
+function nationalVote(L, side, edge, noise, mode) {
+  const S = polSystem(L), sh = campShares(L), sides = Object.keys(sh), v = {};
+  sides.forEach((s, i) => { v[s] = Math.max(0.5, sh[s] + noise(i) * (2 + sh[s] * 0.08) + (s === side ? edge : 0)); });
+  const sys = mode || S.sys, tot = sides.reduce((t, s) => t + v[s], 0);
+  if (sys === "coll") return v[side] / tot * 100 + noise(9) * 3 > 12 ? "win" : "lose";
+  if (sys === "pres") {
+    const order = sides.slice().sort((a, b) => v[b] - v[a]);
+    if (S.rounds === 1 || v[order[0]] > tot / 2) return order[0] === side ? "win" : "lose";
+    if (order[0] !== side && order[1] !== side) return "first";
+    // Second tour : les électeurs des éliminés se reportent vers le finaliste le plus proche.
+    const [a, b] = order;
+    let va = v[a], vb = v[b];
+    order.slice(2).forEach((s, i) => { const d = lean(s, a) - lean(s, b), toA = clamp((d > 0 ? 0.7 : d < 0 ? 0.3 : 0.5) + noise(5 + i) * 0.2, 0, 1); va += v[s] * toA * 0.8; vb += v[s] * (1 - toA) * 0.8; });
+    return (va > vb ? a : b) === side ? "win" : "lose";
+  }
+  // Scrutin majoritaire : le premier parti gouverne seul. Sinon, le premier parti du bloc le plus fort (lui et ses alliés naturels).
+  if (S.fptp) return sides.slice().sort((a, b) => v[b] - v[a])[0] === side ? "win" : "lose";
+  const bloc = s => sides.reduce((t, x) => t + (lean(x, s) === 1 ? v[x] : 0), 0);
+  return sides.slice().sort((a, b) => bloc(b) - bloc(a) || v[b] - v[a])[0] === side ? "win" : "lose";
+}
+// L'avance du candidat : popularité, argent, lobbys, réseau ; et l'usure du camp au pouvoir, l'économie.
+function candidateEdge(L, incumbent = false) {
+  const P = L.politics, side = P.side;
+  let e = (P.pop - 50) * 0.18 + lobbySupport(L) * 4 + Math.min(2, P.funds / Math.max(1, campaignCost(L, 5)) * 1.5) + Math.min(1.5, (L.network || 0) * 0.2) + (incumbent ? 1.5 : 0);
+  if (P.scandalAt != null && L.age - P.scandalAt <= 3) e -= 6;
+  if (L.sex === "f" && L.calYear < 1990) e -= 3;
+  if (polRegime(L) === "dem") {
+    const yrs = P.govSince != null ? L.calYear - P.govSince : 0, econ = clamp((L.econ - 1) * 30, -6, 6);
+    e += P.govSide === side ? econ - Math.min(6, yrs * 0.6) : Math.min(4, yrs * 0.4) - econ / 2;
+  }
+  return e;
+}
+function generalChance(L, edge, mode) {
+  const side = L.politics.side, n = 400;
+  let w = 0;
+  for (let k = 0; k < n; k++) if (nationalVote(L, side, edge, i => NORM[(k * 10 + i) % NORM.length], mode) === "win") w++;
+  return clamp(w / n, 0.01, 0.97);
+}
+// L'investiture : être le candidat (ou le chef) de son parti. Plus le parti est grand, plus il y a de prétendants.
+function nominationChance(L) {
+  const P = L.politics, R = polRegime(L), S = polSystem(L);
+  if (R === "hybrid") {
+    if (P.side !== "pouvoir") return 0.6;
+    const z = (P.loyalty - 75) / 8 + (P.patron ? 1 : 0) + (P.rank === 4 ? 1 : 0);
+    return clamp(Math.exp(z) / (Math.exp(z) + 6), 0.01, 0.9);
+  }
+  const rivals = clamp((campShares(L)[P.side] || 5) / 10, 1, 5);
+  let z = (P.pop - 50) / 15 + Math.min(1.5, (L.network || 0) * 0.15) + (P.rank === 4 || P.former >= 4 ? 0.7 : 0) + lobbySupport(L);
+  if (S.pick === "primary") z += Math.min(1.5, P.funds / Math.max(1, campaignCost(L, 5)) * 1.2) + (P.lob.media || 0) / 80;
+  else if (S.pick === "members") z += (P.loyalty - 50) / 30 + Math.min(0.6, P.funds / Math.max(1, campaignCost(L, 5)) * 0.5);
+  else z += (P.loyalty - 50) / 15;
+  if (P.scandalAt != null && L.age - P.scandalAt <= 3) z -= 1.5;
+  return clamp(Math.exp(z) / (Math.exp(z) + rivals), 0.02, 0.97);
+}
+// Les chances au sommet : l'investiture, puis l'élection elle-même.
+function topOdds(L, incumbent = false) {
+  const nom = incumbent ? 1 : nominationChance(L), gen = generalChance(L, candidateEdge(L, incumbent));
+  return { nom, gen, total: nom * gen };
+}
 function electionChance(L, rank, incumbent = false) {
   const P = L.politics, R = polRegime(L);
-  // Le sommet : une poignée d'élus par génération ; sous un régime hybride, le chef désigne son successeur.
-  if (rank === 5 && !incumbent) {
-    let t = 0.02 + (P.pop - 50) / 500 + lobbySupport(L) * 0.05 + Math.min(0.04, P.funds / Math.max(1, campaignCost(L, 5)) * 0.03) + (P.rank === 4 ? 0.03 : 0) + Math.min(0.03, (L.network || 0) * 0.004);
-    if (R === "hybrid") t = P.side === "pouvoir" ? 0.005 + P.loyalty / 5000 : 0.005;
-    if (P.scandalAt != null && L.age - P.scandalAt <= 3) t -= 0.05;
-    return clamp(t, 0.005, 0.08);
-  }
-  let p = [0, 0.45, 0.25, 0.15, 0, 0.3][rank] + (incumbent ? 0.12 : 0);
+  if (rank === 5) return topOdds(L, incumbent).total;
+  let p = [0, 0.45, 0.25, 0.15, 0][rank] + (incumbent ? 0.12 : 0);
   p += (P.pop - 40) / 170;
   p += Math.min(0.12, P.funds / Math.max(1, campaignCost(L, rank)) * 0.06);
   p += lobbySupport(L) * 0.12;
   p += Math.min(0.1, (L.network || 0) * 0.015);
-  if (R === "hybrid") p += P.side === "pouvoir" ? (rank === 5 ? 0.35 : 0.3) : -0.2;
-  if (P.side === "eco" || P.side === "ind") p -= rank >= 3 ? 0.12 : 0.04;
+  if (R === "hybrid") p += P.side === "pouvoir" ? 0.3 : -0.2;
+  // L'étiquette compte : un grand parti porte ses candidats, un petit les laisse seuls.
+  const sh = campShares(L)[P.side];
+  if (R === "dem" && sh != null) p += (sh - 30) / (rank >= 3 ? 150 : 300);
+  if (P.side === "ind") p -= rank >= 3 ? 0.12 : 0.04;
   if (L.sex === "f" && L.calYear < 1990) p -= 0.08;
   if (P.scandalAt != null && L.age - P.scandalAt <= 2) p -= 0.15;
-  return clamp(p, 0.02, rank === 5 ? 0.6 : 0.85);
+  return clamp(p, 0.02, 0.85);
 }
+const NOM_LOST = { primary: "Perd la primaire de son parti", members: "Les adhérents du parti choisissent un autre candidat", caucus: "Les parlementaires du parti lui préfèrent un rival", congress: "Le congrès du parti investit un rival" };
+const NOM_WON = { primary: "Remporte la primaire de son parti", members: "Désigné$ par les adhérents du parti", caucus: "Élu$ à la tête du parti par ses parlementaires", congress: "Investi$ par le congrès du parti" };
 // Une élection, qui se joue l'année même : la campagne se paie d'abord sur le trésor de campagne.
 function runElection(L, rank, incumbent = false) {
-  const P = L.politics, cost = campaignCost(L, rank), title = L.polTitle(rank);
+  const P = L.politics, cost = campaignCost(L, rank), title = L.polTitle(rank), e = L.g("", "e"), S = polSystem(L), R = polRegime(L);
   // Les lobbys amis financent, les lobbys hostiles font campagne contre vous.
   let gift = 0;
   for (const id of lobbiesHere(L)) if (!LOBBIES[id].people && (P.lob[id] || 0) >= 30) gift += median(L.here) * 0.04 * lobbyPower(L, id) * rank;
   if (gift > 0) { P.funds += gift; P.dirt += 0.1; }
   const hostile = lobbiesHere(L).filter(id => (P.lob[id] || 0) <= -40 && lobbyPower(L, id) >= 2).map(id => LOBBIES[id].who);
-  const ch = electionChance(L, rank, incumbent);
-  const fromFunds = Math.min(P.funds, cost);
-  P.funds -= fromFunds; if (cost > fromFunds) L.pay(cost - fromFunds);
+  const pay = part => { const c = cost * part, f = Math.min(P.funds, c); P.funds -= f; if (c > f) L.pay(c - f); };
   L.bump("health", -1); L.bump("rel", -1);
   const extra = `${gift > 0 ? ` Des lobbys amis ont financé la campagne (${money(gift)}).` : ""}${hostile.length ? ` ${capFirst(hostile.join(", "))} ont fait campagne contre ${L.g("lui", "elle")}.` : ""}`;
-  if (rand() < ch) {
-    if (rank === 5) { P.topTerms = (P.topTerms || 0) + 1; P.govSide = P.side; P.cycle = L.calYear % 5; }
-    if (incumbent) { P.termEnd = L.age + OFFICE[rank].term; P.history.push({ y: L.calYear, t: `${capFirst(title)} (réélu${L.g("", "e")})` }); L.say(`Réélu${L.g("", "e")} : ${title}.${extra}`, "work", true); }
-    else L.setOffice(rank, `Élu${L.g("", "e")} : ${title} !${extra}`);
+  let win, first = false, odds;
+  if (rank === 5) {
+    // Le sommet se joue en deux temps : être investi par son parti, puis gagner le pays.
+    const o = topOdds(L, incumbent);
+    odds = incumbent ? `chances ${Math.round(o.gen * 100)} %` : `investiture ${Math.round(o.nom * 100)} %, élection ${Math.round(o.gen * 100)} %`;
+    if (!incumbent) {
+      pay(0.3);
+      const how = R === "hybrid" ? null : S.pick;
+      if (rand() >= o.nom) {
+        L.bump("happy", -5); P.pop = clamp(P.pop - 2, 0, 100);
+        L.say(`${how ? NOM_LOST[how] : P.side === "pouvoir" ? "Le chef désigne un autre successeur" : "L’opposition se range derrière un autre candidat"} pour l’élection : ${title}.${extra}`, "work", true);
+        return `Pas investi${e} (${odds})`;
+      }
+      L.say(`${how ? NOM_WON[how].replace("$", e) : P.side === "pouvoir" ? `Désigné${e} comme successeur par le pouvoir` : `Candidat${e} unique de l’opposition`} : ${S.sys === "pres" ? "en route pour l’élection" : S.sys === "coll" ? "candidat$ du parti devant l’Assemblée fédérale".replace("$", e) : "en tête de liste pour les législatives"}.`, "work", true);
+      pay(0.7);
+    } else pay(1);
+    const r = nationalVote(L, P.side, candidateEdge(L, incumbent), () => randn());
+    win = r === "win"; first = r === "first";
+  } else {
+    const ch = electionChance(L, rank, incumbent);
+    odds = `chances ${Math.round(ch * 100)} %`;
+    pay(1);
+    win = rand() < ch;
+  }
+  if (win) {
+    if (rank === 5) {
+      P.topTerms = (P.topTerms || 0) + 1; setGov(L, P.side); P.cycle = L.calYear % 5;
+      P.midAt = S.mid ? L.age + Math.floor(S.term / 2) : null;
+    }
+    if (incumbent) { P.termEnd = L.age + termOf(L, rank); P.history.push({ y: L.calYear, t: `${capFirst(title)} (réélu${e})` }); L.say(`Réélu${e} : ${title}.${extra}`, "work", true); }
+    else L.setOffice(rank, `Élu${e} : ${title} !${extra}`);
     L.bump("happy", rank >= 3 ? 10 : 6); L.network += rank * 0.3; P.pop = clamp(P.pop + 5, 0, 100);
-    return `Élu${L.g("", "e")} : ${title} (chances ${Math.round(ch * 100)} %)`;
+    return `Élu${e} : ${title} (${odds})`;
   }
   L.bump("happy", -6); P.pop = clamp(P.pop - 4, 0, 100);
-  if (incumbent) { L.leaveOffice(`Battu${L.g("", "e")} : perd son poste de ${title}.${extra}`); return "Battu."; }
-  L.say(`Candidat${L.g("", "e")} au poste de ${title}, ${L.g("battu", "battue")}.${extra}`, "work", true);
-  return `Battu${L.g("", "e")} (chances ${Math.round(ch * 100)} %)`;
+  if (rank === 5 && S.sys !== "pres") {
+    // Législatives perdues : l'adversaire gouverne ; le chef de parti garde (ou retrouve) son siège.
+    setGov(L, rivalOf(L, P.side));
+    if (incumbent) { L.setOffice(3, `Perd les législatives : quitte la tête du gouvernement, redevient ${L.polTitle(3)}.${extra}`); P.termEnd = L.age + termOf(L, 3); return "Battu."; }
+    L.say(`Mène son parti aux législatives : c’est l’adversaire qui l’emporte.${extra}`, "work", true);
+    return `Battu${e} (${odds})`;
+  }
+  if (incumbent) { L.leaveOffice(`Battu${e} : perd son poste de ${title}.${extra}`); return "Battu."; }
+  L.say(rank === 5 ? `Candidat${e} à l’élection présidentielle, ${first ? `éliminé${e} au premier tour` : S.rounds === 2 ? `battu${e} au second tour` : `battu${e}`}.${extra}` : `Candidat${e} au poste de ${title}, ${L.g("battu", "battue")}.${extra}`, "work", true);
+  return `Battu${e} (${odds})`;
 }
 // À quel poste peut-on se présenter, ici et maintenant.
 function nextRace(L) {
-  const P = L.politics, R = polRegime(L), titles = officeTitles(L, R);
+  const P = L.politics, R = polRegime(L), titles = officeTitles(L, R), S = polSystem(L);
   if (!elected(R) || P.rank === 5) return null;
-  const wait = r => { const t = (P.tried || {})[r], gap = r === 5 ? 5 : 3; return t != null && L.age - t < gap ? `prochaine élection dans ${gap - (L.age - t)} an${gap - (L.age - t) > 1 ? "s" : ""}` : ""; };
+  const wait = r => { const t = (P.tried || {})[r], gap = r === 5 ? S.term : 3; return t != null && L.age - t < gap ? `prochaine élection dans ${gap - (L.age - t)} an${gap - (L.age - t) > 1 ? "s" : ""}` : ""; };
   if (P.rank < 3) return { rank: P.rank + 1, why: P.rank + 1 === 3 && P.side === "ind" ? "sans parti, personne ne vous investit aux élections nationales" : wait(P.rank + 1) };
   if (!titles[5]) return null;
-  const why = L.age < 35 ? "à partir de 35 ans" : L.age > 75 ? "trop âgé pour une campagne nationale".replace("âgé", L.g("âgé", "âgée")) : P.side === "ind" ? "il faut un parti" : P.rank === 3 && P.pop < 55 ? "il faut être ministre, ou très populaire (55/100)" : wait(5);
+  const why = L.age < S.minAge ? `à partir de ${S.minAge} ans` : L.age > 75 ? "trop âgé pour une campagne nationale".replace("âgé", L.g("âgé", "âgée"))
+    : P.side === "ind" ? "il faut un parti" : (P.topTerms || 0) >= S.limit + (P.extraTerms || 0) && !S.consec ? "vous avez déjà fait le nombre maximal de mandats" : wait(5);
   return { rank: 5, why };
+}
+// Comment on arrive au sommet, ici : le texte du panneau.
+function systemNote(L) {
+  const P = L.politics, R = polRegime(L), S = polSystem(L), title = capFirst(L.polTitle(5)), sh = campShares(L), e = L.g("", "e");
+  const how = R === "hybrid" ? `${title} : les élections se gagnent d’avance ; le pouvoir désigne son candidat`
+    : S.sys === "coll" ? "Le Conseil fédéral : sept membres élus par le Parlement ; les grands partis y ont chacun leur place"
+    : S.sys === "parl" ? `${title} : le chef du parti qui gagne les législatives (ou du bloc le plus fort)`
+    : `${title} : élu${e} au suffrage universel${L.code === "US" ? " indirect (grands électeurs), à un tour" : S.rounds === 2 ? ", à deux tours" : ", à un tour"}`;
+  const pick = R === "hybrid" ? "" : ` · investiture : ${PICK_LABEL[S.pick]}`;
+  const term = ` · mandat de ${S.term} ans${S.limit === Infinity ? ", sans limite" : S.limit === 1 ? (S.consec ? ", pas deux de suite" : ", un seul") : `, ${S.limit} ${S.consec ? "d’affilée " : ""}au plus`}`;
+  const top = Object.keys(sh).sort((a, b) => sh[b] - sh[a])[0];
+  const mine = P && sh[P.side] != null ? ` · votre camp pèse ≈ ${sh[P.side]} % des voix${P.side === top ? " (premier parti)" : ""}` : "";
+  return `${how}${pick}${term}${mine}.`;
+}
+
+// --- Gouverner le pays ---------------------------------------------------------------------
+// Au sommet, on tient le pays : son économie (qui fait les revenus de tous, les vôtres et ceux de vos
+// entreprises), sa dette publique et sa tension sociale. Chaque geste les fait bouger, pour des années.
+// Dette publique au début des années 2010, en % du PIB (approximations) ; plus basse avant.
+const DEBT0 = { JP: 230, GR: 165, IT: 135, US: 115, FR: 110, PT: 110, BE: 105, ES: 105, CA: 105, SG: 160, GB: 95, AR: 85, BR: 85, IN: 82, CN: 80, ZA: 72, DE: 65, EG: 90, MX: 50, KR: 50, AU: 50, PL: 50, CH: 40, NO: 40, SE: 35, TR: 30, RU: 20, SA: 25, NG: 38 };
+function nationOf(L) {
+  const P = L.politics;
+  if (P.nation && P.nation.code === L.code) return P.nation;
+  const y = L.calYear, d = DEBT0[L.code] ?? 55, debt = Math.round(y >= 2008 ? d : y >= 1980 ? d * 0.65 : 35);
+  return P.nation = { code: L.code, econ: 1, debt, debt0: debt, tension: 30, since: y };
+}
+function applyNation(L, nat) {
+  const P = L.politics;
+  if (!P || P.rank !== 5 || !nat) return;
+  const N = nationOf(L);
+  N.econ = clamp(N.econ + nat[0], 0.8, 1.25); N.debt = clamp(N.debt + nat[1], 0, 300); N.tension = clamp(N.tension + nat[2], 0, 100);
+}
+const signed = (x, unit = "") => `${x > 0 ? "+" : x < 0 ? "−" : ""}${Math.abs(x).toLocaleString("fr-FR", { maximumFractionDigits: 1 })}${unit}`;
+// Ce qu'un geste fait au pays, en clair : « économie +3 % · dette +8 pts · tension −5 ».
+const natNote = nat => [nat[0] ? `économie ${signed(nat[0] * 100, " %")}` : "", nat[1] ? `dette ${signed(nat[1], " pts")}` : "", nat[2] ? `tension ${signed(nat[2])}` : ""].filter(Boolean).join(" · ");
+function lobbyShift(L, ids, d) {
+  const P = L.politics;
+  for (const id of ids) if (P.lob[id] != null) P.lob[id] = clamp(P.lob[id] + d, -100, 100);
+}
+// Les réformes sur la table cette année (quatre, qui changent d'une année à l'autre).
+function agenda(L) {
+  const pool = BILLS.filter(b => L.calYear >= (b.from || 0)), n = pool.length, start = L.calYear * 7 % n;
+  return [0, 1, 2, 3].map(k => pool[(start + k * 5) % n]).filter((b, i, a) => a.indexOf(b) === i);
+}
+const billIdx = b => BILLS.indexOf(b);
+// Faire voter, ou passer en force : la loi s'applique, avec ses gagnants et ses perdants.
+function enactBill(L, bill, forced) {
+  const P = L.politics, R = polRegime(L);
+  lobbyShift(L, bill.pro, 10); lobbyShift(L, bill.con, -12);
+  P.pop = clamp(P.pop + bill.pub * 1.2 - (forced && R === "dem" ? 3 : 0), 0, 100);
+  applyNation(L, bill.nat);
+  if (forced) applyNation(L, [0, 0, R === "dem" ? 8 : 3]);
+  if (bill.side) P.loyalty = clamp(P.loyalty + (lean(P.side, bill.side) === 1 ? 5 : -5), 0, 100);
+  applyBill(L, bill);
+}
+// La liste des gestes du sommet : [id, intitulé, détail, possible, pourquoi pas].
+function govOptions(L) {
+  const P = L.politics, R = polRegime(L), S = polSystem(L), N = nationOf(L), c = L.code, y = L.calYear, dem = R === "dem", out = [];
+  const add = (id, label, sub, ok = true, why = "") => out.push({ id, label, sub, ok: ok && (P.did || {})[id] !== L.age, why: (P.did || {})[id] === L.age ? "déjà cette année" : why });
+  // Deux politiques contraires ne se mènent pas la même année.
+  const not = id => (P.did || {})[id] !== L.age, contra = "contraire de ce que vous avez décidé cette année";
+  // L'économie et les finances publiques.
+  add("g_relance", y >= 1930 ? "Lancer un plan de relance" : "Lancer de grands travaux", `${natNote([0.05, 8, -5])} · popularité +3`, not("g_austerite"), contra);
+  add("g_austerite", "Imposer un plan d’économies", `${natNote([-0.03, -10, 12])} · popularité −5 · syndicats furieux`, not("g_relance"), contra);
+  add("g_taxcut", "Baisser les impôts", `${natNote([0.02, 6, 3])} · popularité +4 · vos impôts baissent aussi`, not("g_taxrich"), contra);
+  add("g_taxrich", "Taxer les grandes fortunes", `${natNote([-0.01, -5, -8])} · popularité +3 · vous payez ≈ 3 % de votre épargne`, not("g_taxcut"), contra);
+  if (y >= 1900) add("g_tariffs", "Relever les droits de douane", `${natNote([-0.015, -1, -3])} · popularité +2 · industrie et agriculture protégées`);
+  // Le pays et le monde.
+  add("g_speech", L.calYear >= 1950 ? "S’adresser à la nation à la télévision" : "S’adresser à la nation à la radio", `tension −6 · popularité +1 à +4`);
+  add("g_summit", y >= 1945 ? "Voyage d’État et sommet international" : "Voyage d’État à l’étranger", `${natNote([0.01, 0, 0])} (contrats) · popularité +2 à +5`);
+  if (c !== "CH") add("g_war", "Lancer une intervention militaire", `60 % : popularité +8, tension −8 · 40 % : enlisement, popularité −12`);
+  if (S.sys !== "coll") add("g_reshuffle", S.sys === "parl" ? "Remanier son gouvernement" : c === "US" ? "Remanier son cabinet" : "Changer de Premier ministre, remanier", "popularité +4 · tension −4 · loyauté −6");
+  if (P.courtSeat) add("g_court", c === "US" ? "Nommer un juge à la Cour suprême" : c === "FR" ? "Nommer au Conseil constitutionnel" : "Nommer un juge à la Cour constitutionnelle", "Un siège se libère · vos passages en force ne seront presque plus annulés");
+  if (dem) add("g_referendum", "Organiser un référendum sur une grande réforme", `Gagné (≈ ${Math.round(clamp(P.pop / 110, 0.1, 0.85) * 100)} %) : réforme adoptée, popularité +6 · perdu : −10`);
+  // Le pouvoir et ses tentations.
+  if (!dem) add("g_crackdown", "Réprimer l’opposition", "tension −20 · popularité −4 · arrestations, censure");
+  add("g_enrich", "Puiser dans les caisses de l’État", `≈ ${money(median(L.here) * (4 + corruptionOf(L) * 30))} pour vous · ${dem ? "gros risque de scandale" : "les rivaux prennent note"}`);
+  return out;
+}
+// Les gestes avec un choix : une réforme de l'agenda.
+function govAction(L, id, arg) {
+  const P = L.politics, R = polRegime(L), S = polSystem(L), N = nationOf(L), m = median(L.here), dem = R === "dem", e = L.g("", "e");
+  switch (id) {
+    case "g_bill": case "g_force": {
+      const bill = BILLS[+arg];
+      if (!bill || !agenda(L).includes(bill)) return null;
+      if (id === "g_bill") {
+        if (rand() >= execPower(L)) { P.pop = clamp(P.pop - 2, 0, 100); L.say(`Présente ${bill.t} : le Parlement la rejette.`, "work", true); return "Réforme rejetée"; }
+        enactBill(L, bill, false); L.say(`Fait adopter ${bill.t}.`, "work", true); return `Adoptée : ${bill.t}`;
+      }
+      // Passer en force : les juges peuvent censurer, sauf si la Cour est à vous.
+      const censure = dem ? (P.court === P.side ? 0.05 : L.code === "FR" ? 0.15 : 0.3) : 0;
+      if (rand() < censure) { P.pop = clamp(P.pop - 3, 0, 100); applyNation(L, [0, 0, 5]); L.say(`Impose ${bill.t} par ${L.code === "FR" ? "le 49.3" : "décret"} ; ${L.code === "US" ? "la Cour suprême" : L.code === "FR" ? "le Conseil constitutionnel" : "la justice"} l’annule.`, "work", true); return "Annulée par les juges"; }
+      enactBill(L, bill, true); L.say(`Impose ${bill.t} ${L.code === "FR" ? "par le 49.3" : "par décret"}, sans vote du Parlement.`, "work", true); return `Imposée : ${bill.t}`;
+    }
+    case "g_relance": applyNation(L, [0.05, 8, -5]); P.pop = clamp(P.pop + 3, 0, 100); lobbyShift(L, ["build", "unions", "industry"], 6); L.say("Lance un grand plan de relance : chantiers, aides, embauches.", "work", true); return "Relance lancée";
+    case "g_austerite": applyNation(L, [-0.03, -10, 12]); P.pop = clamp(P.pop - 5, 0, 100); lobbyShift(L, ["bank"], 8); lobbyShift(L, ["unions"], -12); L.say("Impose un plan d’économies : budgets coupés, salaires publics gelés.", "work", true); return "Économies imposées";
+    case "g_taxcut": applyNation(L, [0.02, 6, 3]); P.pop = clamp(P.pop + 4, 0, 100); lobbyShift(L, ["bank", "retail", "industry"], 6); L.addMoney(Math.max(0, L.income || 0) * 0.04); L.say("Baisse les impôts.", "work", true); return "Impôts en baisse";
+    case "g_taxrich": {
+      applyNation(L, [-0.01, -5, -8]); P.pop = clamp(P.pop + 3, 0, 100); lobbyShift(L, ["bank", "industry", "tech"], -12); lobbyShift(L, ["unions"], 8);
+      const x = Math.max(0, L.savings) * 0.03; if (x > 0) L.pay(x);
+      L.say("Crée un impôt sur les grandes fortunes.", "work", true); return x > 0 ? `Vous payez aussi : ${money(x)}` : "Impôt sur la fortune créé";
+    }
+    case "g_tariffs": applyNation(L, [-0.015, -1, -3]); P.pop = clamp(P.pop + 2, 0, 100); lobbyShift(L, ["industry", "agri"], 10); lobbyShift(L, ["retail", "tech"], -8); L.say("Relève les droits de douane pour protéger l’industrie du pays.", "work", true); return "Droits de douane relevés";
+    case "g_speech": { const d = 1 + rand() * 3; applyNation(L, [0, 0, -6]); P.pop = clamp(P.pop + d, 0, 100); L.say("S’adresse solennellement à la nation.", "work"); return `Popularité +${Math.round(d)} · tension −6`; }
+    case "g_summit": { const d = 2 + rand() * 3; applyNation(L, [0.01, 0, 0]); P.pop = clamp(P.pop + d, 0, 100); lobbyShift(L, ["arms", "industry", "oil"], 4); L.bump("health", -1); L.network += 0.5; L.say(pick(["Voyage d’État : contrats signés et dîner de gala.", "Sommet international : la photo de famille fait le tour du monde.", "Reçoit avec faste un chef d’État étranger."]), "work"); return `Popularité +${Math.round(d)}`; }
+    case "g_war": {
+      lobbyShift(L, ["arms"], 12); applyNation(L, [0, 4, 0]); L.bump("happy", -3);
+      if (rand() < 0.6) { P.pop = clamp(P.pop + 8, 0, 100); applyNation(L, [0, 0, -8]); L.say("Lance une intervention militaire : succès rapide, le pays se rassemble derrière son chef.", "history", true); return "Succès : popularité +8"; }
+      P.pop = clamp(P.pop - 12, 0, 100); applyNation(L, [-0.01, 4, 12]); L.say("Lance une intervention militaire ; le conflit s’enlise et les cercueils reviennent.", "history", true); return "Enlisement : popularité −12";
+    }
+    case "g_reshuffle": P.pop = clamp(P.pop + 4, 0, 100); P.loyalty = clamp(P.loyalty - 6, 0, 100); applyNation(L, [0, 0, -4]); L.say(S.sys === "parl" ? "Remanie son gouvernement." : L.code === "US" ? "Remanie son cabinet." : "Change de Premier ministre et remanie le gouvernement.", "work", true); return "Nouveau gouvernement";
+    case "g_court": P.courtSeat = false; P.court = P.side; lobbyShift(L, Object.keys(LOBBIES).filter(k => LOBBIES[k].side === P.side), 6); L.say(L.code === "FR" ? "Nomme un fidèle au Conseil constitutionnel." : `Nomme un juge de son camp à ${L.code === "US" ? "la Cour suprême" : "la Cour constitutionnelle"}.`, "work", true); return "La Cour penche de votre côté";
+    case "g_referendum": {
+      const bill = agenda(L)[0];
+      if (rand() < clamp(P.pop / 110, 0.1, 0.85)) { enactBill(L, bill, false); P.pop = clamp(P.pop + 6, 0, 100); L.say(`Référendum gagné : ${bill.t} est adoptée par le peuple.`, "work", true); return "Référendum gagné"; }
+      P.pop = clamp(P.pop - 10, 0, 100); applyNation(L, [0, 0, 4]); L.say(`Référendum perdu sur ${bill.t} : un désaveu personnel.`, "work", true); return "Référendum perdu";
+    }
+    case "g_crackdown": applyNation(L, [0, 0, -20]); P.pop = clamp(P.pop - 4, 0, 100); P.dirt += 1.5; L.say("Fait arrêter des opposants et interdire les manifestations.", "work", true); return "Tension −20";
+    case "g_enrich": {
+      const x = m * (4 + corruptionOf(L) * 30);
+      L.addMoney(x); P.dirt += dem ? 4 : 2; applyNation(L, [0, 1, 3]);
+      L.say(`Détourne discrètement de l’argent public (${money(x)}).`, "money", true); return `+${money(x)}`;
+    }
+  }
+  return null;
+}
+// L'année du pays : les effets s'estompent, la dette grossit, la rue gronde, les marchés s'affolent.
+function nationYear(L, R) {
+  const P = L.politics, N = nationOf(L), e = L.g("", "e");
+  N.econ = 1 + (N.econ - 1) * 0.7;
+  N.debt = clamp(N.debt + 1 + (N.econ < 1 ? 3 : 0), 0, 300);
+  N.tension = clamp(N.tension + (30 - N.tension) * 0.2 + (L.econ < 0.97 ? 6 : 0) + (L.econ > 1.03 ? -3 : 0), 0, 100);
+  if (P.court && P.court !== P.side) P.court = null;
+  if (!P.courtSeat && R === "dem" && rand() < 0.15) P.courtSeat = true;
+  if (N.debt > 100 && rand() < (N.debt - 100) / 250) {
+    N.econ = clamp(N.econ - 0.06, 0.8, 1.25); N.tension = clamp(N.tension + 10, 0, 100); P.pop = clamp(P.pop - 8, 0, 100);
+    L.say(`Crise de la dette : les marchés paniquent, les taux s’envolent (dette ≈ ${Math.round(N.debt)} % du PIB).`, "history", true);
+  }
+  if (N.tension >= 70 && rand() < (N.tension - 55) / 60) {
+    P.pop = clamp(P.pop - 5, 0, 100); N.econ = clamp(N.econ - 0.02, 0.8, 1.25);
+    // Sous un régime autoritaire, la rue ou l'armée peuvent emporter le chef.
+    if (R !== "dem" && N.tension >= 85 && rand() < 0.3) {
+      const exile = rand() < 0.5;
+      L.leaveOffice(exile ? `Renversé${e} par la rue ; fuit le pays en catastrophe.` : `Renversé${e} par un coup d’État militaire ; arrêté${e}.`);
+      L.bump("happy", -20); if (!exile) L.bump("health", -8);
+      return;
+    }
+    L.say(R === "dem" ? pick(["Grève générale : le pays est paralysé des semaines durant.", "Manifestations monstres contre la politique du gouvernement."]) : "Émeutes dans les grandes villes ; le pouvoir vacille.", "history", true);
+  }
+}
+const pctTxt = x => `${x >= 0 ? "+" : "−"}${Math.abs(x * 100).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} %`;
+function nationHtml(L, bar) {
+  const P = L.politics, N = nationOf(L), opts = govOptions(L), R = polRegime(L), ag = agenda(L), forceOk = R !== "dem" || polSystem(L).sys === "pres";
+  const pill = o => `<button class="sp-pill" data-pol="${o.id}"${o.ok ? "" : " disabled"}>${esc(o.label)} <span>${esc(o.ok ? o.sub : o.why)}</span></button>`;
+  const done = id => (P.did || {})[id] === L.age;
+  const billPill = (id, b, why) => { const pro = b.pro.map(k => LOBBIES[k].who), con = b.con.map(k => LOBBIES[k].who), op = b.pub >= 2 ? "l’opinion est pour" : b.pub <= -2 ? "l’opinion est contre" : "l’opinion est partagée";
+    return `<button class="sp-pill" data-pol="${id}" data-arg="${billIdx(b)}"${done(id) ? " disabled" : ""}>${esc(capFirst(b.t))} <span>${esc(done(id) ? "déjà cette année" : `${why} · ${op}${b.nat ? ` · ${natNote(b.nat)}` : ""}${pro.length ? ` · pour : ${pro.join(", ")}` : ""}${con.length ? ` · contre : ${con.join(", ")}` : ""}`)}</span></button>`; };
+  return `<p class="sp-head">Gouverner le pays</p>
+    <div class="sp-card"><div class="sp-main"><b>État du pays</b>
+      <small>Économie : ${pctTxt(N.econ - 1)} sous l’effet de votre politique (revenus, entreprises, popularité) · dette publique ≈ ${Math.round(N.debt)} % du PIB${N.debt > 100 ? " : les marchés surveillent" : ""}</small>
+      <small>Tension sociale ${Math.round(N.tension)}/100 ${bar(N.tension)}${N.tension >= 70 ? " · grèves et manifestations menacent" : ""}</small>
+      <small>Vos pouvoirs : ${esc(powerNote(L))}</small></div></div>
+    <div class="sp-pills stack">${opts.map(pill).join("")}</div>
+    <details class="sp-more"><summary>Faire voter une réforme <small>chances ≈ ${Math.round(execPower(L) * 100)} % · une par an</small></summary><div class="sp-pills stack">${ag.map(b => billPill("g_bill", b, `Vote ≈ ${Math.round(execPower(L) * 100)} %`)).join("")}</div></details>
+    ${forceOk ? `<details class="sp-more"><summary>${L.code === "FR" ? "Passer en force (49.3)" : "Passer en force par décret"} <small>sans vote · tension +${R === "dem" ? 8 : 3}${R === "dem" ? " · les juges peuvent annuler" : ""}</small></summary><div class="sp-pills stack">${ag.map(b => billPill("g_force", b, R === "dem" ? `Annulation ≈ ${Math.round((P.court === P.side ? 0.05 : L.code === "FR" ? 0.15 : 0.3) * 100)} %` : "Le Parlement obéit")).join("")}</div></details>` : ""}`;
 }
 
 // --- Les gestes de l'année (panneau « Dépenser et investir ») --------------------------------
@@ -593,9 +985,11 @@ function polOptions(L) {
   const R = polRegime(L), m = median(L.here), a = L.age, inf = L.polInfluence();
   const race = nextRace(L);
   if (race) {
-    const ch = electionChance(L, race.rank), cost = campaignCost(L, race.rank), title = L.polTitle(race.rank);
+    const cost = campaignCost(L, race.rank), title = L.polTitle(race.rank), S = polSystem(L);
     const banned = P.banUntil != null && a < P.banUntil;
-    add("run", race.rank === 5 && officeTitles(L)[5][0] === "Premier ministre" ? `Mener le parti aux élections pour devenir ${title}` : `Se présenter : ${title}`, `Chances ≈ ${Math.round(ch * 100)} % · campagne ≈ ${eur(cost)}${P.funds > 0 ? ` (trésor : ${eur(P.funds)})` : ""}${OFFICE[race.rank].full && !OFFICE[P.rank].full && L.job ? " · à plein temps : vous quittez votre emploi" : ""}`,
+    // Au sommet, deux étapes : l'investiture par le parti, puis l'élection.
+    const o = race.rank === 5 ? topOdds(L) : null, chances = o ? `Investiture (${R === "hybrid" ? (P.side === "pouvoir" ? "le chef choisit" : "l’opposition s’unit") : PICK_LABEL[S.pick]}) ≈ ${Math.round(o.nom * 100)} % · puis ${S.sys === "pres" ? "élection" : S.sys === "coll" ? "vote du Parlement" : "législatives"} ≈ ${Math.round(o.gen * 100)} % · au total ≈ ${Math.max(1, Math.round(o.total * 100))} %` : `Chances ≈ ${Math.round(electionChance(L, race.rank) * 100)} %`;
+    add("run", race.rank === 5 && S.sys === "parl" ? `Briguer la tête du parti et mener les législatives pour devenir ${title}` : race.rank === 5 && S.sys === "coll" ? `Briguer un siège : ${title}` : `Se présenter : ${title}`, `${chances} · campagne ≈ ${eur(cost)}${P.funds > 0 ? ` (trésor : ${eur(P.funds)})` : ""}${OFFICE[race.rank].full && !OFFICE[P.rank].full && L.job ? " · à plein temps : vous quittez votre emploi" : ""}`,
       !race.why && !banned && L.age >= 18 && P.funds + Math.max(0, L.savings) >= cost && womenCanRun(L), banned ? `inéligible jusqu’à ${P.banUntil} ans` : L.age < 18 ? "candidat à partir de 18 ans".replace("candidat", L.g("candidat", "candidate")) : !womenCanRun(L) ? "les femmes ne peuvent pas encore être élues ici : militer, c’est aussi réclamer ce droit" : race.why || "pas assez d’argent pour la campagne");
   }
   if (elected(R)) {
@@ -611,6 +1005,17 @@ function polOptions(L) {
   } else {
     add("field", R === "colony" ? "Organiser un meeting pour l’indépendance" : "Distribuer des tracts, réunir des opposants", "Popularité +, mais la police surveille");
   }
+  // Les pouvoirs du sommet, selon le pays.
+  if (P.rank === 5 && elected(R)) {
+    const S = polSystem(L);
+    if (R === "dem" && (S.sys === "parl" || (L.code === "FR" && S.sys === "pres"))) {
+      const ch = generalChance(L, candidateEdge(L, true), "parl");
+      add("dissolve", S.sys === "pres" ? "Dissoudre l’Assemblée nationale" : "Provoquer des élections anticipées", `Victoire ≈ ${Math.round(ch * 100)} % : ${S.sys === "pres" ? "une majorité pour gouverner ; sinon, la cohabitation" : "un nouveau mandat ; sinon, l’opposition gouverne"}`);
+    }
+    // Un mandat de plus : au dernier mandat permis, là où la Constitution se révise (pas aux États-Unis).
+    if (S.sys === "pres" && L.code !== "US" && S.limit !== Infinity && (P.topTerms || 0) >= S.limit + (P.extraTerms || 0))
+      add("constitution", "Réviser la Constitution pour un mandat de plus", R === "dem" ? `Référendum ≈ ${Math.round(clamp(P.pop / 140, 0.05, 0.6) * 100)} % · popularité −6 : on parle de dérive` : "Le Parlement vote ce qu’on lui demande ; les opposants protestent");
+  }
   if (P.rank >= 2 && (L.businesses || []).length) add("favor", "Faire passer une mesure favorable à vos entreprises", "Bénéfices +6 à +12 % · conflit d’intérêts : gros risque de scandale");
   add("quit", "Quitter la vie politique", P.rank > 0 ? `Vous laissez votre poste de ${L.polTitle()}.` : "Rendre sa carte.");
   return out;
@@ -622,6 +1027,17 @@ function polAction(L, id, arg) {
   if (id === "enter") { const why = polJoinWhy(L); return why ? `Impossible : ${why}.` : L.joinPolitics(arg); }
   if (!P) return null;
   if (id === "meet" || id === "snub" || id === "join") return lobbyAction(L, id, arg);
+  // Gouverner : seulement au sommet, chaque geste une fois par an.
+  if (id.startsWith("g_")) {
+    if (P.rank !== 5) return null;
+    P.did = P.did || {};
+    if (P.did[id] === L.age) return "Déjà cette année.";
+    const o = govOptions(L).find(x => x.id === id);
+    if (id !== "g_bill" && id !== "g_force" && (!o || !o.ok)) return o ? `Impossible : ${o.why}.` : null;
+    const r = govAction(L, id, arg);
+    if (r) P.did[id] = L.age;
+    return r;
+  }
   const o = polOptions(L).find(x => x.id === id);
   if (!o || !o.ok) return o ? `Impossible : ${o.why}.` : null;
   P.did = P.did || {}; P.did[id] = L.age;
@@ -647,6 +1063,30 @@ function polAction(L, id, arg) {
       for (const b of L.businesses || []) b.mult *= 1 + g;
       P.conflict += 2; P.dirt += 1;
       L.say("Fait passer en douce une mesure taillée pour ses propres entreprises.", "money"); return `Bénéfices +${Math.round(g * 100)} %`;
+    }
+    case "dissolve": {
+      const S = polSystem(L), pres = S.sys === "pres", e = L.g("", "e");
+      const won = nationalVote(L, P.side, candidateEdge(L, true), () => randn(), "parl") === "win";
+      L.bump("health", -1);
+      if (won) {
+        setGov(L, P.side); P.pop = clamp(P.pop + 3, 0, 100);
+        if (!pres) P.termEnd = L.age + S.term;
+        L.say(pres ? "Dissout l’Assemblée : les électeurs lui donnent une majorité." : "Pari gagné : les élections anticipées lui donnent un nouveau mandat.", "work", true);
+        return pres ? "Majorité retrouvée" : "Nouveau mandat";
+      }
+      setGov(L, rivalOf(L, P.side)); P.pop = clamp(P.pop - 5, 0, 100);
+      if (pres) { L.say("Dissout l’Assemblée et perd : c’est la cohabitation.", "work", true); return "Cohabitation"; }
+      L.setOffice(3, `Pari perdu : les élections anticipées portent l’opposition au pouvoir ; redevient ${L.polTitle(3)}.`); P.termEnd = L.age + termOf(L, 3);
+      return `Battu${e} aux élections anticipées`;
+    }
+    case "constitution": {
+      if (R === "dem") {
+        P.pop = clamp(P.pop - 6, 0, 100);
+        if (rand() >= clamp(P.pop / 140, 0.05, 0.6)) { L.say("Le référendum pour un mandat de plus est rejeté.", "work", true); return "Référendum perdu"; }
+      } else P.pop = clamp(P.pop - 3, 0, 100);
+      P.extraTerms = (P.extraTerms || 0) + 1;
+      L.say(R === "dem" ? "Le référendum passe : la Constitution l’autorise à briguer un mandat de plus." : "Fait réviser la Constitution pour rester au pouvoir.", "work", true);
+      return "Un mandat de plus possible";
     }
     case "quit": L.quitPolitics("Quitte la vie politique."); return "Fin de la carrière politique.";
   }
@@ -724,14 +1164,17 @@ function politicsHtml(L, full = false) {
     <div class="sp-card"><div class="sp-main"><b>${esc(capFirst(P.rank > 0 ? L.polTitle() : titles[0] ? L.g(titles[0][0], titles[0][1]) : ""))} · ${esc(P.party)}</b>
       <small>Popularité ${Math.round(P.pop)}/100 ${bar(P.pop)} · influence ${inf}/100 ${bar(inf)} · loyauté ${Math.round(P.loyalty)}/100</small>
       <small>${esc(REGIME_NOTE[R])}${gov}${P.termEnd != null && P.rank > 0 ? ` · mandat jusqu’à ${P.termEnd} ans` : ""}${P.funds >= 1 ? ` · trésor de campagne ≈ ${eur(P.funds)}` : ""}${P.banUntil != null && L.age < P.banUntil ? ` · inéligible jusqu’à ${P.banUntil} ans` : ""}</small>
+      ${elected(R) && titles[5] ? `<small>${esc(systemNote(L))}</small>` : ""}
       ${P.history.length ? `<small>Parcours : ${P.history.slice(-6).map(h => `${esc(h.t)} (${h.y})`).join(" · ")}</small>` : ""}</div></div>
-    <div class="sp-pills">${opts.filter(o => o.id !== "switch").map(o => `<button class="sp-pill" data-pol="${o.id}"${o.ok ? "" : " disabled"}>${esc(o.label)} <span>${esc(o.ok ? o.sub : o.why)}</span></button>`).join("")}</div>
-    ${(sw => sw ? `<details class="sp-more"><summary>Changer de parti <small>${esc(sw.ok ? sw.sub : sw.why)}</small></summary><div class="sp-pills">${partiesFor(L).filter(p => p.id !== P.side).map(p => `<button class="sp-pill" data-pol="switch" data-arg="${p.id}"${sw.ok ? "" : " disabled"}>Rejoindre : ${esc(p.label.charAt(0).toLowerCase() + p.label.slice(1))} <span>${esc(p.sub)}</span></button>`).join("")}</div></details>` : "")(opts.find(o => o.id === "switch"))}
+    ${P.rank === 5 ? `${nationHtml(L, bar)}<p class="sp-head">Campagne et vie du parti</p>` : ""}
+    <div class="sp-pills stack">${opts.filter(o => o.id !== "switch").map(o => `<button class="sp-pill" data-pol="${o.id}"${o.ok ? "" : " disabled"}>${esc(o.label)} <span>${esc(o.ok ? o.sub : o.why)}</span></button>`).join("")}</div>
+    ${(sw => sw ? `<details class="sp-more"><summary>Changer de parti <small>${esc(sw.ok ? sw.sub : sw.why)}</small></summary><div class="sp-pills stack">${partiesFor(L).filter(p => p.id !== P.side).map(p => `<button class="sp-pill" data-pol="switch" data-arg="${p.id}"${sw.ok ? "" : " disabled"}>Rejoindre : ${esc(p.label.charAt(0).toLowerCase() + p.label.slice(1))} <span>${esc(p.sub)}</span></button>`).join("")}</div></details>` : "")(opts.find(o => o.id === "switch"))}
     <p class="sp-head">Les lobbys</p>
     <p class="sp-note" style="margin-top:0">Plus votre poste est haut, plus ils vous courtisent : un maire intéresse les promoteurs, un ministre les lobbys de son ministère, un chef de gouvernement tout le monde. Leur soutien finance vos campagnes ; leur hostilité vous coûte des voix.</p>
-    <div class="sp-pills">${lobbiesHere(L).sort((x, y) => lobbyPower(L, y) - lobbyPower(L, x)).map(id => { const B = LOBBIES[id], r = P.lob[id] || 0, w = lobbyPower(L, id), done = (P.did || {})[`meet:${id}`] === L.age;
-      return `<button class="sp-pill" data-pol="meet" data-arg="${id}"${done ? " disabled" : ""}>Recevoir : ${esc(B.label)} <span>${relLabel(r)} (${r > 0 ? "+" : ""}${Math.round(r)}) · poids ${w >= 5 ? "énorme" : w >= 2.5 ? "fort" : w >= 1 ? "moyen" : "faible"} pour vous${B.dom.length ? ` · défend : ${B.dom.slice(0, 3).join(", ").toLowerCase()}` : ""}</span></button>`; }).join("")}</div>
-    <details class="sp-more"><summary>Tenir un lobby à distance${P.former >= 3 && P.rank <= 1 ? ", ou travailler pour lui" : ""}</summary><div class="sp-pills">${lobbiesHere(L).map(id => `<button class="sp-pill" data-pol="snub" data-arg="${id}">Refuser de recevoir : ${esc(LOBBIES[id].label)} <span>relation −12</span></button>${P.former >= 3 && P.rank <= 1 && (P.lob[id] || 0) >= 25 && !L.retired ? `<button class="sp-pill" data-pol="join" data-arg="${id}">Travailler pour eux : ${esc(LOBBIES[id].label)} <span>Un salaire très confortable ; on parlera de pantouflage</span></button>` : ""}`).join("")}</div></details>
+    ${(ids => { const lob = id => { const B = LOBBIES[id], r = P.lob[id] || 0, w = lobbyPower(L, id), done = (P.did || {})[`meet:${id}`] === L.age;
+      return `<button class="sp-pill" data-pol="meet" data-arg="${id}"${done ? " disabled" : ""}>Recevoir : ${esc(B.label)} <span>${relLabel(r)} (${r > 0 ? "+" : ""}${Math.round(r)}) · poids ${w >= 5 ? "énorme" : w >= 2.5 ? "fort" : w >= 1 ? "moyen" : "faible"} pour vous${B.dom.length ? ` · défend : ${B.dom.slice(0, 3).join(", ").toLowerCase()}` : ""}</span></button>`; };
+      return `<div class="sp-pills stack">${ids.slice(0, 6).map(lob).join("")}</div>${ids.length > 6 ? `<details class="sp-more"><summary>Voir les autres lobbys (${ids.length - 6})</summary><div class="sp-pills stack">${ids.slice(6).map(lob).join("")}</div></details>` : ""}`; })(lobbiesHere(L).sort((x, y) => lobbyPower(L, y) - lobbyPower(L, x)))}
+    <details class="sp-more"><summary>Tenir un lobby à distance${P.former >= 3 && P.rank <= 1 ? ", ou travailler pour lui" : ""}</summary><div class="sp-pills stack">${lobbiesHere(L).map(id => `<button class="sp-pill" data-pol="snub" data-arg="${id}">Refuser de recevoir : ${esc(LOBBIES[id].label)} <span>relation −12</span></button>${P.former >= 3 && P.rank <= 1 && (P.lob[id] || 0) >= 25 && !L.retired ? `<button class="sp-pill" data-pol="join" data-arg="${id}">Travailler pour eux : ${esc(LOBBIES[id].label)} <span>Un salaire très confortable ; on parlera de pantouflage</span></button>` : ""}`).join("")}</div></details>
     <p class="sp-note">Chaque geste, une fois par an. Les élections de fin de mandat, les nominations, les lois à voter et les offres des lobbys arrivent d’elles-mêmes, comme des décisions. Enveloppes, cadeaux et votes pour vos propres entreprises finissent parfois en scandale, d’autant plus vite que la presse est libre.</p>`;
   }
   if (bigBiz.length) {
@@ -785,5 +1228,7 @@ ACTIONS.push({ id: "politics", cat: "pro", label: "S’engager en politique",
 function polMiniRows(L) {
   const P = L.politics;
   if (!P) return [["Engagement", "aucun", L.age >= POL_MIN_AGE ? "Ouvert à tous, quel que soit le métier" : `Possible dès ${POL_MIN_AGE} ans`]];
-  return [["Poste", capFirst(P.rank > 0 ? L.polTitle() : L.g(officeTitles(L)[0][0], officeTitles(L)[0][1])), P.party], ["Popularité", `${Math.round(P.pop)}/100`, `influence ${L.polInfluence()}/100`]];
+  const rows = [["Poste", capFirst(P.rank > 0 ? L.polTitle() : L.g(officeTitles(L)[0][0], officeTitles(L)[0][1])), P.party], ["Popularité", `${Math.round(P.pop)}/100`, `influence ${L.polInfluence()}/100`]];
+  if (P.rank === 5) { const N = nationOf(L); rows.push(["Le pays", `économie ${pctTxt(N.econ - 1)}`, `dette ≈ ${Math.round(N.debt)} % du PIB · tension ${Math.round(N.tension)}/100`]); }
+  return rows;
 }

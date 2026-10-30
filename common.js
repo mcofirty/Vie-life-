@@ -3,7 +3,8 @@
 
 const nf = new Intl.NumberFormat("fr-FR");
 const fmt = (n, d = 0) => new Intl.NumberFormat("fr-FR", { maximumFractionDigits: d, minimumFractionDigits: d }).format(n);
-const esc = s => String(s ?? "").replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+// Échappe le texte, et colle les unités à leur nombre (« 8 % », « 30 ans ») pour qu'un retour à la ligne ne les sépare pas.
+const esc = s => String(s ?? "").replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch])).replace(/(\d) (?=%|\$|€|ans?\b|pts\b)/g, "$1\u00a0");
 const ans = n => `${n} an${n > 1 ? "s" : ""}`;
 const PPP_TO_EUR_FR = 0.72; // 1 $ PPA ≈ 0,72 € aux prix français
 const SPEEDS = [1, 2, 4, 8, 12, 16];
@@ -150,13 +151,14 @@ function dashboardData(L) {
   const activity = !L.alive ? "—" : L.schooling ? `Études · ${eduText(L)}` : L.retired ? "À la retraite" : L.business ? L.business.label : L.job ? capFirst(L.job) : L.homemaker ? "Au foyer" : L.age < 6 ? "Petite enfance" : L.age < 15 ? "Enfant, hors de l’école" : "Sans emploi";
   const kids = L.children.filter(k => k.alive);
   const status = [
-    { icon: L.schooling ? "edu" : "work", label: L.schooling ? "Études" : "Travail", value: activity },
-    { icon: "couple", label: "Couple", value: L.married ? `${L.g("Marié", "Mariée")} à ${L.partner}` : L.age < 16 ? "—" : L.marriedEver ? L.g("Seul (séparé ou veuf)", "Seule (séparée ou veuve)") : L.g("Célibataire", "Célibataire") },
-    { icon: "child", label: "Enfants", value: kids.length ? `${kids.length} · ${kids.map(k => `${k.name} ${L.age - k.born}`).join(", ")}` : "Aucun" },
-    ...(L.passion ? [{ icon: "leisure", label: "Passion", value: L.passionLabel() }] : []),
+    // act : où mène la carte (onglet Agir, feuille Famille, Argent ou Politique).
+    { icon: L.schooling ? "edu" : "work", label: L.schooling ? "Études" : "Travail", value: activity, act: L.alive && L.age >= 6 ? "agir" : null },
+    { icon: "couple", label: "Couple", act: L.alive ? "family" : null, value: L.married ? `${L.g("Marié", "Mariée")} à ${L.partner}` : L.age < 16 ? "—" : L.marriedEver ? L.g("Seul (séparé ou veuf)", "Seule (séparée ou veuve)") : L.g("Célibataire", "Célibataire") },
+    { icon: "child", label: "Enfants", act: L.alive ? "family" : null, value: kids.length ? `${kids.length} · ${kids.map(k => `${k.name} ${L.age - k.born}`).join(", ")}` : "Aucun" },
+    ...(L.passion ? [{ icon: "leisure", label: "Passion", act: L.alive ? "agir-perso" : null, value: L.passionLabel() }] : []),
     // Toujours visible dès 16 ans : un raccourci vers le panneau « Politique », quel que soit le métier.
-    ...(L.alive && L.age >= 16 ? [{ icon: "work", label: "Politique", act: "politics", cta: !L.politics, value: L.politics ? `${capFirst(L.politics.rank > 0 ? L.polTitle() : L.politics.party)} · popularité ${Math.round(L.politics.pop)}/100` : "S’engager ›" }] : []),
-    { icon: "home", label: "Logement", value: `${L.house ? "Propriétaire" : L.age < 23 && !L.married && L.parents.some(p => p.alive) ? "Chez les parents" : "Locataire"} · ${L.urban ? "en ville" : "à la campagne"}` },
+    ...(L.alive && L.age >= 16 ? [{ icon: "civic", label: "Politique", act: "politics", cta: !L.politics, value: L.politics ? `${capFirst(L.politics.rank > 0 ? L.polTitle() : L.politics.party)} · popularité ${Math.round(L.politics.pop)}/100` : "S’engager" }] : []),
+    { icon: "home", label: "Logement", act: L.alive ? "money" : null, value: `${L.house ? "Propriétaire" : L.age < 23 && !L.married && L.parents.some(p => p.alive) ? "Chez les parents" : "Locataire"} · ${L.urban ? "en ville" : "à la campagne"}` },
   ];
   const todo = [];
   if (L.alive && L.queue.length) todo.push({ tone: "act", text: `Décision en attente : ${L.queue[0].text}`, act: "decision", btn: "Décider" });
