@@ -6,6 +6,18 @@ Simulation de vie en français, inspirée du concept de [1in8b.life](https://1in
 
 Vous naissez au hasard parmi les bébés de l’année (ou parmi les 8 milliards d’humains), puis vous vivez une vie entière, année après année, guidée par les statistiques réelles de tous les pays et territoires du monde (216), de 1900 à 2100.
 
+## Nouveautés (version 13) : une vraie carrière de sportif
+
+- **Un club, un poste** : le sportif d’un sport collectif (football, basket, rugby, hockey, baseball, cricket, cyclisme, e-sport) signe dans un club (petit club du pays, puis les **vrais clubs** des grands championnats) et joue à un poste : gardien, défenseur, milieu, attaquant ; meneur, pivot ; pilier, demi d’ouverture ; lanceur, frappeur ; batteur, lanceur ; sprinteur, grimpeur ; jungle, mid…
+- **Des saisons détaillées** : matchs joués, temps de jeu (titulaire, rotation, remplaçant), statistiques du poste (buts et passes décisives, points et rebonds par match, essais, coups de circuit et moyenne au bâton, guichets, victoires d’étape, KDA…), note de la saison, classement du club contre les vrais adversaires, coupe nationale, coupe d’Europe et autres compétitions continentales. Totaux de carrière et six dernières saisons sur la page « Votre carrière ».
+- **Contrat, valeur et transferts** : contrat de deux à quatre ans, valeur estimée sur le marché ; à la fin du contrat, prolonger ou choisir parmi les offres de vrais clubs, au pays ou à l’étranger. Trop fort pour son club, on reçoit des offres de plus grands ; signer dans l’élite, c’est passer professionnel. Le salaire suit le niveau du club, la richesse du championnat et le temps de jeu.
+- **L’équipe nationale** : on est appelé selon son niveau et la force de son pays (il faut être meilleur pour jouer pour le Brésil que pour le Sénégal) ; sélections, buts, capitaine, 100 sélections. La Coupe du monde et les Jeux se jouent en sélection, et la nation compte pour les gagner.
+- **Sports individuels** : classement mondial (numéro 1 mondial), tournois et médailles internationales, bilan des combats (victoires avant la limite) pour la boxe, record personnel au 100 m, au marathon et au 100 m nage libre, record du monde.
+- **Récompenses** : meilleur joueur du championnat, meilleur buteur, passeur, gardien, marqueur, frappeur…, meilleur jeune, meilleur joueur du monde.
+- **Nouveaux gestes** : demander plus de temps de jeu, travailler avec un préparateur mental ; « Demander un transfert » propose de vrais clubs.
+- **Le dopage** : une offre qu’on peut refuser ; accepter fait gagner en niveau, mais un contrôle positif coûte deux ans de suspension, un titre et sa réputation.
+- **Après la carrière** : maillot retiré, match d’adieu, panthéon de son sport ; reconversion en directeur sportif de son ancien club ou en agent de joueurs, en plus d’entraîneur et de consultant.
+
 ## Nouveautés (version 12) : les vrais clubs, dans n’importe quel pays
 
 - **Les vrais clubs des 5 grands championnats de chaque sport** (composition 2025-2026) : football (Premier League, LaLiga, Serie A, Bundesliga, Ligue 1), basket (NBA, Liga ACB, Süper Lig, Grèce, LNB Élite), rugby (Top 14, Premiership, URC, Super Rugby, Japon), hockey (NHL, KHL, SHL, Liiga, National League), baseball (MLB, NPB, KBO, CPBL, Mexique), cricket (IPL, Big Bash, County Championship, PSL, SA20), cyclisme (WorldTour) et e-sport (LCK, LPL, LEC, LTA Nord, CBLOL) : plus de 500 clubs.

@@ -601,7 +601,7 @@ Object.assign(Life.prototype, {
       if (P.stage === 3) { if (rand() < 0.08) this.say(pick(starLife(this)), "work"); this.bump("rel", -0.5); }
     }
     // Transfert vers un grand championnat (sport).
-    if (M.kind === "sport" && P.stage >= 2 && !P.transferAsked && P.skill >= 78 && a <= 30 && BIG_LEAGUES[P.id]) {
+    if (M.kind === "sport" && P.stage >= 2 && !P.transferAsked && !P.club && P.skill >= 78 && a <= 30 && BIG_LEAGUES[P.id]) {
       const dests = BIG_LEAGUES[P.id].filter(x => x !== this.code && countryAt(x, this.calYear).gdp > c.gdp * 1.3);
       if (dests.length && rand() < 0.3) {
         P.transferAsked = true;
@@ -685,6 +685,8 @@ Object.assign(Life.prototype, {
     ];
     if (fame >= 50 && this.calYear >= 1960) opts.push({ label: this.g("Consultant à la télévision", "Consultante à la télévision"), autoWeight: 2, apply: () => { this.job = this.g("consultant sportif à la télévision", "consultante sportive à la télévision"); this.jobInfo = { id: "consultant", sector: "serv", informal: false, self: true }; this.incomePct = clamp(0.75 + fame / 500, 0.01, 0.98); this.computeIncome(); this.say(`Devient ${this.job}.`, "work", true); } });
     if (this.edu === "secondaire" && this.here.tert >= 5) opts.push({ label: "Reprendre des études", autoWeight: 0.6, apply: () => { this.schooling = "universite"; this.adultStudy = this.age + 3; this.degree = { field: "sport", level: "licence", elite: null }; this.say("Reprend des études, en sciences du sport.", "edu", true); } });
+    if (fame >= 35 && P.club) opts.push({ label: `Directeur sportif à ${P.club.name}`.replace("Directeur", this.g("Directeur", "Directrice")), sub: "Recruter, construire l’équipe : le club que vous connaissez par cœur.", autoWeight: 1, apply: () => { this.job = this.g(`directeur sportif (${P.club.name})`, `directrice sportive (${P.club.name})`); this.jobInfo = { id: "sportdir", sector: "serv", informal: false, self: false }; this.incomePct = clamp(0.8 + fame / 600, 0.01, 0.98); this.computeIncome(); this.say(`Devient ${this.job}.`, "work", true); } });
+    if (fame >= 25) opts.push({ label: this.g("Devenir agent de joueurs", "Devenir agente de joueurs"), sub: "Un carnet d’adresses, des commissions sur les transferts.", autoWeight: 0.8, apply: () => { this.job = this.g("agent de sportifs", "agente de sportifs"); this.jobInfo = { id: "sportagent", sector: "serv", informal: false, self: true }; this.incomePct = clamp(0.6 + fame / 300 + rand() * 0.15, 0.01, 0.98); this.computeIncome(); this.say(`Devient ${this.job} : ses anciens coéquipiers lui confient leurs contrats.`, "work", true); } });
     opts.push({ label: "Changer complètement de vie", autoWeight: 1, apply: () => this.startWork() });
     this.ask("La carrière sportive est finie. Et maintenant ?", opts);
   },
@@ -804,7 +806,7 @@ function breakLine(L, id, stage) {
 }
 function starLine(L, id) {
   const M = PASSIONS[id], g = (m, f) => L.g(m, f), ind = screenIndustry(L);
-  if (M.kind === "sport") return pick([`Devient une star de son sport ; sélection en équipe nationale.`, "Est élu{|e} meilleur{|e} joueur{|se} de la saison ; son nom est sur tous les maillots."]).replace(/\{\|e\}/g, g("", "e")).replace("{|se}", g("", "se"));
+  if (M.kind === "sport") return pick([`Devient une star de son sport ; sélection en équipe nationale.`, "Est élu{|e} meilleur{|e} {joueur|joueuse} de la saison ; son nom est sur tous les maillots."]).replace(/\{\|e\}/g, g("", "e")).replace("{joueur|joueuse}", g("joueur", "joueuse"));
   const T = {
     chant: "Son album est numéro un ; ses chansons passent partout.", rap: "Son album est disque de platine ; ses textes sont sur toutes les lèvres.",
     acting: `Devient une star (${ind}) ; son visage est sur les affiches.`, tele: "Devient une star de la télé-réalité : magazines, plateaux, publicités.", video: "Des millions d’abonnés ; les marques se l’arrachent.",

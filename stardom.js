@@ -59,21 +59,27 @@ Object.assign(Life.prototype, {
     if (P.boostUntil != null && a > P.boostUntil) { P.boost = 1; P.boostUntil = null; this.say("Son contrat arrive à son terme ; il faudra le renégocier.", "work"); }
     if (P.agent && P.stage >= 1) P.fame = clamp(P.fame + 1 + P.agent.skill / 100, 0, 100);
     // Sport : les grandes compétitions de l'année.
-    if (M.kind === "sport" && P.stage >= 2 && P.injuredAt !== a) {
+    if (M.kind === "sport" && P.stage >= 2 && P.injuredAt !== a && !(P.bannedUntil >= a)) {
+      // Les sports d'équipe se jouent en sélection nationale : il faut être appelé, et la nation compte.
+      const nat = M.team && P.club;
       for (const comp of competitionsFor(P.id, y)) {
-        const prep = P.prepAt === a ? 1.3 : 1;
-        const pick = clamp((P.skill - 68) / 30 * prep * (comp.yearly ? 0.8 : 1), 0, 0.95);
-        if (rand() > pick) continue;
-        const win = clamp(((P.skill - 82) / 22 + P.fame / 500) * prep * (comp.yearly ? 0.6 : 1), 0.01, 0.45);
+        // Le championnat du monde d'e-sport se joue entre les équipes des grandes ligues.
+        if (P.id === "esport" && P.club && !(P.club.lg && P.club.r >= 82)) continue;
+        if (nat && P.id === "foot" && comp.medals && a > 23) continue; // le tournoi olympique de football : les moins de 23 ans
+        const prep = (P.prepAt === a ? 1.3 : 1) * (P.mindAt === a ? 1.15 : 1);
+        const pick = nat ? (P.natAt === a ? 1 : 0) : clamp((P.skill - 68) / 30 * prep * (comp.yearly ? 0.8 : 1), 0, 0.95);
+        if (rand() >= pick) continue;
+        const win = nat ? clamp([0.16, 0.05, 0.01][nationTier(P.id, sportNation(this))] * prep * (1 + (P.skill - 85) / 40 + P.fame / 400), 0.003, 0.35)
+          : clamp(((P.skill - 82) / 22 + P.fame / 500) * prep * (comp.yearly ? 0.6 : 1), 0.01, 0.45);
         const r = rand();
         if (comp.medals && r < win) this.addTitle(`Médaille d’or aux ${comp.name.replace("les ", "")}`, 18, `Médaille d’or aux ${comp.name.replace("les ", "")} ! L’hymne, le podium, le pays entier qui pleure avec ${this.g("lui", "elle")}.`);
         else if (comp.medals && r < win * 2.5) this.addTitle(`Médaille ${r < win * 1.7 ? "d’argent" : "de bronze"} aux ${comp.name.replace("les ", "")}`, 9, `Monte sur le podium : ${r < win * 1.7 ? "argent" : "bronze"} aux ${comp.name.replace("les ", "")}.`);
         else if (!comp.medals && r < win) this.addTitle(`Vainqueur : ${comp.short}`, 16, `Remporte ${comp.name} ! Son nom entre dans l’histoire de son sport.`);
-        else this.say(`Participe à ${comp.name}, sans gagner ; une expérience inoubliable.`, "work", true);
+        else this.say(nat ? `Joue ${comp.name} avec l’équipe nationale, sans aller au bout ; une expérience inoubliable.` : `Participe à ${comp.name}, sans gagner ; une expérience inoubliable.`, "work", true);
         P.fame = clamp(P.fame + 1.5 * comp.weight, 0, 100);
       }
       // Le championnat du pays, pour les sports d'équipe et les autres.
-      if (rand() < clamp(0.06 + (P.skill - 80) / 120, 0.02, 0.3)) this.addTitle(`${this.g("Champion", "Championne")} du pays (${y})`, 6, M.team ? "Son équipe remporte le championnat du pays." : `Devient ${this.g("champion", "championne")} du pays.`);
+      if (!P.club && rand() < clamp(0.06 + (P.skill - 80) / 120, 0.02, 0.3)) this.addTitle(`${this.g("Champion", "Championne")} du pays (${y})`, 6, M.team ? "Son équipe remporte le championnat du pays." : `Devient ${this.g("champion", "championne")} du pays.`);
     }
     // Arts : une grande récompense, plus probable l'année d'un succès.
     if (M.kind !== "sport" && P.stage >= 2 && rand() < (P.hitAt === a ? 0.35 : 0.03) * (0.5 + P.skill / 100)) {
@@ -215,6 +221,7 @@ function careerHtml(L) {
       <small>Niveau ${Math.round(P.skill)}/100 ${bar(P.skill)} · notoriété ${Math.round(P.fame)}/100 ${bar(P.fame)}${fans ? ` · ≈ ${fmtFans(fans)} ${L.calYear >= 2008 ? "abonnés" : "fans"}` : ""}${window ? ` · ${window}` : ""}</small>
       <small>${P.agent ? `Agent : ${esc(P.agent.name)} (talent ${P.agent.skill}/100, ${Math.round(P.agent.cut * 100)} %)` : "Pas d’agent"}${P.boost > 1 ? ` · contrat ×${P.boost.toLocaleString("fr-FR")} jusqu’à ${P.boostUntil} ans` : ""}${P.school ? ` · ${esc(P.school)}` : ""}${L.isCareer() ? (L.income > 0 ? ` · revenu ≈ ${eur(L.income)} par an` : " · revenus comptés à la fin de l’année") : " · pas encore votre métier"}</small>
       ${titles.length ? `<small>Palmarès : ${titles.slice(-8).map(x => esc(x.t)).join(" · ")}${titles.length > 8 ? ` · et ${titles.length - 8} autres` : ""}</small>` : ""}</div></div>
+    ${typeof sportHtml === "function" ? sportHtml(L) : ""}
     <div class="sp-pills">${opts.map(o => `<button class="sp-pill" data-car="${o.id}"${o.ok ? "" : " disabled"}>${esc(o.label)} <span>${esc(o.ok ? o.sub : o.why)}</span></button>`).join("")}</div>
     <p class="sp-note">Chaque geste, une fois par an. ${sport ? "Les grandes compétitions (Jeux olympiques, Coupe du monde, Grand Chelem, Tour de France…) se jouent d’elles-mêmes quand votre niveau vous y qualifie." : "Les grandes récompenses arrivent plus souvent l’année d’un succès."}</p>
   </div>`;
