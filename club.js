@@ -162,14 +162,27 @@ Object.assign(Life.prototype, {
     while (C.squad.length < Math.ceil(S.n * 0.8)) C.squad.push(newPlayer(this, lvl - 6, { age: 26 + Math.floor(rand() * 6), taken: namesIn(C), home: C.code }));
     // La saison.
     const lg = clubLeague(this, C), str = strengthOf(C), divR = DIV_REV[C.div], startDiv = C.div;
-    const mine = effStrength(C) + randn() * 3.5;
+    // Un seul classement par championnat et par saison : si vous y possédez plusieurs clubs, ils jouent la même saison.
+    const T = this.leagueTables = this.leagueTables || {};
+    for (const k in T) if (T[k].y !== y) delete T[k];
+    const tkey = C.div === 0 && lg ? `${lg.id}:${y}` : null;
+    if (tkey && !T[tkey]) {
+      const s = Object.fromEntries(lg.clubs.map(x => [x.name, x.r + randn() * 3.5]));
+      for (const x of this.businesses || []) if (isClub(x) && x.club && x.club.div === 0 && clubLeague(this, x.club) === lg) s[x.club.name] = effStrength(x.club) + randn() * 3.5;
+      T[tkey] = { y, s };
+    }
+    const mine = tkey && T[tkey].s[C.name] != null ? T[tkey].s[C.name] : effStrength(C) + randn() * 3.5;
     const res = { y, div: C.div, notes: [] };
     let rank, size = 20, rel = 3, champ = null, podium = [];
     if (C.div === 0 && lg) {
       // Contre les vrais clubs du championnat (un club venu d'en bas prend la place du plus faible).
-      let rivals = lg.clubs.filter(x => x.name !== C.name);
-      if (rivals.length >= lg.clubs.length) rivals = rivals.slice(0, -1);
-      const table = [...rivals.map(x => ({ name: x.name, s: x.r + randn() * 3.5 })), { name: C.name, s: mine, me: true }].sort((x, z) => z.s - x.s);
+      const ts = T[tkey].s;
+      let rivals = lg.clubs.filter(x => x.name !== C.name).map(x => ({ name: x.name, s: ts[x.name] }));
+      for (const x of this.businesses || []) if (isClub(x) && x.club && x.club !== C && x.club.div === 0 && clubLeague(this, x.club) === lg && !rivals.some(r => r.name === x.club.name)) rivals.push({ name: x.club.name, s: ts[x.club.name] ?? effStrength(x.club), own: !lg.clubs.some(c => c.name === x.club.name) });
+      rivals.sort((x, z) => z.s - x.s);
+      // Autant de clubs que dans le vrai championnat : les clubs promus prennent la place des plus faibles.
+      while (rivals.length >= lg.clubs.length) { const k = rivals.map(r => !r.own && !(this.businesses || []).some(x => isClub(x) && x.club && x.club.name === r.name)).lastIndexOf(true); rivals.splice(k >= 0 ? k : rivals.length - 1, 1); }
+      const table = [...rivals, { name: C.name, s: mine, me: true }].sort((x, z) => z.s - x.s);
       rank = table.findIndex(x => x.me) + 1; size = table.length; rel = lg.rel;
       champ = table[0].me ? null : table[0].name; podium = table.slice(0, 3).map(x => x.me ? C.name : x.name);
     } else {

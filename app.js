@@ -414,7 +414,7 @@ document.addEventListener("click", e => {
   const act = b.dataset.act;
   $("menu").hidden = true;
   if (act === "family" || act === "money" || act === "politics") openPanel(act);
-  if (act === "club" && firstClubIdx(life) >= 0) openPanel(`club:${firstClubIdx(life)}`);
+  if (act === "club" && firstClubIdx(life) >= 0) openPanel(clubMenuKind(life));
   if (act === "birthcard") { if (prefs.classroom) toast("Le partage est désactivé en mode classe"); else shareCard("birth", life).then(r => r === "downloaded" && toast("Image enregistrée")); }
   if (act === "help") openHelp();
   if (act === "quit") quitLife();
@@ -641,6 +641,9 @@ function openPanel(kind) {
   } else if (kind === "politics") {
     $("panelTitle").textContent = "Politique";
     $("panelBody").innerHTML = L.alive ? politicsHtml(L, true) : "";
+  } else if (kind === "club:all") {
+    $("panelTitle").textContent = "Vos clubs";
+    $("panelBody").innerHTML = L.alive ? clubsOverviewHtml(L) : "";
   } else if (kind.startsWith("club:")) {
     const b = (L.businesses || [])[+kind.slice(5)];
     if (!b || !isClub(b)) { m.hidden = true; return; }

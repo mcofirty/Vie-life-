@@ -6,6 +6,14 @@ Simulation de vie en français, inspirée du concept de [1in8b.life](https://1in
 
 Vous naissez au hasard parmi les bébés de l’année (ou parmi les 8 milliards d’humains), puis vous vivez une vie entière, année après année, guidée par les statistiques réelles de tous les pays et territoires du monde (216), de 1900 à 2100.
 
+## Nouveautés (version 15) : gérer plusieurs clubs de sport
+
+- **Une vue d’ensemble « Vos clubs »** (menu, tableau de bord) dès qu’on en possède deux : sport, championnat, classement de la saison passée, trophées, trésorerie et valeur de chaque club, et qui le dirige. Dans la feuille d’un club, on passe d’un club à l’autre d’un geste.
+- **Un directeur général par club** : à chaque nouveau club, le diriger soi-même (deux fois plus de travail : santé, proches et bonheur en pâtissent) ou le confier à un directeur général, qui gère l’effectif et le marché ; on peut reprendre la direction à tout moment.
+- **La règle de multipropriété** : on ne contrôle pas deux clubs du même championnat ; on peut y être actionnaire minoritaire (25 %). Si l’un de vos clubs monte dans le championnat d’un autre, il faut céder le contrôle de l’un des deux.
+- **Des transferts entre vos clubs** d’un même sport, au prix du marché (onglet « Effectif »).
+- **Une seule saison par championnat** : quand vous possédez plusieurs clubs du même championnat, ils jouent la même saison (un seul champion).
+
 ## Nouveautés (version 14) : racheter des parts, jusqu’aux plus grandes entreprises du monde
 
 - **Racheter les parts de ses entreprises et de ses clubs** : une nouvelle rubrique « Capital » sur chaque fiche (entreprise et club) dès qu’on ne détient pas tout : prendre la majorité (51 %), puis racheter toutes les parts (100 %). Les autres actionnaires vendent avec une prime ; une entreprise cotée en Bourse se rachète par une offre publique d’achat (prime de 25 %) et quitte la Bourse. Un investisseur minoritaire qui passe la majorité reprend la direction.
