@@ -415,6 +415,7 @@ document.addEventListener("click", e => {
   $("menu").hidden = true;
   if (act === "family" || act === "money" || act === "politics") openPanel(act);
   if (act === "club" && firstClubIdx(life) >= 0) openPanel(clubMenuKind(life));
+  if (act === "fortune") { if (hasFortune(life)) openPanel("fortune"); else toast("Ces gestes s’ouvrent à partir de 100 millions de patrimoine."); }
   if (act === "birthcard") { if (prefs.classroom) toast("Le partage est désactivé en mode classe"); else shareCard("birth", life).then(r => r === "downloaded" && toast("Image enregistrée")); }
   if (act === "help") openHelp();
   if (act === "quit") quitLife();
@@ -494,6 +495,7 @@ $("dash").addEventListener("click", e => {
   if (a === "money") openPanel("money");
   if (a === "politics") openPanel("politics");
   if (a.startsWith("club:")) openPanel(a);
+  if (a === "fortune") openPanel("fortune");
   if (a === "family") openPanel("family");
   if (a === "agir" || a === "agir-perso") { $("actPanel").scrollIntoView({ behavior: "smooth", block: "center" }); $("actPanel").classList.remove("flash"); void $("actPanel").offsetWidth; $("actPanel").classList.add("flash"); }
 });
@@ -641,6 +643,9 @@ function openPanel(kind) {
   } else if (kind === "politics") {
     $("panelTitle").textContent = "Politique";
     $("panelBody").innerHTML = L.alive ? politicsHtml(L, true) : "";
+  } else if (kind === "fortune") {
+    $("panelTitle").textContent = "Votre fortune";
+    $("panelBody").innerHTML = L.alive ? fortuneHtml(L) : "";
   } else if (kind === "club:all") {
     $("panelTitle").textContent = "Vos clubs";
     $("panelBody").innerHTML = L.alive ? clubsOverviewHtml(L) : "";

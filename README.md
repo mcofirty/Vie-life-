@@ -6,6 +6,20 @@ Simulation de vie en français, inspirée du concept de [1in8b.life](https://1in
 
 Vous naissez au hasard parmi les bébés de l’année (ou parmi les 8 milliards d’humains), puis vous vivez une vie entière, année après année, guidée par les statistiques réelles de tous les pays et territoires du monde (216), de 1900 à 2100.
 
+## Nouveautés (version 16) : la vie des très grandes fortunes
+
+Une nouvelle feuille **« Votre fortune »** (menu, tableau de bord) dès 100 millions de patrimoine, en sept onglets. Ses gestes ne comptent pas parmi les trois actions de l’année.
+
+- **Fortune** : rang mondial et national parmi les milliardaires de l’époque (de quelques dizaines en 1900 à plusieurs milliers aujourd’hui), la plus grande fortune du moment, les paliers (premier milliard, dix, cent milliards, top 100, top 10, première fortune du pays, du monde, de l’histoire), la presse et votre surnom, un **rival milliardaire** qui vous dispute les classements et tente des offensives sur vos entreprises et vos clubs, les grands forums et dîners de chefs d’État.
+- **Luxe** : superyacht, jet privé, île à votre nom, château restauré, résidences dans les grandes villes du monde, maison au complet (et les mémoires d’un ancien majordome), voitures de légende, clinique de longévité. Tout s’entretient chaque année, avec l’argent disponible ; sinon, il faut vendre.
+- **Collections** : chefs-d’œuvre aux enchères (dont la cote monte… ou qui se révèlent des faux), chevaux de course (les grandes courses, puis le haras), une écurie de course automobile et son championnat du monde, une cave de grands crus, une réserve naturelle pour sauver une espèce (et les braconniers).
+- **Influence** : racheter un journal, une radio, une chaîne de télévision, un site d’information ou un réseau social (popularité en politique, accusations de manipulation), financer partis et campagnes, parrainer les Jeux olympiques ou la Coupe du monde, accaparer le marché d’une matière première, lancer une OPA hostile sur le groupe de votre rival, lancer sa cryptomonnaie, l’exil fiscal, l’optimisation fiscale (et le redressement).
+- **Philanthropie** : une fondation pour une cause (vaccins, éducation, climat, recherche médicale, pauvreté, culture) qui rend compte chaque année de ce qu’elle accomplit, une découverte médicale possible ; une bibliothèque, un hôpital, un musée, une université, un opéra ou un stade à votre nom ; la promesse de donner la moitié de sa fortune.
+- **Projets** hors norme, payés année après année, sans réussite garantie : la plus haute tour du monde, un aéroport, une ville nouvelle, une ville à charte, une micronation, un réacteur à fusion, un remède contre une grande maladie, un avion supersonique, la plus vieille coupe de voile, nettoyer les océans, une base sur Mars.
+- **Aventures** : vol suborbital, séjour en orbite, tour de la Lune, son propre programme spatial (lancements réussis ou explosions, jusqu’à la Lune et Mars) ; le tour du monde en ballon, les abysses, l’Everest, le pôle Sud, le tour du monde en solitaire, avec un vrai risque de mort ; une garde rapprochée.
+- **Les revers de la fortune** : enlèvements et maîtres chanteurs, enfants gâtés (ou qui rejettent l’argent), faux amis et « projets en or », scandales (nier, transiger, réparer), la chute… et le grand retour.
+- **Ce qui reste** : une nécrologie de grande fortune ; la **dynastie** passe aux héritiers (le fondateur, les œuvres, la fondation, le rival de la famille).
+
 ## Nouveautés (version 15) : gérer plusieurs clubs de sport
 
 - **Une vue d’ensemble « Vos clubs »** (menu, tableau de bord) dès qu’on en possède deux : sport, championnat, classement de la saison passée, trophées, trésorerie et valeur de chaque club, et qui le dirige. Dans la feuille d’un club, on passe d’un club à l’autre d’un geste.

@@ -595,7 +595,7 @@ $("menuBtn").addEventListener("click", () => {
   const sw = (key, label) => `<label class="cell"><span class="cell-main"><b>${label}</b></span><input type="checkbox" class="switch" data-pref="${key}"${prefs[key] ? " checked" : ""}></label>`;
   const btn = (act, label, sub = "") => `<button class="cell link" data-act="${act}"><span class="cell-main"><b>${label}</b>${sub ? `<small>${sub}</small>` : ""}</span><span class="chev"></span></button>`;
   openSheet(`<h2 class="sheet-title">${esc(life.name)}, ${ans(life.age)}</h2>
-    <div class="group menu-list">${btn("family", "Famille et vie")}${btn("money", "Dépenser et investir")}${btn("politics", "Politique", life.politics ? "" : "Ouvert à tous, quel que soit le métier")}${firstClubIdx(life) >= 0 ? (ownedClubs(life).length >= 2 ? btn("club", `Vos ${ownedClubs(life).length} clubs`, ownedClubs(life).map(([b]) => life.ensureClub(b).name).slice(0, 3).join(", ")) : btn("club", "Votre club", life.ensureClub(life.businesses[firstClubIdx(life)]).name)) : ""}${btn("nextdec", "Aller à la prochaine décision")}</div>
+    <div class="group menu-list">${btn("family", "Famille et vie")}${btn("money", "Dépenser et investir")}${btn("politics", "Politique", life.politics ? "" : "Ouvert à tous, quel que soit le métier")}${firstClubIdx(life) >= 0 ? (ownedClubs(life).length >= 2 ? btn("club", `Vos ${ownedClubs(life).length} clubs`, ownedClubs(life).map(([b]) => life.ensureClub(b).name).slice(0, 3).join(", ")) : btn("club", "Votre club", life.ensureClub(life.businesses[firstClubIdx(life)]).name)) : ""}${hasFortune(life) ? btn("fortune", "Votre fortune", `${money(life.netWorth())}`) : ""}${btn("nextdec", "Aller à la prochaine décision")}</div>
     <div class="group menu-list">${sw("music", "Musique douce")}${sw("pauses", "Pauses de réflexion")}${sw("gentle", "Pas de scènes effrayantes")}</div>
     <div class="group menu-list">${prefs.classroom ? "" : btn("birthcard", "Carte de naissance", "Une image à partager")}${btn("help", "Besoin d’aide")}${btn("quit", "Quitter", "La vie est gardée : vous pourrez la reprendre")}</div>`, { dismissable: true });
 });
@@ -613,6 +613,7 @@ document.addEventListener("click", e => {
   haptic();
   if (act === "family" || act === "money" || act === "politics") panelSheet(act);
   if (act === "club" && firstClubIdx(life) >= 0) panelSheet(clubMenuKind(life));
+  if (act === "fortune" && hasFortune(life)) panelSheet("fortune");
   if (act === "nextdec") { closeSheet(); setTimeout(() => skip(true), 320); }
   if (act === "birthcard") shareCard("birth", life).then(r => r === "downloaded" && toast("Image enregistrée"));
   if (act === "help") helpSheet();
@@ -718,6 +719,8 @@ function panelSheet(kind) {
   const choice = (name, obj, cur) => `<div class="group">${Object.entries(obj).map(([k, o]) => `<button class="cell link choice-cell" data-choice="${name}" data-v="${k}"><span class="tick">${k === cur ? "✓" : ""}</span><span class="cell-main"><b>${typeof o === "string" ? o : o.label}</b>${o.note ? `<small>${o.note}</small>` : ""}</span></button>`).join("")}</div>`;
   if (kind === "politics") {
     openSheet(`<h2 class="sheet-title">Politique</h2>${L.alive ? politicsHtml(L, true) : ""}`, { dismissable: true, onClose: renderLife, tabs: POL_TABS.of, tabOrder: POL_TABS.order, tabKey: "politics" });
+  } else if (kind === "fortune") {
+    openSheet(`<h2 class="sheet-title">Votre fortune</h2>${L.alive ? fortuneHtml(L) : ""}`, { dismissable: true, onClose: renderLife, tabs: h => FX_TABS.includes(h) ? h : null, tabOrder: FX_TABS, tabKey: "fortune" });
   } else if (kind === "club:all") {
     openSheet(`<h2 class="sheet-title">Vos clubs</h2>${L.alive ? clubsOverviewHtml(L) : ""}`, { dismissable: true, onClose: renderLife });
   } else if (kind.startsWith("club:")) {
@@ -818,6 +821,7 @@ $("dash").addEventListener("click", e => {
   if (a === "money") panelSheet("money");
   if (a === "politics") panelSheet("politics");
   if (a.startsWith("club:")) panelSheet(a);
+  if (a === "fortune") panelSheet("fortune");
   if (a === "family") panelSheet("family");
   if (a === "agir" || a === "agir-perso") {
     document.querySelector(`[data-name=actcat] [data-v=${a === "agir" ? "pro" : "perso"}]`).click();
