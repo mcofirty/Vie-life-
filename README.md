@@ -6,6 +6,13 @@ Simulation de vie en français, inspirée du concept de [1in8b.life](https://1in
 
 Vous naissez au hasard parmi les bébés de l’année (ou parmi les 8 milliards d’humains), puis vous vivez une vie entière, année après année, guidée par les statistiques réelles de tous les pays et territoires du monde (216), de 1900 à 2100.
 
+## Nouveautés (version 14) : racheter des parts, jusqu’aux plus grandes entreprises du monde
+
+- **Racheter les parts de ses entreprises et de ses clubs** : une nouvelle rubrique « Capital » sur chaque fiche (entreprise et club) dès qu’on ne détient pas tout : prendre la majorité (51 %), puis racheter toutes les parts (100 %). Les autres actionnaires vendent avec une prime ; une entreprise cotée en Bourse se rachète par une offre publique d’achat (prime de 25 %) et quitte la Bourse. Un investisseur minoritaire qui passe la majorité reprend la direction.
+- **Les plus grandes entreprises du monde, à chaque époque** (environ 35) : US Steel, Standard Oil, Pennsylvania Railroad et AT&T au début du siècle ; General Motors, IBM, General Electric, Coca-Cola, Toyota, Sony, NTT ensuite ; puis Microsoft, Apple, Nvidia, Alphabet, Amazon, Meta, Tesla, Saudi Aramco, TSMC, Samsung, LVMH, Nestlé, Tencent, Alibaba, Reliance… Leur valeur suit à peu près l’histoire (bulle japonaise, bulle internet, faillite de General Motors en 2009, de Penn Central en 1970), avec des écarts propres à chaque vie ; après 2025, chacune trace sa route.
+- **Acheter des actions, entrer au conseil, prendre le contrôle** : investir une part de son épargne, acheter 1 % de l’entreprise, monter à 5 % (siège au conseil d’administration), prendre le contrôle (51 %, par offre publique d’achat), tout racheter (100 %). Dividendes chaque année ; quand on contrôle l’entreprise, dividende exceptionnel et nomination d’un nouveau PDG. Vendre un gros bloc fait baisser le prix ; une faillite efface tout.
+- Les actions comptent dans le patrimoine et passent aux héritiers. Pas de Bourse dans les économies planifiées ; il faut un compte en banque.
+
 ## Nouveautés (version 13) : une vraie carrière de sportif
 
 - **Un club, un poste** : le sportif d’un sport collectif (football, basket, rugby, hockey, baseball, cricket, cyclisme, e-sport) signe dans un club (petit club du pays, puis les **vrais clubs** des grands championnats) et joue à un poste : gardien, défenseur, milieu, attaquant ; meneur, pivot ; pilier, demi d’ouverture ; lanceur, frappeur ; batteur, lanceur ; sprinteur, grimpeur ; jungle, mid…
